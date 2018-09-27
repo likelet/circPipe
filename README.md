@@ -1,6 +1,8 @@
 # cirPipe  
 
-## Input Infile  
+## Quick Start 
+
+## Input file  
 
 * Raw reads in fastq format  
 
@@ -8,3 +10,10 @@
 
 * Annotation file from [xxx](http://ccb.jhu.edu/software/hisat2/faq.shtml) 
 
+## Installation 
+
+## Constribution 
+
+## Citation 
+
+## License
