@@ -55,3 +55,92 @@ def print_blue = {  str -> ANSI_BLUE + str + ANSI_RESET }
 def print_cyan = {  str -> ANSI_CYAN + str + ANSI_RESET }
 def print_purple = {  str -> ANSI_PURPLE + str + ANSI_RESET }
 def print_white = {  str -> ANSI_WHITE + str + ANSI_RESET }
+
+params.str = 'Hello world!'
+
+params.reads = "/home/wqj/database/test/*{1,2}.fq.gz"
+params.starindex = '/home/wqj/test/starindex'
+//params.annot = "$baseDir/data/ggal/ggal_1_48850000_49020000.bed.gff"
+//params.genome = "$baseDir/data/ggal/ggal_1_48850000_49020000.Ggal71.500bpflank.fa"
+//params.outdir = 'results'
+
+log.info """\
+         c i r P i p e   P I P E L I N E
+         =============================
+
+
+         reads : ${params.reads}
+         starindex : ${params.starindex}
+
+         """
+         .stripIndent()
+
+/*
+ * the index directory
+ */
+starindex = file(params.starindex)
+
+/*
+ * Create the `read_pairs` channel that emits tuples containing three elements:
+ * the pair ID, the first read-pair file and the second read-pair file
+ */
+Channel
+    .fromFilePairs( params.reads )
+    .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+    .set { read_pairs }
+
+
+//params.input_folder = '/home/wqj/database/test'
+//params.output_folder = '/home/wqj/test'
+
+
+process test_fastp{
+    tag "$pair_id"
+
+    input:
+    set pair_id, file(query_file) from read_pairs
+
+    output:
+    set pair_id, file ('fastp_*') into fastpfiles
+
+    """
+    fastp -i ${query_file[0]} -I ${query_file[1]} -o fastp_${pair_id}_1.fq.gz -O fastp_${pair_id}_2.fq.gz
+    """
+}
+
+process test_star{
+    tag "$pair_id"
+
+    input:
+    set pair_id, file(query_file) from fastpfiles
+    file starindex
+
+    output:
+    set pair_id, file ('star*') into starfiles
+
+    """
+    /home/wqj/tools/STAR/bin/Linux_x86_64/STAR \
+	--runThreadN 20 \
+	--chimSegmentMin 10 \
+	--genomeDir ${starindex} \
+	--readFilesCommand zcat \
+	--readFilesIn ${query_file[0]} ${query_file[1]} \
+	--outFileNamePrefix star
+    """
+}
+
+//this is not finished.
+process test_bwa{
+    input:
+    file query_file from fastpfiles
+
+    output:
+    file 'out_for_bwa*' into bwafiles
+
+    """
+    /home/wqj/tools/bwa/bwa mem -t 20 -T 19 \
+	-M -R "@RG\tID:out_for_fastp\tPL:PGM\tLB:noLB\tSM:out_for_fastp" \
+	/home/wqj/test/bwaindex/genome \
+	${query_file[0]} ${query_file[1]} > /home/wqj/test/out_for_bwa.mem.sam
+    """
+}
