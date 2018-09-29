@@ -55,13 +55,11 @@ def print_cyan = {  str -> ANSI_CYAN + str + ANSI_RESET }
 def print_purple = {  str -> ANSI_PURPLE + str + ANSI_RESET }
 def print_white = {  str -> ANSI_WHITE + str + ANSI_RESET }
 
-params.str = 'Hello world!'
+params.str = '\t'
 
 params.reads = "/home/wqj/database/test/*{1,2}.fq.gz"
 params.starindex = '/home/wqj/test/starindex'
-//params.annot = "$baseDir/data/ggal/ggal_1_48850000_49020000.bed.gff"
-//params.genome = "$baseDir/data/ggal/ggal_1_48850000_49020000.Ggal71.500bpflank.fa"
-//params.outdir = 'results'
+params.outdir = '/home/wqj/test'
 
 log.info """\
          c i r P i p e   P I P E L I N E
@@ -70,6 +68,7 @@ log.info """\
 
          reads : ${params.reads}
          starindex : ${params.starindex}
+         outdir : ${params.outdir}
 
          """
          .stripIndent()
@@ -78,6 +77,7 @@ log.info """\
  * the index directory
  */
 starindex = file(params.starindex)
+outdir = file(params.outdir)
 
 /*
  * Create the `read_pairs` channel that emits tuples containing three elements:
@@ -88,15 +88,11 @@ Channel
     .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
     .set { read_pairs }
 
-
-
 /*
-  Add input file error exceptions Here
+ * Add input file error exceptions Here
  */
-
-//params.input_folder = '/home/wqj/database/test'
-//params.output_folder = '/home/wqj/test'
-
+if( !starindex.exists() ) exit 1, "Missing star index directory: ${starindex}"
+if( !outdir.exists() ) exit 1, "Missing output directory: ${outdir}"
 
 process test_fastp{
     tag "$pair_id"
@@ -106,6 +102,7 @@ process test_fastp{
 
     output:
     set pair_id, file ('fastp_*') into fastpfiles
+    set pair_id, file ('fastp_*') into fastpfiles_bwa
 
     """
     fastp -i ${query_file[0]} -I ${query_file[1]} -o fastp_${pair_id}_1.fq.gz -O fastp_${pair_id}_2.fq.gz
@@ -133,18 +130,18 @@ process test_star{
     """
 }
 
-//not finished yet.
+still not finished
 process test_bwa{
+    tag "$pair_id"
+
     input:
-    file query_file from fastpfiles
+    set pair_id, file (query_file) from fastpfiles_bwa
+    file outdir
 
     output:
-    file 'out_for_bwa*' into bwafiles
+    set pair_id, file ('bwa_*') into bwafiles
 
     """
-    /home/wqj/tools/bwa/bwa mem -t 20 -T 19 \
-	-M -R "@RG\tID:out_for_fastp\tPL:PGM\tLB:noLB\tSM:out_for_fastp" \
-	/home/wqj/test/bwaindex/genome \
-	${query_file[0]} ${query_file[1]} > /home/wqj/test/out_for_bwa.mem.sam
+    /home/wqj/tools/bwa/bwa mem -t 20 -T 19 -M -R "@RG'${params.str}'ID:fastp_${pair_id}'${params.str}'PL:PGM'${params.str}'LB:noLB'${params.str}'SM:fastp_${pair_id}" /home/wqj/test/bwaindex/genome ${query_file[0]} ${query_file[1]} > ${outdir}/bwa_${pair_id}.mem.sam
     """
 }
