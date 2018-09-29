@@ -19,7 +19,6 @@
  *
  * Authors:
  * Qi Zhao <zhaoqi@sysucc.org.cn>: design and implement the pipeline.
- * Yu Sun <sun_yu@mail.nankai.edu.cn>: design and implement the analysis report sections.
  * Wei qijin
  */
 
@@ -90,6 +89,11 @@ Channel
     .set { read_pairs }
 
 
+
+/*
+  Add input file error exceptions Here
+ */
+
 //params.input_folder = '/home/wqj/database/test'
 //params.output_folder = '/home/wqj/test'
 
@@ -129,7 +133,7 @@ process test_star{
     """
 }
 
-//this is not finished.
+//not finished yet.
 process test_bwa{
     input:
     file query_file from fastpfiles
