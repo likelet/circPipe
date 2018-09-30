@@ -93,7 +93,7 @@ Channel
 if( !starindex.exists() ) exit 1, "Missing star index directory: ${starindex}"
 if( !outdir.exists() ) exit 1, "Missing output directory: ${outdir}"
 
-process test_fastp{
+process run_fastp{
     tag "$pair_id"
 
     input:
@@ -108,7 +108,7 @@ process test_fastp{
     """
 }
 
-process test_star{
+process run_star{
     tag "$pair_id"
 
     input:
@@ -129,7 +129,7 @@ process test_star{
     """
 }
 
-process test_bwa{
+process run_bwa{
     tag "$pair_id"
 
     input:
