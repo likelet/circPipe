@@ -55,7 +55,6 @@ def print_cyan = {  str -> ANSI_CYAN + str + ANSI_RESET }
 def print_purple = {  str -> ANSI_PURPLE + str + ANSI_RESET }
 def print_white = {  str -> ANSI_WHITE + str + ANSI_RESET }
 
-params.str = '\t'
 
 params.reads = "/home/wqj/database/test/*{1,2}.fq.gz"
 params.starindex = '/home/wqj/test/starindex'
@@ -130,18 +129,20 @@ process test_star{
     """
 }
 
-still not finished
 process test_bwa{
     tag "$pair_id"
 
     input:
     set pair_id, file (query_file) from fastpfiles_bwa
-    file outdir
 
     output:
-    set pair_id, file ('bwa_*') into bwafiles
+    set pair_id, file ('*.sam') into bwafiles
 
     """
-    /home/wqj/tools/bwa/bwa mem -t 20 -T 19 -M -R "@RG'${params.str}'ID:fastp_${pair_id}'${params.str}'PL:PGM'${params.str}'LB:noLB'${params.str}'SM:fastp_${pair_id}" /home/wqj/test/bwaindex/genome ${query_file[0]} ${query_file[1]} > ${outdir}/bwa_${pair_id}.mem.sam
+    /home/wqj/tools/bwa/bwa \
+	mem -t 20 -T 19 -M -R \
+	"@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
+	/home/wqj/test/bwaindex/genome \
+	${query_file[0]} ${query_file[1]} > bwa_${pair_id}.mem.sam
     """
 }
