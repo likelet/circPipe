@@ -56,9 +56,6 @@ def print_purple = {  str -> ANSI_PURPLE + str + ANSI_RESET }
 def print_white = {  str -> ANSI_WHITE + str + ANSI_RESET }
 
 
-params.reads = "/home/wqj/database/test/*{1,2}.fq.gz"
-params.starindex = '/home/wqj/test/starindex'
-params.outdir = '/home/wqj/test'
 
 log.info """\
          c i r P i p e   P I P E L I N E
@@ -73,10 +70,15 @@ log.info """\
          .stripIndent()
 
 /*
- * the index directory
+ * the output directory
  */
-starindex = file(params.starindex)
 outdir = file(params.outdir)
+
+
+/*
+ * Add input file error exceptions Here
+ */
+if( !outdir.exists() ) exit 1, "Missing output directory: ${outdir}"
 
 /*
  * Create the `read_pairs` channel that emits tuples containing three elements:
@@ -85,64 +87,76 @@ outdir = file(params.outdir)
 Channel
     .fromFilePairs( params.reads )
     .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .set { read_pairs }
+    .set { read_pairs_fastp }
 
-/*
- * Add input file error exceptions Here
- */
-if( !starindex.exists() ) exit 1, "Missing star index directory: ${starindex}"
-if( !outdir.exists() ) exit 1, "Missing output directory: ${outdir}"
 
+//run the fastp
 process run_fastp{
     tag "$pair_id"
+    publishDir params.outdir, mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
-    set pair_id, file(query_file) from read_pairs
+    set pair_id, file(query_file) from read_pairs_fastp
 
     output:
-    set pair_id, file ('fastp_*') into fastpfiles
+    set pair_id, file ('fastp_*') into fastpfiles_star
     set pair_id, file ('fastp_*') into fastpfiles_bwa
+    file ('*.html') into fastqc_for_waiting
 
     """
     fastp -i ${query_file[0]} -I ${query_file[1]} -o fastp_${pair_id}_1.fq.gz -O fastp_${pair_id}_2.fq.gz
     """
 }
 
-process run_star{
-    tag "$pair_id"
+fastqc_for_waiting = fastqc_for_waiting.first()
 
-    input:
-    set pair_id, file(query_file) from fastpfiles
-    file starindex
+if ( params.aligner == 'star' ){
+    starindex = file(params.starindex) //the index directory
+    if( !starindex.exists() ) exit 1, "Missing star index directory: ${starindex}" //input file error exceptions
 
-    output:
-    set pair_id, file ('star*') into starfiles
+    process run_star{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', overwrite: true
 
-    """
-    /home/wqj/tools/STAR/bin/Linux_x86_64/STAR \
-	--runThreadN 20 \
-	--chimSegmentMin 10 \
-	--genomeDir ${starindex} \
-	--readFilesCommand zcat \
-	--readFilesIn ${query_file[0]} ${query_file[1]} \
-	--outFileNamePrefix star
-    """
+        input:
+        set pair_id, file(query_file) from fastpfiles_star
+        file starindex
+
+        output:
+        set pair_id, file ('star*') into starfiles
+
+        """
+        /home/wqj/tools/STAR/bin/Linux_x86_64/STAR \
+    	--runThreadN 20 \
+    	--chimSegmentMin 10 \
+    	--genomeDir ${starindex} \
+    	--readFilesCommand zcat \
+    	--readFilesIn ${query_file[0]} ${query_file[1]} \
+    	--outFileNamePrefix star
+        """
+    }
+}
+else if ( params.aligner == 'bwa'){
+    process run_bwa{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', overwrite: true
+
+        input:
+        set pair_id, file (query_file) from fastpfiles_bwa
+
+        output:
+        set pair_id, file ('*.sam') into bwafiles
+
+        """
+        /home/wqj/tools/bwa/bwa \
+    	mem -t 20 -T 19 -M -R \
+    	"@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
+    	/home/wqj/test/bwaindex/genome \
+    	${query_file[0]} ${query_file[1]} > bwa_${pair_id}.mem.sam
+        """
+    }
 }
 
-process run_bwa{
-    tag "$pair_id"
 
-    input:
-    set pair_id, file (query_file) from fastpfiles_bwa
 
-    output:
-    set pair_id, file ('*.sam') into bwafiles
 
-    """
-    /home/wqj/tools/bwa/bwa \
-	mem -t 20 -T 19 -M -R \
-	"@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-	/home/wqj/test/bwaindex/genome \
-	${query_file[0]} ${query_file[1]} > bwa_${pair_id}.mem.sam
-    """
-}
