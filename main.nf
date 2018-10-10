@@ -69,11 +69,11 @@ log.info """\
          """
          .stripIndent()
 
+
 /*
  * the output directory
  */
 outdir = file(params.outdir)
-
 
 /*
  * Add input file error exceptions Here
@@ -104,15 +104,21 @@ process run_fastp{
     file ('*.html') into fastqc_for_waiting
 
     """
-    fastp -i ${query_file[0]} -I ${query_file[1]} -o fastp_${pair_id}_1.fq.gz -O fastp_${pair_id}_2.fq.gz
+    fastp \
+    -i ${query_file[0]} \
+    -I ${query_file[1]} \
+    -o fastp_${pair_id}_1.fq.gz \
+    -O fastp_${pair_id}_2.fq.gz
     """
 }
 
 fastqc_for_waiting = fastqc_for_waiting.first()
 
+
+//start mapping
 if ( params.aligner == 'star' ){
     starindex = file(params.starindex) //the index directory
-    if( !starindex.exists() ) exit 1, "Missing star index directory: ${starindex}" //input file error exceptions
+    if( !starindex.exists() ) exit 1, "Missing star index directory: ${starindex}"
 
     process run_star{
         tag "$pair_id"
@@ -123,20 +129,20 @@ if ( params.aligner == 'star' ){
         file starindex
 
         output:
-        set pair_id, file ('star*') into starfiles
+        set pair_id, file ('*.junction') into starfiles
 
         """
-        /home/wqj/tools/STAR/bin/Linux_x86_64/STAR \
+        STAR \
     	--runThreadN 20 \
     	--chimSegmentMin 10 \
     	--genomeDir ${starindex} \
     	--readFilesCommand zcat \
     	--readFilesIn ${query_file[0]} ${query_file[1]} \
-    	--outFileNamePrefix star
+    	--outFileNamePrefix star_${pair_id}_
         """
     }
 }
-else if ( params.aligner == 'bwa'){
+else if ( params.aligner == 'bwa' ){
     process run_bwa{
         tag "$pair_id"
         publishDir params.outdir, mode: 'copy', overwrite: true
@@ -148,14 +154,86 @@ else if ( params.aligner == 'bwa'){
         set pair_id, file ('*.sam') into bwafiles
 
         """
-        /home/wqj/tools/bwa/bwa \
+        bwa \
     	mem -t 20 -T 19 -M -R \
     	"@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
     	/home/wqj/test/bwaindex/genome \
-    	${query_file[0]} ${query_file[1]} > bwa_${pair_id}.mem.sam
+    	${query_file[0]} ${query_file[1]} \
+	> bwa_${pair_id}.mem.sam
         """
     }
 }
+
+
+//start calling circRNA
+if ( params.circall == 'circexplorer2' && params.aligner == 'star' ){
+    annotationfile = file(params.annotationfile) //the annotationfile
+    if( !annotationfile.exists() ) exit 1, "Missing annotation file: ${annotationfile}"
+    genomefile = file(params.genomefile) //the genomefile
+    if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
+
+    process run_circexplorer2{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', overwrite: true
+
+        input:
+        set pair_id, file (query_file) from starfiles
+        file annotationfile
+        file genomefile
+
+        output:
+        set pair_id, file ('CIRCexplorer2*') into circexplorer2files
+
+        """
+        CIRCexplorer2 \
+    	parse -t STAR ${query_file} \
+    	> CIRCexplorer2_parse_${pair_id}.log
+
+        CIRCexplorer2 \
+    	annotate -r ${annotationfile} \
+    	-g ${genomefile} \
+    	-b back_spliced_junction.bed \
+    	-o CIRCexplorer2_${pair_id}_circularRNA_known.txt \
+    	> CIRCexplorer2_annotate_${pair_id}.log
+        """
+    }
+}
+else if ( params.circall == 'ciri' && params.aligner == 'bwa' ){
+    gtffile = file(params.gtffile) //the annotationfile
+    if( !gtffile.exists() ) exit 1, "Missing annotation file: ${gtffile}"
+    genomefile = file(params.genomefile) //the genomefile
+    if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
+    ciridir = file(params.ciridir)
+    if( !genomefile.exists() ) exit 1, "Missing CIRI Directory: ${ciridir}"
+
+    process run_ciri{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', overwrite: true
+
+        input:
+        set pair_id, file (query_file) from bwafiles
+        file gtffile
+        file genomefile
+        file ciridir
+
+        output:
+        set pair_id, file ('CIRI*') into cirifiles
+
+        """
+        perl ${ciridir}/CIRI2.pl \
+	    -T 10 \
+	    -F ${genomefile} \
+	    -A ${gtffile} \
+	    -G CIRI_${pair_id}.log \
+	    -I ${query_file} \
+	    -O CIRI_${pair_id}.ciri \
+	    > CIRI_${pair_id}_detail.log
+        """
+    }
+}
+
+
+
 
 
 
