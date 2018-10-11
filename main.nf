@@ -57,6 +57,7 @@ def print_white = {  str -> ANSI_WHITE + str + ANSI_RESET }
 
 
 
+
 log.info """\
          c i r P i p e   P I P E L I N E
          =============================
@@ -65,6 +66,7 @@ log.info """\
          reads : ${params.reads}
          starindex : ${params.starindex}
          outdir : ${params.outdir}
+         outfastpdir : ${params.outfastpdir}
 
          """
          .stripIndent()
@@ -74,11 +76,13 @@ log.info """\
  * the output directory
  */
 outdir = file(params.outdir)
+//outfastpdir = file(params.outfastpdir)
 
 /*
  * Add input file error exceptions Here
  */
 if( !outdir.exists() ) exit 1, "Missing output directory: ${outdir}"
+//if( !outfastpdir.exists() ) exit 1, "Missing fastp output directory: ${outfastpdir}"
 
 /*
  * Create the `read_pairs` channel that emits tuples containing three elements:
@@ -101,15 +105,29 @@ process run_fastp{
     output:
     set pair_id, file ('fastp_*') into fastpfiles_star
     set pair_id, file ('fastp_*') into fastpfiles_bwa
+    set pair_id, file ('fastp_*') into fastpfiles_mapsplice
+    set pair_id, file ('fastp_*') into fastpfiles_segemehl
     file ('*.html') into fastqc_for_waiting
 
-    """
-    fastp \
-    -i ${query_file[0]} \
-    -I ${query_file[1]} \
-    -o fastp_${pair_id}_1.fq.gz \
-    -O fastp_${pair_id}_2.fq.gz
-    """
+	shell:
+	if ( params.aligner == 'mapsplice' || params.aligner == 'segemehl' ){
+	    """
+        fastp \
+        -i ${query_file[0]} \
+        -I ${query_file[1]} \
+        -o fastp_${pair_id}_1.fq \
+        -O fastp_${pair_id}_2.fq
+        """
+	} else {
+        """
+        fastp \
+        -i ${query_file[0]} \
+        -I ${query_file[1]} \
+        -o fastp_${pair_id}_1.fq.gz \
+        -O fastp_${pair_id}_2.fq.gz
+        """
+	}
+
 }
 
 fastqc_for_waiting = fastqc_for_waiting.first()
@@ -117,6 +135,7 @@ fastqc_for_waiting = fastqc_for_waiting.first()
 
 //start mapping
 if ( params.aligner == 'star' ){
+
     starindex = file(params.starindex) //the index directory
     if( !starindex.exists() ) exit 1, "Missing star index directory: ${starindex}"
 
@@ -159,16 +178,114 @@ else if ( params.aligner == 'bwa' ){
     	"@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
     	/home/wqj/test/bwaindex/genome \
     	${query_file[0]} ${query_file[1]} \
-	> bwa_${pair_id}.mem.sam
+	    > bwa_${pair_id}.mem.sam
         """
+    }
+}
+else if ( params.aligner == 'mapsplice' ){
+
+    condadir = file(params.condadir) //the annotationfile
+    if( !condadir.exists() ) exit 1, "Missing conda directory: ${condadir}"
+
+    gtffile = file(params.gtffile) //the annotationfile
+    if( !gtffile.exists() ) exit 1, "Missing annotation file: ${gtffile}"
+
+    mapsdir = file(params.mapsdir) //the mapsplice directory
+    if( !mapsdir.exists() ) exit 1, "Missing Mapsplice Directory: ${mapsdir}"
+
+    refdir = file(params.refdir) //the reference genome directory
+    if( !refdir.exists() ) exit 1, "Missing Reference Genome Directory: ${refdir}"
+
+    process run_mapsplice{
+        tag "$pair_id"
+	    publishDir params.outdir, mode: 'copy', overwrite: true
+
+	    input:
+	    set pair_id, file (query_file) from fastpfiles_mapsplice
+	    file mapsdir
+	    file gtffile
+	    file refdir
+        file outdir
+
+	    output:
+        set pair_id, file ('*.log') into mapsplicefiles
+
+        conda params.condadir
+
+	    """
+	    python ${mapsdir}/mapsplice.py \
+	    -p 25 -k 1 \
+	    --fusion-non-canonical \
+	    --non-canonical-double-anchor \
+	    --min-fusion-distance 200 \
+	    -x /home/wqj/test/bowtieindex/chrX \
+	    --gene-gtf ${gtffile} \
+	    -c ${refdir} \
+	    -1 ${query_file[0]} \
+	    -2 ${query_file[1]} \
+	    -o ${outdir}/output_mapsplice_${pair_id} 2\
+	    > mapsplice_${pair_id}.log
+	    """
+    }
+}
+else if ( params.aligner == 'segemehl' ){
+
+    condadir = file(params.condadir) //the annotationfile
+    if( !condadir.exists() ) exit 1, "Missing conda directory: ${condadir}"
+
+    genomefile = file(params.genomefile) //the genomefile
+    if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
+
+    segdir = file(params.mapsdir) //the segemehl directory
+    if( !segdir.exists() ) exit 1, "Missing Segemehl Directory: ${segdir}"
+
+    segindex = file(params.segindex) //the segemehl index file
+    if( !segindex.exists() ) exit 1, "Missing Segemehl index file: ${segindex}"
+
+    process run_segemehl{
+        tag "$pair_id"
+	    publishDir params.outdir, mode: 'copy', overwrite: true
+
+	    input:
+	    set pair_id, file (query_file) from fastpfiles_segemehl
+	    file segdir
+	    file genomefile
+	    file segindex
+
+	    output:
+        set pair_id, file ('segemehl*') into segemehlfiles
+
+        conda params.condadir
+
+	    """
+	    ${segdir}/segemehl.x \
+	    -d ${genomefile} \
+	    -i ${segindex} \
+	    -q ${query_file[0]} \
+	    -p ${query_file[1]} \
+	    -t 20 -S \
+	    | samtools view -bS - \
+	    | samtools sort -o - deleteme \
+	    | samtools view -h - \
+	    > segemehl_${pair_id}_mapped.sam
+
+        ${segdir}/testrealign.x \
+        -d ${genomefile} \
+        -q segemehl_${pair_id}_mapped.sam \
+        -n \
+        -U segemehl_${pair_id}_splicesites.bed \
+        -T segemehl_${pair_id}_transrealigned.bed
+	    """
     }
 }
 
 
 //start calling circRNA
 if ( params.circall == 'circexplorer2' && params.aligner == 'star' ){
+
     annotationfile = file(params.annotationfile) //the annotationfile
     if( !annotationfile.exists() ) exit 1, "Missing annotation file: ${annotationfile}"
+
     genomefile = file(params.genomefile) //the genomefile
     if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
 
@@ -186,23 +303,26 @@ if ( params.circall == 'circexplorer2' && params.aligner == 'star' ){
 
         """
         CIRCexplorer2 \
-    	parse -t STAR ${query_file} \
-    	> CIRCexplorer2_parse_${pair_id}.log
+	    parse -t STAR ${query_file} \
+	    > CIRCexplorer2_parse_${pair_id}.log
 
         CIRCexplorer2 \
-    	annotate -r ${annotationfile} \
-    	-g ${genomefile} \
-    	-b back_spliced_junction.bed \
-    	-o CIRCexplorer2_${pair_id}_circularRNA_known.txt \
-    	> CIRCexplorer2_annotate_${pair_id}.log
+	    annotate -r ${annotationfile} \
+	    -g ${genomefile} \
+	    -b back_spliced_junction.bed \
+	    -o CIRCexplorer2_${pair_id}_circularRNA_known.txt \
+	    > CIRCexplorer2_annotate_${pair_id}.log
         """
     }
 }
 else if ( params.circall == 'ciri' && params.aligner == 'bwa' ){
+
     gtffile = file(params.gtffile) //the annotationfile
     if( !gtffile.exists() ) exit 1, "Missing annotation file: ${gtffile}"
+
     genomefile = file(params.genomefile) //the genomefile
     if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
+
     ciridir = file(params.ciridir)
     if( !genomefile.exists() ) exit 1, "Missing CIRI Directory: ${ciridir}"
 
@@ -231,7 +351,6 @@ else if ( params.circall == 'ciri' && params.aligner == 'bwa' ){
         """
     }
 }
-
 
 
 
