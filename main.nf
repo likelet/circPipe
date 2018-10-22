@@ -29,16 +29,7 @@
  * Wei qijin
  */
 
-// requirement:
-// - fastp/fastqc／AfterQC
-// - STAR/tophat2/bowtie2/hisat2/StringTie
-// - samtools/sambamba
-// - Cufflinks/gffcompare
-// - Bedops
-// - CPAT
-// - PLEK
-// - CNCI
-// - kallisto [https://pachterlab.github.io/kallisto/starting]
+
 
 //pre-defined functions for render command
 //=======================================================================================
