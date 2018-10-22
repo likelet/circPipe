@@ -1,19 +1,26 @@
-# cirPipe  
+# nf-core/cirpipe
+**cirRNA analysis pipe**
 
-## Quick Start 
+[![Build Status](https://travis-ci.org/nf-core/cirpipe.svg?branch=master)](https://travis-ci.org/nf-core/cirpipe)
+[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
 
-## Input file  
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
+[![Docker](https://img.shields.io/docker/automated/nfcore/cirpipe.svg)](https://hub.docker.com/r/nfcore/cirpipe)
+![Singularity Container available](
+https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
-* Raw reads in fastq format  
+### Introduction
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
 
-* Genome index files for alignment. e.g [ hisat index ](http://ccb.jhu.edu/software/hisat2/faq.shtml)
 
-* Annotation file from [xxx](http://ccb.jhu.edu/software/hisat2/faq.shtml) 
+### Documentation
+The nf-core/cirpipe pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
-## Installation 
+1. [Installation](docs/installation.md)
+2. Pipeline configuration
+    * [Local installation](docs/configuration/local.md)
+    * [Adding your own system](docs/configuration/adding_your_own.md)
+3. [Running the pipeline](docs/usage.md)
+4. [Output and how to interpret the results](docs/output.md)
+5. [Troubleshooting](docs/troubleshooting.md)
 
-## Constribution 
-
-## Citation 
-
-## License
