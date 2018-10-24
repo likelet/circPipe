@@ -4,6 +4,15 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - fastqc=0.11.7
+  - fastp=0.19.4
   - pysam=0.15.1
   - segemehl=0.2.0
+  - numpy=1.15.2
+  - bwa=0.7.17
+  - nextflow=0.32.0
+  - bowtie=1.2.2
+  - bowtie2=2.3.4.3
+  - samtools=1.9
+  - star=2.6.1b
+  - circexplorer2=2.3.3
+  - mapsplice=2.2.0

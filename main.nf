@@ -206,109 +206,175 @@ log.info "========================================="
 
 
 
+/*
+ * Checking the input files
+ * Adding input files error exceptions Here
+ */
+outdir = file(params.outdir) //the output directory
+if( !outdir.exists() ) exit 1, print_red("Missing output directory: ${outdir}")
+
+if ( params.star ){
+
+    starindex = file(params.starindex) //the index directory
+    if( !starindex.exists() ) exit 1, print_red("Missing star index directory: ${starindex}")
+
+}
+
+if ( params.mapsplice ){
+
+    condadir = file(params.condadir) //the python3 environment
+    if( !condadir.exists() ) exit 1, print_red("Missing python3 environment: ${condadir}")
+
+    gtffile = file(params.gtffile) //the annotationfile
+    if( !gtffile.exists() ) exit 1, print_red("Missing annotation file: ${gtffile}")
+
+    mapsdir = file(params.mapsdir) //the mapsplice directory
+    if( !mapsdir.exists() ) exit 1, print_red("Missing Mapsplice Directory: ${mapsdir}")
+
+    refdir = file(params.refdir) //the reference genome directory
+    if( !refdir.exists() ) exit 1, print_red("Missing Reference Genome Directory: ${refdir}")
+
+}
+
+if ( params.segemehl ){
+
+    condadir = file(params.condadir) //the python3 environment
+    if( !condadir.exists() ) exit 1, print_red("Missing python3 environment: ${condadir}")
+
+    genomefile = file(params.genomefile) //the genomefile
+    if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
+
+    segdir = file(params.mapsdir) //the segemehl directory
+    if( !segdir.exists() ) exit 1, print_red("Missing Segemehl Directory: ${segdir}")
+
+    segindex = file(params.segindex) //the segemehl index file
+    if( !segindex.exists() ) exit 1, print_red("Missing Segemehl index file: ${segindex}")
+
+}
+
+if ( params.circexplorer2 ){
+
+    if ( params.star ){
+
+        annotationfile = file(params.annotationfile) //the annotationfile
+        if( !annotationfile.exists() ) exit 1, print_red("Missing annotation file: ${annotationfile}")
+
+        genomefile = file(params.genomefile) //the genomefile
+        if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
+
+    }else{
+
+        exit 1, print_yellow( "Please run star before circexplorer2" )
+
+    }
 
 
-log.info """\
+}
+
+if ( params.ciri ){
+
+    if ( params.bwa ){
+
+        gtffile = file(params.gtffile) //the annotationfile
+        if( !gtffile.exists() ) exit 1, print_red("Missing annotation file: ${gtffile}")
+
+        genomefile = file(params.genomefile) //the genomefile
+        if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
+
+        ciridir = file(params.ciridir)
+        if( !genomefile.exists() ) exit 1, print_red("Missing CIRI Directory: ${ciridir}")
+
+    }else{
+
+        exit 1, print_yellow( "Please run bwa before ciri" )
+
+    }
+
+}
+
+if ( params.find_circ ){
+
+    if ( params.bowtie2 ){
+
+        conda2dir = file(params.conda2dir) //the python2 environment
+        if( !conda2dir.exists() ) exit 1, print_red("Missing python2 environment: ${conda2dir}")
+
+        genomefile = file(params.genomefile) //the genomefile
+        if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
+
+        find_circdir = file(params.find_circdir)
+        if( !find_circdir.exists() ) exit 1, print_red("Missing find_circ Directory: ${find_circdir}")
+
+    }else{
+
+        exit 1, print_yellow( "Please run bowtie2 before find_circ" )
+
+    }
+
+}
+
+
+//showing the process and files
+log.info print_purple("""\
          c i r P i p e   P I P E L I N E
          =============================
 
 
+         Reads types :
+         singleEnd : ${params.singleEnd}
+         
+         Tools selected :
+         star : ${params.star}
+         bwa : ${params.bwa}
+         bowtie2 = ${params.bowtie2}
+         mapsplice = ${params.mapsplice}
+         segemehl = ${params.segemehl}
+         find_circ = ${params.find_circ}
+         circexplorer2 = ${params.circexplorer2}
+         ciri = ${params.ciri}
+
+         Input files selected :
          reads : ${params.reads}
-         starindex : ${params.starindex}
-         outdir : ${params.outdir}
+         annotation file : ${params.annotationfile}
+         genome file : ${params.genomefile}
+         gtf file : ${params.gtffile}
 
-         """
-         .stripIndent()
+         Index selected :
+         segemehl index : ${params.segindex}
+
+         Output files directory :
+         output directory : ${params.outdir}
+
+
+         Start running...
+
+
+         """)
+        .stripIndent()
 
 
 
-
-/*
- * Add input file error exceptions Here
- */
-outdir = file(params.outdir) //the output directory
-if( !outdir.exists() ) exit 1, "Missing output directory: ${outdir}"
-
-if ( params.aligner == 'star' ){
-
-    starindex = file(params.starindex) //the index directory
-    if( !starindex.exists() ) exit 1, "Missing star index directory: ${starindex}"
-
+ava_cpu = Runtime.getRuntime().availableProcessors()
+// set individual cpu for fork run
+if ( params.cpu != null && ava_cpu > params.cpu ) {
+    idv_cpu = params.cpu
+} else if ( params.cpu != null && ava_cpu < params.cpu ) {
+    idv_cpu = ava_cpu
+    print print_yellow("Exceeding the max available processors, \n use default parameter to run pipe. ")
 }
-else if ( params.aligner == 'mapsplice' ){
-
-    condadir = file(params.condadir) //the python3 environment
-    if( !condadir.exists() ) exit 1, "Missing python3 environment: ${condadir}"
-
-    gtffile = file(params.gtffile) //the annotationfile
-    if( !gtffile.exists() ) exit 1, "Missing annotation file: ${gtffile}"
-
-    mapsdir = file(params.mapsdir) //the mapsplice directory
-    if( !mapsdir.exists() ) exit 1, "Missing Mapsplice Directory: ${mapsdir}"
-
-    refdir = file(params.refdir) //the reference genome directory
-    if( !refdir.exists() ) exit 1, "Missing Reference Genome Directory: ${refdir}"
-
+int fork_number = ava_cpu / idv_cpu
+if (fork_number < 1) {
+    fork_number = 1
 }
-else if ( params.aligner == 'segemehl' ){
-
-    condadir = file(params.condadir) //the python3 environment
-    if( !condadir.exists() ) exit 1, "Missing python3 environment: ${condadir}"
-
-    genomefile = file(params.genomefile) //the genomefile
-    if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
-
-    segdir = file(params.mapsdir) //the segemehl directory
-    if( !segdir.exists() ) exit 1, "Missing Segemehl Directory: ${segdir}"
-
-    segindex = file(params.segindex) //the segemehl index file
-    if( !segindex.exists() ) exit 1, "Missing Segemehl index file: ${segindex}"
-
-}
-
-if ( params.circall == 'circexplorer2' ){
-
-    annotationfile = file(params.annotationfile) //the annotationfile
-    if( !annotationfile.exists() ) exit 1, "Missing annotation file: ${annotationfile}"
-
-    genomefile = file(params.genomefile) //the genomefile
-    if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
-
-}
-else if ( params.circall == 'ciri' ){
-
-    gtffile = file(params.gtffile) //the annotationfile
-    if( !gtffile.exists() ) exit 1, "Missing annotation file: ${gtffile}"
-
-    genomefile = file(params.genomefile) //the genomefile
-    if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
-
-    ciridir = file(params.ciridir)
-    if( !genomefile.exists() ) exit 1, "Missing CIRI Directory: ${ciridir}"
-
-}
-else if ( params.circall == 'find_circ' ){
-
-    conda2dir = file(params.conda2dir) //the python2 environment
-    if( !conda2dir.exists() ) exit 1, "Missing python2 environment: ${conda2dir}"
-
-    genomefile = file(params.genomefile) //the genomefile
-    if( !genomefile.exists() ) exit 1, "Missing genome file: ${genomefile}"
-
-    find_circdir = file(params.find_circdir)
-    if( !find_circdir.exists() ) exit 1, "Missing find_circ Directory: ${find_circdir}"
-
-}
-
 
 /*
  * Create the `read_pairs` channel that emits tuples containing three elements:
  * the pair ID, the first read-pair file and the second read-pair file
  */
 Channel
-    .fromFilePairs( params.reads )
-    .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .set { read_pairs_fastp }
+        .fromFilePairs( params.reads )
+        .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+        .set { read_pairs_fastp }
 
 
 //run the fastp
@@ -316,47 +382,48 @@ process run_fastp{
     tag "$pair_id"
     publishDir params.outdir, mode: 'copy', pattern: "*.html", overwrite: true
 
+    maxForks fork_number
+
     input:
     set pair_id, file(query_file) from read_pairs_fastp
 
     output:
     set pair_id, file ('fastp_*') into fastpfiles_star
     set pair_id, file ('fastp_*') into fastpfiles_bwa
-    set pair_id, file ('fastp_*') into fastpfiles_mapsplice
-    set pair_id, file ('fastp_*') into fastpfiles_segemehl
+    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice
+    set pair_id, file ('unzip_fastp_*') into fastpfiles_segemehl
     set pair_id, file ('fastp_*') into fastpfiles_bowtie2
     file ('*.html') into fastqc_for_waiting
 
-	shell:
-	if ( params.aligner == 'mapsplice' || params.aligner == 'segemehl' ){
-	    """
-        fastp \
-        -i ${query_file[0]} \
-        -I ${query_file[1]} \
-        -o fastp_${pair_id}_1.fq \
-        -O fastp_${pair_id}_2.fq
-        """
-	} else {
-        """
-        fastp \
-        -i ${query_file[0]} \
-        -I ${query_file[1]} \
-        -o fastp_${pair_id}_1.fq.gz \
-        -O fastp_${pair_id}_2.fq.gz
-        """
-	}
+
+    """
+    fastp \
+    -i ${query_file[0]} \
+    -I ${query_file[1]} \
+    -o unzip_fastp_${pair_id}_1.fq \
+    -O unzip_fastp_${pair_id}_2.fq
+ 
+    fastp \
+    -i ${query_file[0]} \
+    -I ${query_file[1]} \
+    -o fastp_${pair_id}_1.fq.gz \
+    -O fastp_${pair_id}_2.fq.gz \
+    -h ${pair_id}.html
+    """
 
 }
 
-fastqc_for_waiting = fastqc_for_waiting.first()
+fastqc_for_waiting = fastqc_for_waiting.first() //wait for finish this process first
 
 
 //start mapping
-if ( params.aligner == 'star' ){
+if ( params.star ){
 
     process run_star{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir params.outdir, mode: 'link', overwrite: true
+
+        maxForks fork_number
 
         input:
         set pair_id, file(query_file) from fastpfiles_star
@@ -365,9 +432,11 @@ if ( params.aligner == 'star' ){
         output:
         set pair_id, file ('*.junction') into starfiles
 
+        shell:
+        star_threads = idv_cpu - 1
         """
         STAR \
-    	--runThreadN 20 \
+    	--runThreadN ${star_threads} \
     	--chimSegmentMin 10 \
     	--genomeDir ${starindex} \
     	--readFilesCommand zcat \
@@ -377,11 +446,14 @@ if ( params.aligner == 'star' ){
     }
 
 }
-else if ( params.aligner == 'bwa' ){
+
+if ( params.bwa ){
 
     process run_bwa{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir params.outdir, mode: 'link', overwrite: true
+
+        maxForks fork_number
 
         input:
         set pair_id, file (query_file) from fastpfiles_bwa
@@ -389,9 +461,12 @@ else if ( params.aligner == 'bwa' ){
         output:
         set pair_id, file ('*.sam') into bwafiles
 
+        shell:
+        bwa_threads = idv_cpu - 1
         """
         bwa \
-    	mem -t 20 -T 19 -M -R \
+    	mem -t ${bwa_threads} \
+    	-T 19 -M -R \
     	"@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
     	/home/wqj/test/bwaindex/genome \
     	${query_file[0]} ${query_file[1]} \
@@ -400,27 +475,33 @@ else if ( params.aligner == 'bwa' ){
     }
 
 }
-else if ( params.aligner == 'mapsplice' ){
+
+if ( params.mapsplice ){
 
     process run_mapsplice{
         tag "$pair_id"
-	    publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir params.outdir, mode: 'copy', overwrite: true
 
-	    input:
-	    set pair_id, file (query_file) from fastpfiles_mapsplice
-	    file mapsdir
-	    file gtffile
-	    file refdir
+        maxForks fork_number
+
+        input:
+        set pair_id, file (query_file) from fastpfiles_mapsplice
+        file mapsdir
+        file gtffile
+        file refdir
         file outdir
 
-	    output:
-        set pair_id, file ('*.log') into mapsplicefiles
+        output:
+        set pair_id into mapsplicefiles
 
         conda params.condadir
 
-	    """
+        shell:
+        mapsplice_threads = idv_cpu - 1
+        """
 	    python ${mapsdir}/mapsplice.py \
-	    -p 25 -k 1 \
+	    -p ${mapsplice_threads} \
+	    -k 1 \
 	    --fusion-non-canonical \
 	    --non-canonical-double-anchor \
 	    --min-fusion-distance 200 \
@@ -429,36 +510,73 @@ else if ( params.aligner == 'mapsplice' ){
 	    -c ${refdir} \
 	    -1 ${query_file[0]} \
 	    -2 ${query_file[1]} \
-	    -o ${outdir}/output_mapsplice_${pair_id} 2\
-	    > mapsplice_${pair_id}.log
+	    -o ${outdir}/output_mapsplice_${pair_id}
 	    """
     }
 
+    process run_modify_mapsplice{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', pattern: "*candidates.bed", overwrite: true
+
+        maxForks fork_number
+
+        input:
+        set pair_id from mapsplicefiles
+        file outdir
+
+        output:
+        set pair_id, file ('*candidates.bed') into modify_mapsplice
+
+        shell :
+        '''
+        cat !{outdir}/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+	    | awk '{print $6}' \
+	    | sed -e 's/.//' \
+	    > !{pair_id}_mapsplice_temp1.bed
+
+	    cat !{outdir}/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+	    | awk '{print $1}' \
+	    | awk -F"~" '{print $2}' \
+	    > !{pair_id}_mapsplice_temp.bed
+
+	    paste !{pair_id}_mapsplice_temp.bed !{pair_id}_mapsplice_temp1.bed !{outdir}/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+	    | grep -v chrM \
+	    | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
+	    > !{pair_id}_modify_mapsplice.candidates.bed
+        '''
+    }
+
 }
-else if ( params.aligner == 'segemehl' ){
+
+if ( params.segemehl ){
 
     process run_segemehl{
         tag "$pair_id"
-	    publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir params.outdir, mode: 'copy', overwrite: true
 
-	    input:
-	    set pair_id, file (query_file) from fastpfiles_segemehl
-	    file segdir
-	    file genomefile
-	    file segindex
+        maxForks fork_number
 
-	    output:
-        set pair_id, file ('segemehl*') into segemehlfiles
+        input:
+        set pair_id, file (query_file) from fastpfiles_segemehl
+        file segdir
+        file genomefile
+        file segindex
+
+        output:
+        set pair_id, file ('*splicesites.bed') into segemehlfiles
 
         conda params.condadir
 
-	    """
+        shell:
+        segemehl_threads = idv_cpu - 1
+        """
 	    ${segdir}/segemehl.x \
 	    -d ${genomefile} \
 	    -i ${segindex} \
 	    -q ${query_file[0]} \
 	    -p ${query_file[1]} \
-	    -t 20 -S \
+	    -t ${segemehl_threads} \
+	    -S \
 	    | samtools view -bS - \
 	    | samtools sort -o - deleteme \
 	    | samtools view -h - \
@@ -473,12 +591,43 @@ else if ( params.aligner == 'segemehl' ){
 	    """
     }
 
+    process run_modify_segemehl{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', pattern:"*candidates.bed", overwrite: true
+
+        maxForks fork_number
+
+        input:
+        set pair_id , file ( query_file ) from segemehlfiles
+
+        output:
+        set pair_id, file ('*candidates.bed') into modify_segemehl
+
+        shell :
+        '''
+        cat !{query_file} \
+	    | awk '{print $4}' \
+	    | awk -F":" '{print $2 "\t" $5 "\t" $6}' \
+	    > !{pair_id}_segemehl.temp.bed
+
+	    paste !{query_file} !{pair_id}_segemehl.temp.bed \
+	    | grep C \
+	    | grep P \
+	    | grep -v chrM \
+	    | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
+	    > !{pair_id}_modify_segemehl.candidates.bed
+        '''
+    }
+
 }
-else if ( params.aligner == 'bowtie2' ){
+
+if ( params.bowtie2 ){
 
     process run_bowtie2{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir params.outdir, mode: 'link', overwrite: true
+
+        maxForks fork_number
 
         input:
         set pair_id, file (query_file) from fastpfiles_bowtie2
@@ -486,9 +635,11 @@ else if ( params.aligner == 'bowtie2' ){
         output:
         set pair_id, file ('bowtie2*') into bowtie2files
 
+        shell:
+        bowtie2_threads = idv_cpu - 1
         """
         bowtie2 \
-        -p 20 \
+        -p ${bowtie2_threads} \
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
@@ -511,11 +662,13 @@ else if ( params.aligner == 'bowtie2' ){
 
 
 //start calling circRNA
-if ( params.circall == 'circexplorer2' && params.aligner == 'star' ){
+if ( params.circexplorer2 && params.star ){
 
     process run_circexplorer2{
         tag "$pair_id"
         publishDir params.outdir, mode: 'copy', overwrite: true
+
+        maxForks fork_number
 
         input:
         set pair_id, file (query_file) from starfiles
@@ -523,28 +676,52 @@ if ( params.circall == 'circexplorer2' && params.aligner == 'star' ){
         file genomefile
 
         output:
-        set pair_id, file ('CIRCexplorer2*') into circexplorer2files
+        set pair_id, file ('*known.txt') into circexplorer2files
 
         """
         CIRCexplorer2 \
-	    parse -t STAR ${query_file} \
-	    > CIRCexplorer2_parse_${pair_id}.log
+        parse -t STAR ${query_file} \
+        > CIRCexplorer2_parse_${pair_id}.log
 
         CIRCexplorer2 \
-	    annotate -r ${annotationfile} \
-	    -g ${genomefile} \
-	    -b back_spliced_junction.bed \
-	    -o CIRCexplorer2_${pair_id}_circularRNA_known.txt \
-	    > CIRCexplorer2_annotate_${pair_id}.log
+        annotate -r ${annotationfile} \
+        -g ${genomefile} \
+        -b back_spliced_junction.bed \
+        -o CIRCexplorer2_${pair_id}_circularRNA_known.txt \
+        > CIRCexplorer2_annotate_${pair_id}.log
         """
     }
 
+    process run_modify_circexplorer2{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', overwrite: true
+
+        maxForks fork_number
+
+        input:
+        set pair_id, file (query_file) from circexplorer2files
+
+        output:
+        set pair_id, file ('*candidates.bed') into modify_circexplorer2
+
+        shell :
+        '''
+        grep circ !{query_file} \
+        | grep -v chrM \
+	    | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
+        > !{pair_id}_modify_circexplorer2.candidates.bed
+        '''
+    }
+
 }
-else if ( params.circall == 'ciri' && params.aligner == 'bwa' ){
+
+if ( params.ciri && params.bwa ){
 
     process run_ciri{
         tag "$pair_id"
         publishDir params.outdir, mode: 'copy', overwrite: true
+
+        maxForks fork_number
 
         input:
         set pair_id, file (query_file) from bwafiles
@@ -553,26 +730,51 @@ else if ( params.circall == 'ciri' && params.aligner == 'bwa' ){
         file ciridir
 
         output:
-        set pair_id, file ('CIRI*') into cirifiles
+        set pair_id, file ('*.txt') into cirifiles
 
         """
         perl ${ciridir}/CIRI2.pl \
-	    -T 10 \
-	    -F ${genomefile} \
-	    -A ${gtffile} \
-	    -G CIRI_${pair_id}.log \
-	    -I ${query_file} \
-	    -O CIRI_${pair_id}.ciri \
-	    > CIRI_${pair_id}_detail.log
+        -T 10 \
+        -F ${genomefile} \
+        -A ${gtffile} \
+        -G CIRI_${pair_id}.log \
+        -I ${query_file} \
+        -O CIRI_${pair_id}.txt \
+        > CIRI_${pair_id}_detail.log
         """
     }
 
+    process run_modify_ciri{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', overwrite: true
+
+        maxForks fork_number
+
+        input:
+        set pair_id, file (query_file) from cirifiles
+
+        output:
+        set pair_id, file ('*candidates.bed') into modify_ciri
+
+        shell :
+        '''
+        cat !{query_file} \
+	    | sed -e '1d' \
+        | grep -v chrM \
+        | awk '{print $2 "\t" $3 "\t" $4 "\t" "segemehl" "\t" $5 "\t" $11}' \
+        > !{pair_id}_modify_ciri.candidates.bed
+        '''
+    }
+
 }
-else if ( params.circall == 'find_circ' && params.aligner == 'bowtie2' ){
+
+if ( params.find_circ && params.bowtie2 ){
 
     process run_find_circ{
         tag "$pair_id"
         publishDir params.outdir, mode: 'copy', overwrite: true
+
+        maxForks fork_number
 
         input:
         set pair_id, file (query_file) from bowtie2files
@@ -580,17 +782,19 @@ else if ( params.circall == 'find_circ' && params.aligner == 'bowtie2' ){
         file find_circdir
 
         output:
-        set pair_id, file ('find_circ*') into find_circfiles
+        set pair_id, file ('*splice_sites.bed') into find_circfiles
 
         conda params.conda2dir
 
-        """
+        shell:
+        bowtie2_threads = idv_cpu - 1
+        """     
         python ${find_circdir}/unmapped2anchors.py ${query_file} \
         | gzip \
         > find_circ_${pair_id}_anchors.qfa.gz
 
         bowtie2 \
-        -p 20 \
+        -p ${bowtie2_threads} \
         --reorder \
         --mm \
         --score-min=C,-15,0 \
@@ -601,26 +805,47 @@ else if ( params.circall == 'find_circ' && params.aligner == 'bowtie2' ){
         -G ${genomefile} \
         -p ${pair_id}_ \
         -s find_circ_${pair_id}_stats.sites.log \
-        -n ${pair_id} \
+        -n find_circ \
         -R find_circ_${pair_id}_spliced_reads.fa \
-        > find_circ_${pair_id}_splice_sites.bed
-
-        grep CIRCULAR find_circ_${pair_id}_splice_sites.bed \
-        | grep -v chrM \
-        | awk '\$5>=2' \
-        | grep UNAMBIGUOUS_BP \
-        | grep ANCHOR_UNIQUE \
-        | python ${find_circdir}/maxlength.py 100000 \
-        > finc_circ_${pair_id}.candidates.bed
+        > find_circ_${pair_id}_splice_sites.bed   
         """
     }
+
+    process run_modify_find_circ{
+        tag "$pair_id"
+        publishDir params.outdir, mode: 'copy', overwrite: true
+
+        maxForks fork_number
+
+        input:
+        set pair_id, file (query_file) from find_circfiles
+
+        output:
+        set pair_id, file ('*candidates.bed') into modify_find_circfiles
+
+        shell :
+        '''
+        grep CIRCULAR !{query_file} \
+        | grep -v chrM \
+        | grep UNAMBIGUOUS_BP \
+        | grep ANCHOR_UNIQUE \
+        | awk '{print $1 "\t" $2 "\t" $3 "\t" $11 "\t" $5 "\t" $6}' \
+	    | sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 \
+        > !{pair_id}_modify_finc_circ.candidates.bed
+        '''
+    }
+
 }
+
+//merge the files
+
 
 /*
  * Completion e-mail notification
  */
 workflow.onComplete {
 
+    println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" )
     // Set up the e-mail variables
     def subject = "[nf-core/cirpipe] Successful: $workflow.runName"
     if(!workflow.success){
@@ -733,14 +958,6 @@ process get_software_versions {
     scrape_software_versions.py > software_versions_mqc.yaml
     """
 }
-
-
-
-/*
- * STEP 1 - FastQC
- */
-
-// add QC here
 
 
 
