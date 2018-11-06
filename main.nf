@@ -98,21 +98,17 @@ if (params.help){
     exit 0
 }
 
+/*
 // Configurable variables
 params.name = false
-params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
-params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
+//params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
+//params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
 params.email = false
 params.plaintext_email = false
 
-multiqc_config = file(params.multiqc_config)
 output_docs = file("$baseDir/docs/output.md")
 
-// Validate inputs
-if ( params.fasta ){
-    fasta = file(params.fasta)
-    if( !fasta.exists() ) exit 1, "Fasta file not found: ${params.fasta}"
-}
+
 // AWSBatch sanity checking
 if(workflow.profile == 'awsbatch'){
     if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
@@ -139,9 +135,9 @@ if( workflow.profile == 'awsbatch') {
     if(!workflow.workDir.startsWith('s3:') || !params.outdir.startsWith('s3:')) exit 1, "Workdir or Outdir not on S3 - specify S3 Buckets for each to run on AWSBatch!"
 }
 
-/*
+ *
  * Create a channel for input read files
- */
+
 if(params.readPaths){
     if(params.singleEnd){
         Channel
@@ -163,7 +159,9 @@ if(params.readPaths){
             .into { read_files_fastqc; read_files_trimming }
 }
 
+*/
 
+/*
 // Header log info
 log.info """=======================================================
                                           ,--./,-.
@@ -179,7 +177,6 @@ summary['Pipeline Name']  = 'nf-core/cirpipe'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
-summary['Fasta Ref']    = params.fasta
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
@@ -195,6 +192,8 @@ summary['Working dir']    = workflow.workDir
 summary['Output dir']     = params.outdir
 summary['Script dir']     = workflow.projectDir
 summary['Config Profile'] = workflow.profile
+
+/*
 if(workflow.profile == 'awsbatch'){
     summary['AWS Region'] = params.awsregion
     summary['AWS Queue'] = params.awsqueue
@@ -205,13 +204,87 @@ log.info "========================================="
 
 
 
-
-/*
+ *
  * Checking the input files
+ * Build up the output files
  * Adding input files error exceptions Here
  */
+
 outdir = file(params.outdir) //the output directory
-if( !outdir.exists() ) exit 1, print_red("Missing output directory: ${outdir}")
+if( !outdir.exists() ) exit 1, print_red("Missing output directory: ${output}")
+
+def fastpoutdir = new File( "${params.outdir}/pipeline_fastp/" )
+if( !fastpoutdir.exists() ) {
+    fastpoutdir.mkdirs()
+}
+
+def toolsoutdir = new File( "${params.outdir}/pipeline_tools/" )
+if( !toolsoutdir.exists() ) {
+    toolsoutdir.mkdirs()
+}
+
+def staroutdir = new File( "${params.outdir}/pipeline_tools/pipeline_star/" )
+if( !staroutdir.exists() ) {
+    staroutdir.mkdirs()
+}
+
+def bwaoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_bwa/" )
+if( !bwaoutdir.exists() ) {
+    bwaoutdir.mkdirs()
+}
+
+def bowtie2outdir = new File( "${params.outdir}/pipeline_tools/pipeline_bowtie2/" )
+if( !bowtie2outdir.exists() ) {
+    bowtie2outdir.mkdirs()
+}
+
+def circexplorer2outdir = new File( "${params.outdir}/pipeline_tools/pipeline_circexplorer2/" )
+if( !circexplorer2outdir.exists() ) {
+    circexplorer2outdir.mkdirs()
+}
+
+def cirioutdir = new File( "${params.outdir}/pipeline_tools/pipeline_ciri/" )
+if( !cirioutdir.exists() ) {
+    cirioutdir.mkdirs()
+}
+
+def find_circoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_find_circ/" )
+if( !find_circoutdir.exists() ) {
+    find_circoutdir.mkdirs()
+}
+
+def mapspliceoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_mapsplice/" )
+if( !mapspliceoutdir.exists() ) {
+    mapspliceoutdir.mkdirs()
+}
+
+def segemehloutdir = new File( "${params.outdir}/pipeline_tools/pipeline_segemehl/" )
+if( !segemehloutdir.exists() ) {
+    segemehloutdir.mkdirs()
+}
+
+def mergeoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_merge/" )
+if( !mergeoutdir.exists() ) {
+    mergeoutdir.mkdirs()
+}
+
+def DEoutdir = new File( "${params.outdir}/DE/" )
+if( !DEoutdir.exists() ) {
+    DEoutdir.mkdirs()
+}
+
+def CORoutdir = new File( "${params.outdir}/COR/" )
+if( !CORoutdir.exists() ) {
+    CORoutdir.mkdirs()
+}
+
+def REPORToutdir = new File( "${params.outdir}/REPORT/" )
+if( !REPORToutdir.exists() ) {
+    REPORToutdir.mkdirs()
+}
+
+otherTools = file(params.otherTools) //the index directory
+if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
 
 if ( params.star ){
 
@@ -380,7 +453,7 @@ Channel
 //run the fastp
 process run_fastp{
     tag "$pair_id"
-    publishDir params.outdir, mode: 'copy', pattern: "*.html", overwrite: true
+    publishDir "${params.outdir}/pipeline_fastp", mode: 'copy', pattern: "*.html", overwrite: true
 
     maxForks fork_number
 
@@ -421,7 +494,7 @@ if ( params.star ){
 
     process run_star{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'link', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_star", mode: 'link', overwrite: true
 
         maxForks fork_number
 
@@ -436,7 +509,7 @@ if ( params.star ){
         star_threads = idv_cpu - 1
         """
         STAR \
-    	--runThreadN ${star_threads} \
+    	--runThreadN ${task.cpus} \
     	--chimSegmentMin 10 \
     	--genomeDir ${starindex} \
     	--readFilesCommand zcat \
@@ -451,7 +524,7 @@ if ( params.bwa ){
 
     process run_bwa{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'link', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_bwa", mode: 'link', overwrite: true
 
         maxForks fork_number
 
@@ -465,7 +538,7 @@ if ( params.bwa ){
         bwa_threads = idv_cpu - 1
         """
         bwa \
-    	mem -t ${bwa_threads} \
+    	mem -t ${task.cpus} \
     	-T 19 -M -R \
     	"@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
     	/home/wqj/test/bwaindex/genome \
@@ -480,7 +553,7 @@ if ( params.mapsplice ){
 
     process run_mapsplice{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_mapsplice", mode: 'copy', overwrite: true
 
         maxForks fork_number
 
@@ -492,7 +565,7 @@ if ( params.mapsplice ){
         file outdir
 
         output:
-        set pair_id into mapsplicefiles
+        set pair_id, file('*.log') into mapsplicefiles
 
         conda params.condadir
 
@@ -500,7 +573,7 @@ if ( params.mapsplice ){
         mapsplice_threads = idv_cpu - 1
         """
 	    python ${mapsdir}/mapsplice.py \
-	    -p ${mapsplice_threads} \
+	    -p ${task.cpus} \
 	    -k 1 \
 	    --fusion-non-canonical \
 	    --non-canonical-double-anchor \
@@ -510,39 +583,93 @@ if ( params.mapsplice ){
 	    -c ${refdir} \
 	    -1 ${query_file[0]} \
 	    -2 ${query_file[1]} \
-	    -o ${outdir}/output_mapsplice_${pair_id}
+	    -o ${outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_${pair_id} 2 \
+        > ${pair_id}_mapsplice.log
 	    """
     }
 
     process run_modify_mapsplice{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', pattern: "*candidates.bed", overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         maxForks fork_number
 
         input:
-        set pair_id from mapsplicefiles
+        set pair_id, file (query_file) from mapsplicefiles
         file outdir
+        file otherTools
 
         output:
-        set pair_id, file ('*candidates.bed') into modify_mapsplice
+        file ('*candidates.bed') into modify_mapsplice
+        val (pair_id) into modify_mapsplice_id
 
         shell :
         '''
-        cat !{outdir}/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+        cat !{outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_!{pair_id}/circular_RNAs.txt \
 	    | awk '{print $6}' \
 	    | sed -e 's/.//' \
 	    > !{pair_id}_mapsplice_temp1.bed
 
-	    cat !{outdir}/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+	    cat !{outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_!{pair_id}/circular_RNAs.txt \
 	    | awk '{print $1}' \
 	    | awk -F"~" '{print $2}' \
 	    > !{pair_id}_mapsplice_temp.bed
 
-	    paste !{pair_id}_mapsplice_temp.bed !{pair_id}_mapsplice_temp1.bed !{outdir}/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+	    paste !{pair_id}_mapsplice_temp.bed !{pair_id}_mapsplice_temp1.bed !{outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_!{pair_id}/circular_RNAs.txt \
 	    | grep -v chrM \
 	    | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
-	    > !{pair_id}_modify_mapsplice.candidates.bed
+	    > !{pair_id}_modify_mapsplice.temp.bed
+	    
+	    python !{otherTools}/quchong.py !{pair_id}_modify_mapsplice.temp.bed !{pair_id}_modify_mapsplice.candidates.bed
+        '''
+    }
+
+    process matrix_mapsplice{
+        tag "$pair_id"
+        publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        maxForks fork_number
+
+        input:
+        file (query_file) from modify_mapsplice.collect()
+        val (pair_id) from modify_mapsplice_id.collect()
+        file otherTools
+
+        output:
+        file ('mapsplice.txt') into merge_mapsplice
+        file ('*.matrix') into output_mapsplice
+
+        shell :
+        '''
+		for file in !{query_file}
+		do
+			cat $file >> concatenate.bed
+		done
+		
+		python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+		sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+		cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+		cat mergeconcatenate.bed > mapsplice.txt
+		
+		for file in !{query_file}
+		do
+			python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
+			paste -d"\t" id.txt counts.txt > temp.txt
+			cat temp.txt > id.txt
+		done
+		
+		echo -e "id\\c" > merge_header.txt
+        for sampleid in !{pair_id}
+        do
+            echo -e "\\t$sampleid\\c" >> merge_header.txt    
+        done 
+        
+        sed -i 's/\\[//g' merge_header.txt
+        sed -i 's/\\,//g' merge_header.txt
+        sed -i 's/\\]//g' merge_header.txt
+        echo -e "\\n\\c" >> merge_header.txt
+         
+        cat merge_header.txt id.txt > mapsplice_merge.matrix
         '''
     }
 
@@ -552,7 +679,7 @@ if ( params.segemehl ){
 
     process run_segemehl{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_segemehl", mode: 'copy', overwrite: true
 
         maxForks fork_number
 
@@ -575,7 +702,7 @@ if ( params.segemehl ){
 	    -i ${segindex} \
 	    -q ${query_file[0]} \
 	    -p ${query_file[1]} \
-	    -t ${segemehl_threads} \
+	    -t ${task.cpus} \
 	    -S \
 	    | samtools view -bS - \
 	    | samtools sort -o - deleteme \
@@ -593,15 +720,17 @@ if ( params.segemehl ){
 
     process run_modify_segemehl{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', pattern:"*candidates.bed", overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
 
         maxForks fork_number
 
         input:
         set pair_id , file ( query_file ) from segemehlfiles
+        file otherTools
 
         output:
-        set pair_id, file ('*candidates.bed') into modify_segemehl
+        file ('*candidates.bed') into modify_segemehl
+        val (pair_id) into modify_segemehl_id
 
         shell :
         '''
@@ -615,7 +744,58 @@ if ( params.segemehl ){
 	    | grep P \
 	    | grep -v chrM \
 	    | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
-	    > !{pair_id}_modify_segemehl.candidates.bed
+	    > !{pair_id}_modify_segemehl.temp.bed
+	    
+	    python !{otherTools}/quchong.py !{pair_id}_modify_segemehl.temp.bed !{pair_id}_modify_segemehl.candidates.bed
+        '''
+    }
+
+    process matrix_segemehl{
+        tag "$pair_id"
+        publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        maxForks fork_number
+
+        input:
+        file (query_file) from modify_segemehl.collect()
+        val (pair_id) from modify_segemehl_id.collect()
+        file otherTools
+
+        output:
+        file ('segemehl.txt') into merge_segemehl
+        file ('*.matrix') into output_segemehl
+
+        shell :
+        '''
+		for file in !{query_file}
+		do
+			cat $file >> concatenate.bed
+		done
+		
+		python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+		sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+		cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+		cat mergeconcatenate.bed > segemehl.txt
+		
+		for file in !{query_file}
+		do
+			python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
+			paste -d"\t" id.txt counts.txt > temp.txt
+			cat temp.txt > id.txt
+		done
+		
+		echo -e "id\\c" > merge_header.txt
+        for sampleid in !{pair_id}
+        do
+            echo -e "\\t$sampleid\\c" >> merge_header.txt    
+        done 
+        
+        sed -i 's/\\[//g' merge_header.txt
+        sed -i 's/\\,//g' merge_header.txt
+        sed -i 's/\\]//g' merge_header.txt
+        echo -e "\\n\\c" >> merge_header.txt
+         
+        cat merge_header.txt id.txt > segemehl_merge.matrix
         '''
     }
 
@@ -625,7 +805,7 @@ if ( params.bowtie2 ){
 
     process run_bowtie2{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'link', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_bowtie2", mode: 'link', overwrite: true
 
         maxForks fork_number
 
@@ -639,7 +819,7 @@ if ( params.bowtie2 ){
         bowtie2_threads = idv_cpu - 1
         """
         bowtie2 \
-        -p ${bowtie2_threads} \
+        -p ${task.cpus} \
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
@@ -666,7 +846,7 @@ if ( params.circexplorer2 && params.star ){
 
     process run_circexplorer2{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_circexplorer2", mode: 'copy', overwrite: true
 
         maxForks fork_number
 
@@ -694,22 +874,75 @@ if ( params.circexplorer2 && params.star ){
 
     process run_modify_circexplorer2{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_circexplorer2", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         maxForks fork_number
 
         input:
         set pair_id, file (query_file) from circexplorer2files
+        file otherTools
 
         output:
-        set pair_id, file ('*candidates.bed') into modify_circexplorer2
+        file ('*candidates.bed') into modify_circexplorer2
+        val (pair_id) into modify_circexplorer2_id
 
         shell :
         '''
         grep circ !{query_file} \
         | grep -v chrM \
 	    | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
-        > !{pair_id}_modify_circexplorer2.candidates.bed
+        > !{pair_id}_modify_circexplorer2.temp.bed
+        
+        python !{otherTools}/quchong.py !{pair_id}_modify_circexplorer2.temp.bed !{pair_id}_modify_circexplorer2.candidates.bed
+        '''
+    }
+
+    process matrix_circexplorer2{
+        tag "$pair_id"
+        publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        maxForks fork_number
+
+        input:
+        file (query_file) from modify_circexplorer2.collect()
+        val (pair_id) from modify_circexplorer2_id.collect()
+        file otherTools
+
+        output:
+        file ('circexplorer2.txt') into merge_circexplorer2
+        file ('*.matrix') into output_circexplorer2
+
+        shell :
+        '''
+		for file in !{query_file}
+		do
+			cat $file >> concatenate.bed
+		done
+		
+		python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+		sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+		cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+		cat mergeconcatenate.bed > circexplorer2.txt
+		
+		for file in !{query_file}
+		do
+			python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
+			paste -d"\t" id.txt counts.txt > temp.txt
+			cat temp.txt > id.txt
+		done
+		
+		echo -e "id\\c" > merge_header.txt
+        for sampleid in !{pair_id}
+        do
+            echo -e "\\t$sampleid\\c" >> merge_header.txt    
+        done 
+        
+        sed -i 's/\\[//g' merge_header.txt
+        sed -i 's/\\,//g' merge_header.txt
+        sed -i 's/\\]//g' merge_header.txt
+        echo -e "\\n\\c" >> merge_header.txt
+         
+        cat merge_header.txt id.txt > circexplorer2_merge.matrix
         '''
     }
 
@@ -719,7 +952,7 @@ if ( params.ciri && params.bwa ){
 
     process run_ciri{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_ciri", mode: 'copy', overwrite: true
 
         maxForks fork_number
 
@@ -746,23 +979,76 @@ if ( params.ciri && params.bwa ){
 
     process run_modify_ciri{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_ciri", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         maxForks fork_number
 
         input:
         set pair_id, file (query_file) from cirifiles
+        file otherTools
 
         output:
-        set pair_id, file ('*candidates.bed') into modify_ciri
+        file ('*candidates.bed') into modify_ciri_file
+        val (pair_id) into modify_ciri_id
 
         shell :
         '''
         cat !{query_file} \
 	    | sed -e '1d' \
         | grep -v chrM \
-        | awk '{print $2 "\t" $3 "\t" $4 "\t" "segemehl" "\t" $5 "\t" $11}' \
-        > !{pair_id}_modify_ciri.candidates.bed
+        | awk '{print $2 "\t" $3 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
+        > !{pair_id}_modify_ciri.temp.bed
+        
+        python !{otherTools}/quchong.py !{pair_id}_modify_ciri.temp.bed !{pair_id}_modify_ciri.candidates.bed
+        '''
+    }
+
+    process matrix_ciri{
+        tag "$pair_id"
+        publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        maxForks fork_number
+
+        input:
+        file (query_file) from modify_ciri_file.collect()
+        val (pair_id) from modify_ciri_id.collect()
+        file otherTools
+
+        output:
+        file ('ciri.txt') into merge_ciri
+        file ('*.matrix') into output_ciri
+
+        shell :
+        '''
+		for file in !{query_file}
+		do
+			cat $file >> concatenate.bed
+		done
+		
+		python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+		sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+		cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+		cat mergeconcatenate.bed > ciri.txt
+		
+		for file in !{query_file}
+		do
+			python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
+			paste -d"\t" id.txt counts.txt > temp.txt
+			cat temp.txt > id.txt
+		done
+		
+		echo -e "id\\c" > merge_header.txt
+        for sampleid in !{pair_id}
+        do
+            echo -e "\\t$sampleid\\c" >> merge_header.txt    
+        done 
+        
+        sed -i 's/\\[//g' merge_header.txt
+        sed -i 's/\\,//g' merge_header.txt
+        sed -i 's/\\]//g' merge_header.txt
+        echo -e "\\n\\c" >> merge_header.txt
+         
+        cat merge_header.txt id.txt > ciri_merge.matrix
         '''
     }
 
@@ -772,7 +1058,7 @@ if ( params.find_circ && params.bowtie2 ){
 
     process run_find_circ{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_find_circ", mode: 'copy', overwrite: true
 
         maxForks fork_number
 
@@ -794,7 +1080,7 @@ if ( params.find_circ && params.bowtie2 ){
         > find_circ_${pair_id}_anchors.qfa.gz
 
         bowtie2 \
-        -p ${bowtie2_threads} \
+        -p ${task.cpus} \
         --reorder \
         --mm \
         --score-min=C,-15,0 \
@@ -813,15 +1099,17 @@ if ( params.find_circ && params.bowtie2 ){
 
     process run_modify_find_circ{
         tag "$pair_id"
-        publishDir params.outdir, mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/pipeline_tools/pipeline_find_circ", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         maxForks fork_number
 
         input:
         set pair_id, file (query_file) from find_circfiles
+        file otherTools
 
         output:
-        set pair_id, file ('*candidates.bed') into modify_find_circfiles
+        file ('*candidates.bed') into modify_find_circfiles
+        val (pair_id) into modify_find_circ_id
 
         shell :
         '''
@@ -831,91 +1119,220 @@ if ( params.find_circ && params.bowtie2 ){
         | grep ANCHOR_UNIQUE \
         | awk '{print $1 "\t" $2 "\t" $3 "\t" $11 "\t" $5 "\t" $6}' \
 	    | sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 \
-        > !{pair_id}_modify_finc_circ.candidates.bed
+        > !{pair_id}_modify_finc_circ.temp.bed
+        
+        python !{otherTools}/quchong.py !{pair_id}_modify_finc_circ.temp.bed !{pair_id}_modify_finc_circ.candidates.bed
+        '''
+    }
+
+    process matrix_find_circ{
+        tag "$pair_id"
+        publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        maxForks fork_number
+
+        input:
+        file (query_file) from modify_find_circfiles.collect()
+        val (pair_id) from modify_find_circ_id.collect()
+        file otherTools
+
+        output:
+        file ('find_circ.txt') into merge_find_circ
+        file ('*.matrix') into output_find_circ
+
+        shell :
+        '''
+		for file in !{query_file}
+		do
+			cat $file >> concatenate.bed
+		done
+		
+		python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+		sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+		cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+		cat mergeconcatenate.bed > find_circ.txt
+		
+		for file in !{query_file}
+		do
+			python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
+			paste -d"\t" id.txt counts.txt > temp.txt
+			cat temp.txt > id.txt
+		done
+		
+		echo -e "id\\c" > merge_header.txt
+        for sampleid in !{pair_id}
+        do
+            echo -e "\\t$sampleid\\c" >> merge_header.txt    
+        done 
+        
+        sed -i 's/\\[//g' merge_header.txt
+        sed -i 's/\\,//g' merge_header.txt
+        sed -i 's/\\]//g' merge_header.txt
+        echo -e "\\n\\c" >> merge_header.txt
+         
+        cat merge_header.txt id.txt > find_circ_merge.matrix
         '''
     }
 
 }
 
 //merge the files
+/*
+//tools_id = transition
+if (params.mapsplice){ temp = transition.concat(merge_mapsplice); transition = temp}
+if (params.segemehl){ temp = transition.concat(merge_segemehl) ; transition = temp }
+if (params.circexplorer2) { temp = transition.concat(merge_circexplorer2) ; transition = temp}
+if (params.ciri) {temp = transition.concat(merge_ciri); transition = temp}
+if (params.find_circ) {temp = transition.concat(merge_find_circ) ; transition = temp}
+transition.subscribe onNext: { println it }, onComplete: { println 'Done.' }
 
+
+tools_id = Channel.create()
+if (params.mapsplice) tools_id = tools_id.concat('mapsplice')
+if (params.segemehl) tools_id = tools_id.concat('segemehl')
+if (params.circexplorer2) tools_id = tools_id.concat('circexplorer2')
+if (params.ciri) tools_id = tools_id.concat('ciri')
+if (params.find_circ) tools_id = tools_id.concat('find_circ')
+tools_id.subscribe onNext: { println it }, onComplete: { println 'Done.' }
+*/
 
 /*
- * Completion e-mail notification
- */
+Channel
+        .from (transition)
+        .ifEmpty { error "Cannot find any files matching" }
+        .map { file -> tuple(file.baseName, file) }
+        .set { file_for_transition }
+
+file_for_transition = transition.map { file -> tuple(file.baseName, file) }
+
+transition = Channel.create()
+merge_tools = transition.concat(merge_ciri,merge_circexplorer2)
+*/
+if (params.ciri && params.find_circ && params.circexplorer2 && params.segemehl && params.mapsplice){
+
+    process merge_all_tools{
+
+        publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        maxForks fork_number
+
+        input:
+        file (file1) from merge_find_circ
+        file (file2) from merge_circexplorer2
+        file (file3) from merge_ciri
+        file (file4) from merge_mapsplice
+        file (file5) from merge_segemehl
+
+        output:
+        file ('*.matrix') into tools_merge
+
+        shell :
+        '''
+        cat !{file1} !{file2} !{file3} !{file4} !{file5} > concatenate.txt
+        python !{otherTools}/hebingtoolsid.py concatenate.txt id_unsort.txt
+        sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 id_unsort.txt > id_sort.txt
+        
+        python !{otherTools}/countnumbers.py id_sort.txt !{file1} counts_find_circ.txt
+        python !{otherTools}/countnumbers.py id_sort.txt !{file2} counts_circexplorer2.txt
+        python !{otherTools}/countnumbers.py id_sort.txt !{file3} counts_ciri.txt
+        python !{otherTools}/countnumbers.py id_sort.txt !{file4} counts_mapsplice.txt
+        python !{otherTools}/countnumbers.py id_sort.txt !{file5} counts_segemehl.txt
+        
+        echo -e "total\\c" > total.txt
+        cat id_sort.txt | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id_merge.txt
+        cat id_merge.txt total.txt > id_list.txt
+        paste -d"\t" id_list.txt counts_find_circ.txt counts_circexplorer2.txt counts_ciri.txt counts_mapsplice.txt counts_segemehl.txt > merge_without_header.txt
+        
+        echo -e "id\\tfind_circ\\tcircexplorer2\\tciri\\tmapsplice\\tsegemehl" > header.txt
+        cat header.txt merge_without_header.txt > all_tools_merge.matrix
+        '''
+    }
+
+}
+
+
+//process merge_all{
+
+//}
+
+/*
+* Completion e-mail notification
+*/
+params.email = false
+
 workflow.onComplete {
 
-    println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" )
-    // Set up the e-mail variables
-    def subject = "[nf-core/cirpipe] Successful: $workflow.runName"
-    if(!workflow.success){
-        subject = "[nf-core/cirpipe] FAILED: $workflow.runName"
+println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" )
+// Set up the e-mail variables
+/*   def subject = "[nf-core/cirpipe] Successful: $workflow.runName"
+if(!workflow.success){
+    subject = "[nf-core/cirpipe] FAILED: $workflow.runName"
+}
+def email_fields = [:]
+email_fields['version'] = workflow.manifest.version
+email_fields['runName'] = custom_runName ?: workflow.runName
+email_fields['success'] = workflow.success
+email_fields['dateComplete'] = workflow.complete
+email_fields['duration'] = workflow.duration
+email_fields['exitStatus'] = workflow.exitStatus
+email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
+email_fields['errorReport'] = (workflow.errorReport ?: 'None')
+email_fields['commandLine'] = workflow.commandLine
+email_fields['projectDir'] = workflow.projectDir
+email_fields['summary'] = summary
+email_fields['summary']['Date Started'] = workflow.start
+email_fields['summary']['Date Completed'] = workflow.complete
+email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
+email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
+if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
+email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
+email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
+
+// Render the TXT template
+def engine = new groovy.text.GStringTemplateEngine()
+def tf = new File("$baseDir/assets/email_template.txt")
+def txt_template = engine.createTemplate(tf).make(email_fields)
+def email_txt = txt_template.toString()
+
+// Render the HTML template
+def hf = new File("$baseDir/assets/email_template.html")
+def html_template = engine.createTemplate(hf).make(email_fields)
+def email_html = html_template.toString()
+
+// Render the sendmail template
+def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
+def sf = new File("$baseDir/assets/sendmail_template.txt")
+def sendmail_template = engine.createTemplate(sf).make(smail_fields)
+def sendmail_html = sendmail_template.toString()
+
+// Send the HTML e-mail
+if (params.email) {
+    try {
+        if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
+        // Try to send HTML e-mail using sendmail
+        [ 'sendmail', '-t' ].execute() << sendmail_html
+        log.info "[nf-core/cirpipe] Sent summary e-mail to $params.email (sendmail)"
+    } catch (all) {
+        // Catch failures and try with plaintext
+        [ 'mail', '-s', subject, params.email ].execute() << email_txt
+        log.info "[nf-core/cirpipe] Sent summary e-mail to $params.email (mail)"
     }
-    def email_fields = [:]
-    email_fields['version'] = workflow.manifest.version
-    email_fields['runName'] = custom_runName ?: workflow.runName
-    email_fields['success'] = workflow.success
-    email_fields['dateComplete'] = workflow.complete
-    email_fields['duration'] = workflow.duration
-    email_fields['exitStatus'] = workflow.exitStatus
-    email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
-    email_fields['errorReport'] = (workflow.errorReport ?: 'None')
-    email_fields['commandLine'] = workflow.commandLine
-    email_fields['projectDir'] = workflow.projectDir
-    email_fields['summary'] = summary
-    email_fields['summary']['Date Started'] = workflow.start
-    email_fields['summary']['Date Completed'] = workflow.complete
-    email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
-    email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
-    email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
-    email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
+}
 
-    // Render the TXT template
-    def engine = new groovy.text.GStringTemplateEngine()
-    def tf = new File("$baseDir/assets/email_template.txt")
-    def txt_template = engine.createTemplate(tf).make(email_fields)
-    def email_txt = txt_template.toString()
+// Write summary e-mail HTML to a file
+def output_d = new File( "${params.outdir}/Documentation/" )
+if( !output_d.exists() ) {
+    output_d.mkdirs()
+}
+def output_hf = new File( output_d, "pipeline_report.html" )
+output_hf.withWriter { w -> w << email_html }
+def output_tf = new File( output_d, "pipeline_report.txt" )
+output_tf.withWriter { w -> w << email_txt }
 
-    // Render the HTML template
-    def hf = new File("$baseDir/assets/email_template.html")
-    def html_template = engine.createTemplate(hf).make(email_fields)
-    def email_html = html_template.toString()
-
-    // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
-    def sf = new File("$baseDir/assets/sendmail_template.txt")
-    def sendmail_template = engine.createTemplate(sf).make(smail_fields)
-    def sendmail_html = sendmail_template.toString()
-
-    // Send the HTML e-mail
-    if (params.email) {
-        try {
-            if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
-            // Try to send HTML e-mail using sendmail
-            [ 'sendmail', '-t' ].execute() << sendmail_html
-            log.info "[nf-core/cirpipe] Sent summary e-mail to $params.email (sendmail)"
-        } catch (all) {
-            // Catch failures and try with plaintext
-            [ 'mail', '-s', subject, params.email ].execute() << email_txt
-            log.info "[nf-core/cirpipe] Sent summary e-mail to $params.email (mail)"
-        }
-    }
-
-    // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/Documentation/" )
-    if( !output_d.exists() ) {
-        output_d.mkdirs()
-    }
-    def output_hf = new File( output_d, "pipeline_report.html" )
-    output_hf.withWriter { w -> w << email_html }
-    def output_tf = new File( output_d, "pipeline_report.txt" )
-    output_tf.withWriter { w -> w << email_txt }
-
-    log.info "[nf-core/cirpipe] Pipeline Complete"
+log.info "[nf-core/cirpipe] Pipeline Complete"
 
 }
 
@@ -924,65 +1341,65 @@ workflow.onComplete {
 
 def create_workflow_summary(summary) {
 
-    def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
-    yaml_file.text  = """
-    id: 'nf-core-cirpipe-summary'
-    description: " - this information is collected when the pipeline is started."
-    section_name: 'nf-core/cirpipe Workflow Summary'
-    section_href: 'https://github.com/nf-core/cirpipe'
-    plot_type: 'html'
-    data: |
-        <dl class=\"dl-horizontal\">
+def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
+yaml_file.text  = """
+id: 'nf-core-cirpipe-summary'
+description: " - this information is collected when the pipeline is started."
+section_name: 'nf-core/cirpipe Workflow Summary'
+section_href: 'https://github.com/nf-core/cirpipe'
+plot_type: 'html'
+data: |
+    <dl class=\"dl-horizontal\">
 ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
-        </dl>
-    """.stripIndent()
+    </dl>
+""".stripIndent()
 
-   return yaml_file
+return yaml_file
+*/
+
 }
 
 
 /*
- * Parse software version numbers
- */
+* Parse software version numbers
+
 process get_software_versions {
 
-    output:
-    file 'software_versions_mqc.yaml' into software_versions_yaml
+output:
+file 'software_versions_mqc.yaml' into software_versions_yaml
 
-    script:
-    """
-    echo $workflow.manifest.version > v_pipeline.txt
-    echo $workflow.nextflow.version > v_nextflow.txt
-    fastqc --version > v_fastqc.txt
-    multiqc --version > v_multiqc.txt
-    scrape_software_versions.py > software_versions_mqc.yaml
-    """
+script:
+"""
+echo $workflow.manifest.version > v_pipeline.txt
+echo $workflow.nextflow.version > v_nextflow.txt
+//multiqc --version > v_multiqc.txt
+scrape_software_versions.py > software_versions_mqc.yaml
+"""
 }
-
+*/
 
 
 
 
 
 /*
- * STEP 3 - Output Description HTML
- */
+* STEP 3 - Output Description HTML
 process output_documentation {
-    tag "$prefix"
-    publishDir "${params.outdir}/Documentation", mode: 'copy'
+tag "$prefix"
+publishDir "${params.outdir}/Documentation", mode: 'copy'
 
-    input:
-    file output_docs
+input:
+file output_docs
 
-    output:
-    file "results_description.html"
+output:
+file "results_description.html"
 
-    script:
-    """
-    markdown_to_html.r $output_docs results_description.html
-    """
+script:
+"""
+markdown_to_html.r $output_docs results_description.html
+"""
 }
-
+*/
 
 
 
