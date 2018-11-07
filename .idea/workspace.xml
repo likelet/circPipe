@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="change something.">
-      <change afterPath="$PROJECT_DIR$/otherTools/countnumbers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/otherTools/hebinglist.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/otherTools/hebingtoolsid.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/otherTools/quchong.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/otherTools/quchongsamples.py" afterDir="false" />
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="update.the problem of merging any tools still exsists. now it can only merge all the tools results.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/base.config" beforeDir="false" afterPath="$PROJECT_DIR$/conf/base.config" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
     </list>
@@ -33,16 +27,16 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Singularity" value="94" />
-          <entry key="config" value="547" />
-          <entry key="nf" value="4349" />
-          <entry key="txt" value="30" />
+          <entry key="config" value="624" />
+          <entry key="nf" value="5492" />
+          <entry key="txt" value="140" />
           <entry key="yml" value="37" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Groovy" value="4349" />
-          <entry key="PLAIN_TEXT" value="671" />
+          <entry key="Groovy" value="5492" />
+          <entry key="PLAIN_TEXT" value="858" />
           <entry key="YAML" value="37" />
         </counts>
       </usages-collector>
@@ -57,6 +51,7 @@
           <entry key="html" value="1" />
           <entry key="matrix" value="1" />
           <entry key="md" value="5" />
+          <entry key="nf" value="1" />
           <entry key="py" value="1" />
           <entry key="r" value="2" />
           <entry key="txt" value="4" />
@@ -66,6 +61,7 @@
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
+          <entry key="Groovy" value="1" />
           <entry key="HTML" value="1" />
           <entry key="PLAIN_TEXT" value="71" />
           <entry key="YAML" value="9" />
@@ -78,8 +74,67 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="399">
-              <caret line="1240" column="38" lean-forward="true" selection-start-line="1240" selection-start-column="38" selection-end-line="1240" selection-end-column="38" />
+            <state relative-caret-position="191">
+              <caret line="1221" lean-forward="true" selection-start-line="1221" selection-end-line="1221" />
+              <folding>
+                <element signature="e#25#410#0" />
+                <element signature="e#412#828#0" />
+                <element signature="e#831#950#0" />
+                <element signature="e#954#996#0" />
+                <element signature="e#1825#3452#0" />
+                <element signature="e#3454#3494#0" />
+                <element signature="e#3533#3565#0" />
+                <element signature="e#3567#5994#0" />
+                <element signature="e#5996#7796#0" />
+                <element signature="e#8024#8052#1" />
+                <element signature="e#8024#8052#1" />
+                <element signature="e#8147#8175#1" />
+                <element signature="e#8147#8175#1" />
+                <element signature="e#8282#8309#1" />
+                <element signature="e#8282#8309#1" />
+                <element signature="e#8413#8439#1" />
+                <element signature="e#8413#8439#1" />
+                <element signature="e#8555#8585#1" />
+                <element signature="e#8555#8585#1" />
+                <element signature="e#8719#8755#1" />
+                <element signature="e#8719#8755#1" />
+                <element signature="e#8862#8889#1" />
+                <element signature="e#8862#8889#1" />
+                <element signature="e#9011#9043#1" />
+                <element signature="e#9011#9043#1" />
+                <element signature="e#9165#9197#1" />
+                <element signature="e#9165#9197#1" />
+                <element signature="e#9316#9347#1" />
+                <element signature="e#9316#9347#1" />
+                <element signature="e#9457#9485#1" />
+                <element signature="e#9457#9485#1" />
+                <element signature="e#9562#9587#1" />
+                <element signature="e#9562#9587#1" />
+                <element signature="e#9667#9693#1" />
+                <element signature="e#9667#9693#1" />
+                <element signature="e#9782#9811#1" />
+                <element signature="e#9782#9811#1" />
+                <element signature="e#13370#14252#0" />
+                <element signature="e#14412#15036#0" />
+                <element signature="e#15087#15832#0" />
+                <element signature="e#15890#16682#0" />
+                <element signature="e#16733#18330#0" />
+                <element signature="e#18393#18999#0" />
+                <element signature="e#19032#19648#0" />
+                <element signature="e#19697#20439#0" />
+                <element signature="e#20481#21983#0" />
+                <element signature="e#22056#22970#0" />
+                <element signature="e#23024#24369#0" />
+                <element signature="e#24416#25970#0" />
+                <element signature="e#26041#27005#0" />
+                <element signature="e#27058#27977#0" />
+                <element signature="e#28023#29565#0" />
+                <element signature="e#29644#30455#0" />
+                <element signature="e#30498#31525#0" />
+                <element signature="e#31579#32417#0" />
+                <element signature="e#32464#34021#0" />
+                <element signature="e#34116#35455#0" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -87,8 +142,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret line="23" column="18" selection-start-line="23" selection-start-column="18" selection-end-line="23" selection-end-column="18" />
+            <state relative-caret-position="437">
+              <caret line="38" column="32" selection-start-line="38" selection-start-column="32" selection-end-line="38" selection-end-column="32" />
             </state>
           </provider>
         </entry>
@@ -151,7 +206,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541495981809" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541584468520" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -351,14 +406,21 @@
       <option name="project" value="LOCAL" />
       <updated>1540345364642</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="update.the problem of merging any tools still exsists. now it can only merge all the tools results.">
+      <created>1541496378062</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1541496378063</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14879356" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.117292225" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -390,13 +452,47 @@
       <window_info anchor="right" id="Palette&#9;" order="9" />
       <window_info anchor="right" id="Maven Projects" order="10" />
     </layout>
+    <layout-to-restore>
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14879356" />
+      <window_info id="Structure" order="1" weight="0.25" />
+      <window_info id="Nl-Palette" order="2" />
+      <window_info id="Favorites" order="3" side_tool="true" />
+      <window_info id="Image Layers" order="4" />
+      <window_info id="Designer" order="5" />
+      <window_info id="UI Designer" order="6" />
+      <window_info id="Capture Tool" order="7" />
+      <window_info id="Learn" order="8" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32907802" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Terminal" order="7" />
+      <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50067025" side_tool="true" weight="0.32907802" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.32907802" />
+      <window_info anchor="bottom" id="Messages" order="10" sideWeight="0.49932975" weight="0.32907802" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Capture Analysis" order="4" />
+      <window_info anchor="right" id="R Graphics" order="5" />
+      <window_info anchor="right" id="Properties" order="6" />
+      <window_info anchor="right" id="Theme Preview" order="7" />
+      <window_info anchor="right" id="R Packages" order="8" />
+      <window_info anchor="right" id="Palette&#9;" order="9" />
+      <window_info anchor="right" id="Maven Projects" order="10" />
+    </layout-to-restore>
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="change something." />
-    <option name="LAST_COMMIT_MESSAGE" value="change something." />
+    <MESSAGE value="update.the problem of merging any tools still exsists. now it can only merge all the tools results." />
+    <option name="LAST_COMMIT_MESSAGE" value="update.the problem of merging any tools still exsists. now it can only merge all the tools results." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/docs/configuration/adding_your_own.md">
@@ -548,15 +644,74 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nextflow.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="23" column="18" selection-start-line="23" selection-start-column="18" selection-end-line="23" selection-end-column="18" />
+        <state relative-caret-position="437">
+          <caret line="38" column="32" selection-start-line="38" selection-start-column="32" selection-end-line="38" selection-end-column="32" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="1240" column="38" lean-forward="true" selection-start-line="1240" selection-start-column="38" selection-end-line="1240" selection-end-column="38" />
+        <state relative-caret-position="191">
+          <caret line="1221" lean-forward="true" selection-start-line="1221" selection-end-line="1221" />
+          <folding>
+            <element signature="e#25#410#0" />
+            <element signature="e#412#828#0" />
+            <element signature="e#831#950#0" />
+            <element signature="e#954#996#0" />
+            <element signature="e#1825#3452#0" />
+            <element signature="e#3454#3494#0" />
+            <element signature="e#3533#3565#0" />
+            <element signature="e#3567#5994#0" />
+            <element signature="e#5996#7796#0" />
+            <element signature="e#8024#8052#1" />
+            <element signature="e#8024#8052#1" />
+            <element signature="e#8147#8175#1" />
+            <element signature="e#8147#8175#1" />
+            <element signature="e#8282#8309#1" />
+            <element signature="e#8282#8309#1" />
+            <element signature="e#8413#8439#1" />
+            <element signature="e#8413#8439#1" />
+            <element signature="e#8555#8585#1" />
+            <element signature="e#8555#8585#1" />
+            <element signature="e#8719#8755#1" />
+            <element signature="e#8719#8755#1" />
+            <element signature="e#8862#8889#1" />
+            <element signature="e#8862#8889#1" />
+            <element signature="e#9011#9043#1" />
+            <element signature="e#9011#9043#1" />
+            <element signature="e#9165#9197#1" />
+            <element signature="e#9165#9197#1" />
+            <element signature="e#9316#9347#1" />
+            <element signature="e#9316#9347#1" />
+            <element signature="e#9457#9485#1" />
+            <element signature="e#9457#9485#1" />
+            <element signature="e#9562#9587#1" />
+            <element signature="e#9562#9587#1" />
+            <element signature="e#9667#9693#1" />
+            <element signature="e#9667#9693#1" />
+            <element signature="e#9782#9811#1" />
+            <element signature="e#9782#9811#1" />
+            <element signature="e#13370#14252#0" />
+            <element signature="e#14412#15036#0" />
+            <element signature="e#15087#15832#0" />
+            <element signature="e#15890#16682#0" />
+            <element signature="e#16733#18330#0" />
+            <element signature="e#18393#18999#0" />
+            <element signature="e#19032#19648#0" />
+            <element signature="e#19697#20439#0" />
+            <element signature="e#20481#21983#0" />
+            <element signature="e#22056#22970#0" />
+            <element signature="e#23024#24369#0" />
+            <element signature="e#24416#25970#0" />
+            <element signature="e#26041#27005#0" />
+            <element signature="e#27058#27977#0" />
+            <element signature="e#28023#29565#0" />
+            <element signature="e#29644#30455#0" />
+            <element signature="e#30498#31525#0" />
+            <element signature="e#31579#32417#0" />
+            <element signature="e#32464#34021#0" />
+            <element signature="e#34116#35455#0" />
+          </folding>
         </state>
       </provider>
     </entry>
