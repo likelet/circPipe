@@ -16,3 +16,12 @@ dependencies:
   - star=2.6.1b
   - circexplorer2=2.3.3
   - mapsplice=2.2.0
+  - r-ggplot2=3.1.0
+  - r-pheatmap=1.0.10
+  - bioconductor-edger=3.22.5
+  - bioconductor-deseq2=1.20.0
+  - bioconductor-limma=3.36.5
+  - bioconductor-chipseeker=1.16.1
+  - bioconductor-fgsea=1.6.0
+  - bioconductor-bsgenome.hsapiens.ucsc.hg38=1.4.1
+  - bioconductor-clusterprofiler=3.8.1
