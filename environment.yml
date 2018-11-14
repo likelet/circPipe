@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - fastp=0.19.4
+  - multiqc=1.6
   - pysam=0.15.1
   - segemehl=0.2.0
   - numpy=1.15.2

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="solved the merging problem.">
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add the environment.(except CIRI and find_circ)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,24 +21,25 @@
           <entry key="project.closed" value="2" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.27" value="1" />
+          <entry key="project.open.time.28" value="1" />
           <entry key="project.open.time.29" value="1" />
-          <entry key="project.opened" value="3" />
+          <entry key="project.opened" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Singularity" value="94" />
-          <entry key="config" value="624" />
-          <entry key="nf" value="5492" />
-          <entry key="txt" value="167" />
-          <entry key="yml" value="68" />
+          <entry key="config" value="671" />
+          <entry key="nf" value="5927" />
+          <entry key="txt" value="230" />
+          <entry key="yml" value="84" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Groovy" value="5492" />
-          <entry key="PLAIN_TEXT" value="885" />
-          <entry key="YAML" value="68" />
+          <entry key="Groovy" value="5927" />
+          <entry key="PLAIN_TEXT" value="995" />
+          <entry key="YAML" value="84" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages" />
@@ -70,11 +73,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="1221" lean-forward="true" selection-start-line="1221" selection-end-line="1221" />
+            <state relative-caret-position="-1083">
+              <caret line="467" column="13" lean-forward="true" selection-start-line="467" selection-start-column="13" selection-end-line="467" selection-end-column="13" />
               <folding>
                 <element signature="e#25#410#0" />
                 <element signature="e#412#828#0" />
@@ -113,26 +116,25 @@
                 <element signature="e#9667#9693#1" />
                 <element signature="e#9782#9811#1" />
                 <element signature="e#9782#9811#1" />
-                <element signature="e#13370#14252#0" />
-                <element signature="e#14412#15036#0" />
-                <element signature="e#15087#15832#0" />
-                <element signature="e#15890#16682#0" />
-                <element signature="e#16733#18330#0" />
-                <element signature="e#18393#18999#0" />
-                <element signature="e#19032#19648#0" />
-                <element signature="e#19697#20439#0" />
-                <element signature="e#20481#21983#0" />
-                <element signature="e#22056#22970#0" />
-                <element signature="e#23024#24369#0" />
-                <element signature="e#24416#25970#0" />
-                <element signature="e#26041#27005#0" />
-                <element signature="e#27058#27977#0" />
-                <element signature="e#28023#29565#0" />
-                <element signature="e#29644#30455#0" />
-                <element signature="e#30498#31525#0" />
-                <element signature="e#31579#32417#0" />
-                <element signature="e#32464#34021#0" />
-                <element signature="e#34116#35455#0" />
+                <element signature="e#14330#14954#0" />
+                <element signature="e#15005#15762#0" />
+                <element signature="e#15820#16612#0" />
+                <element signature="e#16663#18260#0" />
+                <element signature="e#18323#18929#0" />
+                <element signature="e#18962#19590#0" />
+                <element signature="e#19639#20381#0" />
+                <element signature="e#20423#21925#0" />
+                <element signature="e#21998#22912#0" />
+                <element signature="e#22966#24311#0" />
+                <element signature="e#24358#25912#0" />
+                <element signature="e#25983#26947#0" />
+                <element signature="e#27000#27919#0" />
+                <element signature="e#27965#29507#0" />
+                <element signature="e#29586#30397#0" />
+                <element signature="e#30440#31467#0" />
+                <element signature="e#31521#32359#0" />
+                <element signature="e#32406#33963#0" />
+                <element signature="e#34058#35397#0" />
               </folding>
             </state>
           </provider>
@@ -141,17 +143,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/environment.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="494">
-              <caret line="26" column="10" selection-start-line="26" selection-start-column="10" selection-end-line="26" selection-end-column="10" />
+            <state relative-caret-position="133">
+              <caret line="7" column="15" selection-start-line="7" selection-start-column="15" selection-end-line="7" selection-end-column="15" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="437">
-              <caret line="38" column="32" selection-start-line="38" selection-start-column="32" selection-end-line="38" selection-end-column="32" />
+            <state relative-caret-position="418">
+              <caret line="34" column="17" lean-forward="true" selection-start-line="34" selection-start-column="17" selection-end-line="34" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -175,15 +177,15 @@
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/Singularity" />
         <option value="$PROJECT_DIR$/conf/base.config" />
+        <option value="$PROJECT_DIR$/environment.yml" />
         <option value="$PROJECT_DIR$/nextflow.config" />
         <option value="$PROJECT_DIR$/main.nf" />
-        <option value="$PROJECT_DIR$/environment.yml" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="822" />
-    <option name="width" value="979" />
+    <option name="x" value="821" />
+    <option name="width" value="980" />
     <option name="height" value="1040" />
   </component>
   <component name="ProjectView">
@@ -192,6 +194,7 @@
     </navigator>
     <panes>
       <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="AndroidView" />
       <pane id="ProjectPane">
         <subPane>
@@ -209,12 +212,11 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541744272405" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542193559344" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -428,14 +430,21 @@
       <option name="project" value="LOCAL" />
       <updated>1541586762826</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="add the environment.(except CIRI and find_circ)">
+      <created>1541755173148</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1541755173148</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.117292225" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.11863271" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -508,7 +517,8 @@
     <MESSAGE value="change something." />
     <MESSAGE value="update.the problem of merging any tools still exsists. now it can only merge all the tools results." />
     <MESSAGE value="solved the merging problem." />
-    <option name="LAST_COMMIT_MESSAGE" value="solved the merging problem." />
+    <MESSAGE value="add the environment.(except CIRI and find_circ)" />
+    <option name="LAST_COMMIT_MESSAGE" value="add the environment.(except CIRI and find_circ)" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/docs/configuration/adding_your_own.md">
@@ -653,15 +663,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/environment.yml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="494">
-          <caret line="26" column="10" selection-start-line="26" selection-start-column="10" selection-end-line="26" selection-end-column="10" />
+        <state relative-caret-position="133">
+          <caret line="7" column="15" selection-start-line="7" selection-start-column="15" selection-end-line="7" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nextflow.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="34" column="17" lean-forward="true" selection-start-line="34" selection-start-column="17" selection-end-line="34" selection-end-column="17" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="1221" lean-forward="true" selection-start-line="1221" selection-end-line="1221" />
+        <state relative-caret-position="-1083">
+          <caret line="467" column="13" lean-forward="true" selection-start-line="467" selection-start-column="13" selection-end-line="467" selection-end-column="13" />
           <folding>
             <element signature="e#25#410#0" />
             <element signature="e#412#828#0" />
@@ -700,34 +717,26 @@
             <element signature="e#9667#9693#1" />
             <element signature="e#9782#9811#1" />
             <element signature="e#9782#9811#1" />
-            <element signature="e#13370#14252#0" />
-            <element signature="e#14412#15036#0" />
-            <element signature="e#15087#15832#0" />
-            <element signature="e#15890#16682#0" />
-            <element signature="e#16733#18330#0" />
-            <element signature="e#18393#18999#0" />
-            <element signature="e#19032#19648#0" />
-            <element signature="e#19697#20439#0" />
-            <element signature="e#20481#21983#0" />
-            <element signature="e#22056#22970#0" />
-            <element signature="e#23024#24369#0" />
-            <element signature="e#24416#25970#0" />
-            <element signature="e#26041#27005#0" />
-            <element signature="e#27058#27977#0" />
-            <element signature="e#28023#29565#0" />
-            <element signature="e#29644#30455#0" />
-            <element signature="e#30498#31525#0" />
-            <element signature="e#31579#32417#0" />
-            <element signature="e#32464#34021#0" />
-            <element signature="e#34116#35455#0" />
+            <element signature="e#14330#14954#0" />
+            <element signature="e#15005#15762#0" />
+            <element signature="e#15820#16612#0" />
+            <element signature="e#16663#18260#0" />
+            <element signature="e#18323#18929#0" />
+            <element signature="e#18962#19590#0" />
+            <element signature="e#19639#20381#0" />
+            <element signature="e#20423#21925#0" />
+            <element signature="e#21998#22912#0" />
+            <element signature="e#22966#24311#0" />
+            <element signature="e#24358#25912#0" />
+            <element signature="e#25983#26947#0" />
+            <element signature="e#27000#27919#0" />
+            <element signature="e#27965#29507#0" />
+            <element signature="e#29586#30397#0" />
+            <element signature="e#30440#31467#0" />
+            <element signature="e#31521#32359#0" />
+            <element signature="e#32406#33963#0" />
+            <element signature="e#34058#35397#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nextflow.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="437">
-          <caret line="38" column="32" selection-start-line="38" selection-start-column="32" selection-end-line="38" selection-end-column="32" />
         </state>
       </provider>
     </entry>

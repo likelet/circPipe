@@ -382,16 +382,24 @@ if (fork_number < 1) {
  * Create the `read_pairs` channel that emits tuples containing three elements:
  * the pair ID, the first read-pair file and the second read-pair file
  */
-Channel
-        .fromFilePairs( params.reads )
-        .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-        .set { read_pairs_fastp }
+if(params.singleEnd){
+    Channel
+            .fromFilePairs( params.readssingleEnd, size: 1 )
+            .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+            .set { read_pairs_fastp }
+}else{
+    Channel
+            .fromFilePairs( params.reads )
+            .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+            .set { read_pairs_fastp }
+}
+
 
 
 //run the fastp
 process run_fastp{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_fastp", mode: 'copy', pattern: "*.html", overwrite: true
+    publishDir "${params.outdir}/pipeline_fastp", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
 
     maxForks fork_number
 
@@ -404,27 +412,62 @@ process run_fastp{
     set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice
     set pair_id, file ('unzip_fastp_*') into fastpfiles_segemehl
     set pair_id, file ('fastp_*') into fastpfiles_bowtie2
-    file ('*.html') into fastqc_for_waiting
+    file ('*.html') into fastp_for_waiting
+    file ('*_fastp.json') into fastp_for_multiqc
 
+    script:
+    if(params.singleEnd){
+        """
+        fastp \
+        -i ${query_file} \
+        -o unzip_fastp_${pair_id}.fq
 
-    """
-    fastp \
-    -i ${query_file[0]} \
-    -I ${query_file[1]} \
-    -o unzip_fastp_${pair_id}_1.fq \
-    -O unzip_fastp_${pair_id}_2.fq
- 
-    fastp \
-    -i ${query_file[0]} \
-    -I ${query_file[1]} \
-    -o fastp_${pair_id}_1.fq.gz \
-    -O fastp_${pair_id}_2.fq.gz \
-    -h ${pair_id}.html
-    """
+        fastp \
+        -i ${query_file} \
+        -o fastp_${pair_id}.fq.gz \
+        -h ${pair_id}_fastpreport.html \
+        -j ${pair_id}_fastp.json
+        """
+    }else{
+        """
+        fastp \
+        -i ${query_file[0]} \
+        -I ${query_file[1]} \
+        -o unzip_fastp_${pair_id}_1.fq \
+        -O unzip_fastp_${pair_id}_2.fq
+
+        fastp \
+        -i ${query_file[0]} \
+        -I ${query_file[1]} \
+        -o fastp_${pair_id}_1.fq.gz \
+        -O fastp_${pair_id}_2.fq.gz \
+        -h ${pair_id}_fastpreport.html \
+        -j ${pair_id}_fastp.json
+        """
+    }
+
 
 }
 
-fastqc_for_waiting = fastqc_for_waiting.first() //wait for finish this process first
+fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process first
+
+//run the multiqc
+process run_multiqc{
+    publishDir "${params.outdir}/pipeline_fastp", mode: 'copy', pattern: "*.html", overwrite: true
+
+    maxForks fork_number
+
+    input:
+    file (query_file) from fastp_for_multiqc.collect()
+
+    output:
+    file ('*.html') into multiqc_results
+
+    script:
+    """
+    multiqc .
+    """
+}
 
 
 //the first tool : star - circexplorer2
@@ -443,7 +486,7 @@ process run_star{
     set pair_id, file ('*.junction') into starfiles
 
     when:
-    params.star || params.selectAll
+    params.circexplorer2 || params.selectAll
 
     shell:
     star_threads = idv_cpu - 1
@@ -474,7 +517,7 @@ process run_circexplorer2{
     set pair_id, file ('*known.txt') into circexplorer2files
 
     when:
-    params.star || params.selectAll
+    params.circexplorer2 || params.selectAll
 
     script:
     """
@@ -507,7 +550,7 @@ process run_modify_circexplorer2{
     val (pair_id) into modify_circexplorer2_id
 
     when:
-    params.star || params.selectAll
+    params.circexplorer2 || params.selectAll
 
     shell :
     '''
@@ -538,7 +581,7 @@ process matrix_circexplorer2{
     file ('name_circexplorer2.txt') into name_circexplorer2
 
     when:
-    params.star || params.selectAll
+    params.circexplorer2 || params.selectAll
 
     shell :
     '''
@@ -591,7 +634,7 @@ process run_bwa{
     set pair_id, file ('*.sam') into bwafiles
 
     when:
-    params.bwa || params.selectAll
+    params.ciri || params.selectAll
 
     shell:
     bwa_threads = idv_cpu - 1
@@ -623,7 +666,7 @@ process run_ciri{
     set pair_id, file ('*.txt') into cirifiles
 
     when:
-    params.bwa || params.selectAll
+    params.ciri || params.selectAll
 
     script:
     """
@@ -654,7 +697,7 @@ process run_modify_ciri{
     val (pair_id) into modify_ciri_id
 
     when:
-    params.bwa || params.selectAll
+    params.ciri || params.selectAll
 
     shell :
     '''
@@ -686,7 +729,7 @@ process matrix_ciri{
     file ('name_ciri.txt') into name_ciri
 
     when:
-    params.bwa || params.selectAll
+    params.ciri || params.selectAll
 
     shell :
     '''
@@ -1015,7 +1058,7 @@ process run_bowtie2{
     set pair_id, file ('bowtie2*') into bowtie2files
 
     when:
-    params.bowtie2 || params.selectAll
+    params.find_circ || params.selectAll
 
     shell:
     bowtie2_threads = idv_cpu - 1
@@ -1058,7 +1101,7 @@ process run_find_circ{
     conda params.conda2dir
 
     when:
-    params.bowtie2 || params.selectAll
+    params.find_circ || params.selectAll
 
     shell:
     bowtie2_threads = idv_cpu - 1
@@ -1135,7 +1178,7 @@ process matrix_find_circ{
     file ('name_find_circ.txt') into name_find_circ
 
     when:
-    params.bowtie2 || params.selectAll
+    params.find_circ || params.selectAll
 
     shell :
     '''
