@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add the environment.(except CIRI and find_circ)">
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add multiqc and change the params.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
     </list>
@@ -23,22 +22,23 @@
           <entry key="project.open.time.27" value="1" />
           <entry key="project.open.time.28" value="1" />
           <entry key="project.open.time.29" value="1" />
-          <entry key="project.opened" value="4" />
+          <entry key="project.open.time.43" value="1" />
+          <entry key="project.opened" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Singularity" value="94" />
-          <entry key="config" value="671" />
-          <entry key="nf" value="5927" />
-          <entry key="txt" value="230" />
+          <entry key="config" value="672" />
+          <entry key="nf" value="6211" />
+          <entry key="txt" value="269" />
           <entry key="yml" value="84" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Groovy" value="5927" />
-          <entry key="PLAIN_TEXT" value="995" />
+          <entry key="Groovy" value="6211" />
+          <entry key="PLAIN_TEXT" value="1035" />
           <entry key="YAML" value="84" />
         </counts>
       </usages-collector>
@@ -76,8 +76,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1083">
-              <caret line="467" column="13" lean-forward="true" selection-start-line="467" selection-start-column="13" selection-end-line="467" selection-end-column="13" />
+            <state relative-caret-position="397">
+              <caret line="1300" column="38" lean-forward="true" selection-start-line="1300" selection-start-column="38" selection-end-line="1300" selection-end-column="38" />
               <folding>
                 <element signature="e#25#410#0" />
                 <element signature="e#412#828#0" />
@@ -116,25 +116,25 @@
                 <element signature="e#9667#9693#1" />
                 <element signature="e#9782#9811#1" />
                 <element signature="e#9782#9811#1" />
-                <element signature="e#14330#14954#0" />
-                <element signature="e#15005#15762#0" />
-                <element signature="e#15820#16612#0" />
-                <element signature="e#16663#18260#0" />
-                <element signature="e#18323#18929#0" />
-                <element signature="e#18962#19590#0" />
-                <element signature="e#19639#20381#0" />
-                <element signature="e#20423#21925#0" />
-                <element signature="e#21998#22912#0" />
-                <element signature="e#22966#24311#0" />
-                <element signature="e#24358#25912#0" />
-                <element signature="e#25983#26947#0" />
-                <element signature="e#27000#27919#0" />
-                <element signature="e#27965#29507#0" />
-                <element signature="e#29586#30397#0" />
-                <element signature="e#30440#31467#0" />
-                <element signature="e#31521#32359#0" />
-                <element signature="e#32406#33963#0" />
-                <element signature="e#34058#35397#0" />
+                <element signature="e#15004#15296#0" />
+                <element signature="e#15370#16003#0" />
+                <element signature="e#16054#16820#0" />
+                <element signature="e#16878#17679#0" />
+                <element signature="e#17730#19336#0" />
+                <element signature="e#19399#20006#0" />
+                <element signature="e#20039#20668#0" />
+                <element signature="e#20717#21460#0" />
+                <element signature="e#21502#23005#0" />
+                <element signature="e#23788#25200#0" />
+                <element signature="e#24046#25391#0" />
+                <element signature="e#25438#26992#0" />
+                <element signature="e#27063#28027#0" />
+                <element signature="e#28080#28999#0" />
+                <element signature="e#29045#30587#0" />
+                <element signature="e#30666#31479#0" />
+                <element signature="e#31522#32551#0" />
+                <element signature="e#32605#33443#0" />
+                <element signature="e#35144#36483#0" />
               </folding>
             </state>
           </provider>
@@ -152,8 +152,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="418">
-              <caret line="34" column="17" lean-forward="true" selection-start-line="34" selection-start-column="17" selection-end-line="34" selection-end-column="17" />
+            <state relative-caret-position="304">
+              <caret line="31" column="34" selection-start-line="31" selection-start-column="34" selection-end-line="31" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -184,7 +184,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="821" />
+    <option name="x" value="820" />
     <option name="width" value="980" />
     <option name="height" value="1040" />
   </component>
@@ -216,7 +216,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542193559344" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542285069523" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -437,14 +437,21 @@
       <option name="project" value="LOCAL" />
       <updated>1541755173148</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="add multiqc and change the params.">
+      <created>1542193687644</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1542193687644</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.11863271" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.15013404" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -518,7 +525,8 @@
     <MESSAGE value="update.the problem of merging any tools still exsists. now it can only merge all the tools results." />
     <MESSAGE value="solved the merging problem." />
     <MESSAGE value="add the environment.(except CIRI and find_circ)" />
-    <option name="LAST_COMMIT_MESSAGE" value="add the environment.(except CIRI and find_circ)" />
+    <MESSAGE value="add multiqc and change the params." />
+    <option name="LAST_COMMIT_MESSAGE" value="add multiqc and change the params." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/docs/configuration/adding_your_own.md">
@@ -670,15 +678,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/nextflow.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="34" column="17" lean-forward="true" selection-start-line="34" selection-start-column="17" selection-end-line="34" selection-end-column="17" />
+        <state relative-caret-position="304">
+          <caret line="31" column="34" selection-start-line="31" selection-start-column="34" selection-end-line="31" selection-end-column="34" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1083">
-          <caret line="467" column="13" lean-forward="true" selection-start-line="467" selection-start-column="13" selection-end-line="467" selection-end-column="13" />
+        <state relative-caret-position="397">
+          <caret line="1300" column="38" lean-forward="true" selection-start-line="1300" selection-start-column="38" selection-end-line="1300" selection-end-column="38" />
           <folding>
             <element signature="e#25#410#0" />
             <element signature="e#412#828#0" />
@@ -717,25 +725,25 @@
             <element signature="e#9667#9693#1" />
             <element signature="e#9782#9811#1" />
             <element signature="e#9782#9811#1" />
-            <element signature="e#14330#14954#0" />
-            <element signature="e#15005#15762#0" />
-            <element signature="e#15820#16612#0" />
-            <element signature="e#16663#18260#0" />
-            <element signature="e#18323#18929#0" />
-            <element signature="e#18962#19590#0" />
-            <element signature="e#19639#20381#0" />
-            <element signature="e#20423#21925#0" />
-            <element signature="e#21998#22912#0" />
-            <element signature="e#22966#24311#0" />
-            <element signature="e#24358#25912#0" />
-            <element signature="e#25983#26947#0" />
-            <element signature="e#27000#27919#0" />
-            <element signature="e#27965#29507#0" />
-            <element signature="e#29586#30397#0" />
-            <element signature="e#30440#31467#0" />
-            <element signature="e#31521#32359#0" />
-            <element signature="e#32406#33963#0" />
-            <element signature="e#34058#35397#0" />
+            <element signature="e#15004#15296#0" />
+            <element signature="e#15370#16003#0" />
+            <element signature="e#16054#16820#0" />
+            <element signature="e#16878#17679#0" />
+            <element signature="e#17730#19336#0" />
+            <element signature="e#19399#20006#0" />
+            <element signature="e#20039#20668#0" />
+            <element signature="e#20717#21460#0" />
+            <element signature="e#21502#23005#0" />
+            <element signature="e#23788#25200#0" />
+            <element signature="e#24046#25391#0" />
+            <element signature="e#25438#26992#0" />
+            <element signature="e#27063#28027#0" />
+            <element signature="e#28080#28999#0" />
+            <element signature="e#29045#30587#0" />
+            <element signature="e#30666#31479#0" />
+            <element signature="e#31522#32551#0" />
+            <element signature="e#32605#33443#0" />
+            <element signature="e#35144#36483#0" />
           </folding>
         </state>
       </provider>

@@ -385,7 +385,7 @@ if (fork_number < 1) {
 if(params.singleEnd){
     Channel
             .fromFilePairs( params.readssingleEnd, size: 1 )
-            .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+            .ifEmpty { error "Cannot find any reads matching: ${params.readssingleEnd}" }
             .set { read_pairs_fastp }
 }else{
     Channel
@@ -490,15 +490,28 @@ process run_star{
 
     shell:
     star_threads = idv_cpu - 1
-    """
-    STAR \
-    --runThreadN ${task.cpus} \
-    --chimSegmentMin 10 \
-    --genomeDir ${starindex} \
-    --readFilesCommand zcat \
-    --readFilesIn ${query_file[0]} ${query_file[1]} \
-    --outFileNamePrefix star_${pair_id}_
-    """
+    if(params.singleEnd){
+        """
+        STAR \
+        --runThreadN ${task.cpus} \
+        --chimSegmentMin 10 \
+        --genomeDir ${starindex} \
+        --readFilesCommand zcat \
+        --readFilesIn ${query_file} \
+        --outFileNamePrefix star_${pair_id}_
+        """
+    }else{
+        """
+        STAR \
+        --runThreadN ${task.cpus} \
+        --chimSegmentMin 10 \
+        --genomeDir ${starindex} \
+        --readFilesCommand zcat \
+        --readFilesIn ${query_file[0]} ${query_file[1]} \
+        --outFileNamePrefix star_${pair_id}_
+        """
+    }
+
 }
 
 //run the circexplorer2
@@ -638,15 +651,29 @@ process run_bwa{
 
     shell:
     bwa_threads = idv_cpu - 1
-    """
-    bwa \
-    mem -t ${task.cpus} \
-    -T 19 -M -R \
-    "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-    /home/wqj/test/bwaindex/genome \
-    ${query_file[0]} ${query_file[1]} \
-    > bwa_${pair_id}.mem.sam
-    """
+    if(params.singleEnd){
+        """
+        bwa \
+        mem -t ${task.cpus} \
+        -k 15 \
+        -T 19  -M -R \
+        "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
+        /home/wqj/test/bwaindex/genome \
+        ${query_file} \
+        > bwa_${pair_id}.mem.sam
+        """
+    }else{
+        """
+        bwa \
+        mem -t ${task.cpus} \
+        -T 19 -M -R \
+        "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
+        /home/wqj/test/bwaindex/genome \
+        ${query_file[0]} ${query_file[1]} \
+        > bwa_${pair_id}.mem.sam
+        """
+    }
+
 }
 
 //run the ciri
@@ -792,21 +819,40 @@ process run_mapsplice{
 
     shell:
     mapsplice_threads = idv_cpu - 1
-    """
-    python ${mapsdir}/mapsplice.py \
-    -p ${task.cpus} \
-    -k 1 \
-    --fusion-non-canonical \
-    --non-canonical-double-anchor \
-    --min-fusion-distance 200 \
-    -x /home/wqj/test/bowtieindex/chrX \
-    --gene-gtf ${gtffile} \
-    -c ${refdir} \
-    -1 ${query_file[0]} \
-    -2 ${query_file[1]} \
-    -o ${outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_${pair_id} 2 \
-    > ${pair_id}_mapsplice.log
-    """
+    if(params.singleEnd){
+        """
+        python ${mapsdir}/mapsplice.py \
+        -p ${task.cpus} \
+        -k 1 \
+        --fusion-non-canonical \
+        --qual-scale phred33 \
+        --non-canonical-double-anchor \
+        --min-fusion-distance 200 \
+        -x /home/wqj/test/bowtieindex/chrX \
+        --gene-gtf ${gtffile} \
+        -c ${refdir} \
+        -1 ${query_file} \
+        -o ${outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_${pair_id} 2 \
+        > ${pair_id}_mapsplice.log
+        """
+    }else{
+        """
+        python ${mapsdir}/mapsplice.py \
+        -p ${task.cpus} \
+        -k 1 \
+        --fusion-non-canonical \
+        --non-canonical-double-anchor \
+        --min-fusion-distance 200 \
+        -x /home/wqj/test/bowtieindex/chrX \
+        --gene-gtf ${gtffile} \
+        -c ${refdir} \
+        -1 ${query_file[0]} \
+        -2 ${query_file[1]} \
+        -o ${outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_${pair_id} 2 \
+        > ${pair_id}_mapsplice.log
+        """
+    }
+
 }
 
 //produce the bed6 file
@@ -929,26 +975,49 @@ process run_segemehl{
 
     shell:
     segemehl_threads = idv_cpu - 1
-    """
-    ${segdir}/segemehl.x \
-    -d ${genomefile} \
-    -i ${segindex} \
-    -q ${query_file[0]} \
-    -p ${query_file[1]} \
-    -t ${task.cpus} \
-    -S \
-    | samtools view -bS - \
-    | samtools sort -o - deleteme \
-    | samtools view -h - \
-    > segemehl_${pair_id}_mapped.sam
+    if(params.singleEnd){
+        """
+        ${segdir}/segemehl.x \
+        -d ${genomefile} \
+        -i ${segindex} \
+        -q ${query_file} \
+        -t ${task.cpus} \
+        -S \
+        | samtools view -bS - \
+        | samtools sort -o - deleteme \
+        | samtools view -h - \
+        > segemehl_${pair_id}_mapped.sam
 
-    ${segdir}/testrealign.x \
-    -d ${genomefile} \
-    -q segemehl_${pair_id}_mapped.sam \
-    -n \
-    -U segemehl_${pair_id}_splicesites.bed \
-    -T segemehl_${pair_id}_transrealigned.bed
-    """
+        ${segdir}/testrealign.x \
+        -d ${genomefile} \
+        -q segemehl_${pair_id}_mapped.sam \
+        -n \
+        -U segemehl_${pair_id}_splicesites.bed \
+        -T segemehl_${pair_id}_transrealigned.bed
+        """
+    }else{
+        """
+        ${segdir}/segemehl.x \
+        -d ${genomefile} \
+        -i ${segindex} \
+        -q ${query_file[0]} \
+        -p ${query_file[1]} \
+        -t ${task.cpus} \
+        -S \
+        | samtools view -bS - \
+        | samtools sort -o - deleteme \
+        | samtools view -h - \
+        > segemehl_${pair_id}_mapped.sam
+
+        ${segdir}/testrealign.x \
+        -d ${genomefile} \
+        -q segemehl_${pair_id}_mapped.sam \
+        -n \
+        -U segemehl_${pair_id}_splicesites.bed \
+        -T segemehl_${pair_id}_transrealigned.bed
+        """
+    }
+
 }
 
 //produce the bed6 file
@@ -1062,25 +1131,47 @@ process run_bowtie2{
 
     shell:
     bowtie2_threads = idv_cpu - 1
-    """
-    bowtie2 \
-    -p ${task.cpus} \
-    --very-sensitive \
-    --score-min=C,-15,0 \
-    --mm \
-    -x /home/wqj/test/bowtie2index/chrX \
-    -q \
-    -1 ${query_file[0]} \
-    -2 ${query_file[1]} \
-    | samtools view -hbuS - \
-    | samtools sort \
-    -o bowtie2_output_${pair_id}.bam
+    if(params.singleEnd){
+        """
+        bowtie2 \
+        -p ${task.cpus} \
+        --very-sensitive \
+        --score-min=C,-15,0 \
+        --mm \
+        -x /home/wqj/test/bowtie2index/chrX \
+        -q \
+        -U ${query_file} \
+        | samtools view -hbuS - \
+        | samtools sort \
+        -o bowtie2_output_${pair_id}.bam
 
-    samtools \
-    view -hf 4 bowtie2_output_${pair_id}.bam \
-    | samtools view -Sb - \
-    > bowtie2_unmapped_${pair_id}.bam
-    """
+        samtools \
+        view -hf 4 bowtie2_output_${pair_id}.bam \
+        | samtools view -Sb - \
+        > bowtie2_unmapped_${pair_id}.bam
+        """
+    }else{
+        """
+        bowtie2 \
+        -p ${task.cpus} \
+        --very-sensitive \
+        --score-min=C,-15,0 \
+        --mm \
+        -x /home/wqj/test/bowtie2index/chrX \
+        -q \
+        -1 ${query_file[0]} \
+        -2 ${query_file[1]} \
+        | samtools view -hbuS - \
+        | samtools sort \
+        -o bowtie2_output_${pair_id}.bam
+
+        samtools \
+        view -hf 4 bowtie2_output_${pair_id}.bam \
+        | samtools view -Sb - \
+        > bowtie2_unmapped_${pair_id}.bam
+        """
+    }
+
 }
 
 //run the find_circ
