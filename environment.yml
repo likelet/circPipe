@@ -26,3 +26,9 @@ dependencies:
   - bioconductor-fgsea=1.6.0
   - bioconductor-bsgenome.hsapiens.ucsc.hg38=1.4.1
   - bioconductor-clusterprofiler=3.8.1
+  - r-dplyr=0.7.6
+  - r-readr=1.1.1
+  - r-rmarkdown=1.10
+  - r-ggsci=2.9
+  - r-circlize=0.4.5
+  - tophat=2.1.1

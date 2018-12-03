@@ -29,7 +29,7 @@
  * Wei qijin
  */
 
-
+println(PATH)
 
 //pre-defined functions for render command
 //=======================================================================================
@@ -253,6 +253,21 @@ if( !find_circoutdir.exists() ) {
     find_circoutdir.mkdirs()
 }
 
+def autocircoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_autocirc/" )
+if( !autocircoutdir.exists() ) {
+    autocircoutdir.mkdirs()
+}
+
+def tophatoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_tophat/" )
+if( !tophatoutdir.exists() ) {
+    tophatoutdir.mkdirs()
+}
+
+def tophatcircexplorer2outdir = new File( "${params.outdir}/pipeline_tools/pipeline_circexplorer2_for_tophat/" )
+if( !tophatcircexplorer2outdir.exists() ) {
+    tophatcircexplorer2outdir.mkdirs()
+}
+
 def mapspliceoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_mapsplice/" )
 if( !mapspliceoutdir.exists() ) {
     mapspliceoutdir.mkdirs()
@@ -268,14 +283,14 @@ if( !mergeoutdir.exists() ) {
     mergeoutdir.mkdirs()
 }
 
-def DEoutdir = new File( "${params.outdir}/DE/" )
-if( !DEoutdir.exists() ) {
-    DEoutdir.mkdirs()
+def SEPoutdir = new File( "${params.outdir}/plot_separate/" )
+if( !SEPoutdir.exists() ) {
+    SEPoutdir.mkdirs()
 }
 
-def CORoutdir = new File( "${params.outdir}/COR/" )
-if( !CORoutdir.exists() ) {
-    CORoutdir.mkdirs()
+def ALLoutdir = new File( "${params.outdir}/plot_merge/" )
+if( !ALLoutdir.exists() ) {
+    ALLoutdir.mkdirs()
 }
 
 def REPORToutdir = new File( "${params.outdir}/REPORT/" )
@@ -287,15 +302,29 @@ otherTools = file(params.otherTools) //the other tools directory
 if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
 
 
-starindex = file(params.starindex) //the index directory
+//the index directory
+starindex = file(params.starindex) //the star index directory
 if( !starindex.exists() ) exit 1, print_red("Missing star index directory: ${starindex}")
+
+bowtie2index = file(params.bowtie2index) //the bowtie2 index directory
+if( !bowtie2index.exists() ) exit 1, print_red("Missing bowtie2 index directory: ${bowtie2index}")
+
+bowtieindex = file(params.bowtieindex) //the bowtie index directory
+if( !bowtieindex.exists() ) exit 1, print_red("Missing bowtie index directory: ${bowtieindex}")
+
+bwaindex = file(params.bwaindex) //the bwa index directory
+if( !bwaindex.exists() ) exit 1, print_red("Missing bwa index directory: ${bwaindex}")
 
 segindex = file(params.segindex) //the segemehl index file
 if( !segindex.exists() ) exit 1, print_red("Missing Segemehl index file: ${segindex}")
 
 
+//the reference directory
 refdir = file(params.refdir) //the reference genome directory
 if( !refdir.exists() ) exit 1, print_red("Missing Reference Genome Directory: ${refdir}")
+
+refmapsplice = file(params.refmapsplice) //the mapsplice reference genome directory
+if( !refmapsplice.exists() ) exit 1, print_red("Missing Mapsplice Reference Genome Directory: ${refmapsplice}")
 
 annotationfile = file(params.annotationfile) //the annotationfile
 if( !annotationfile.exists() ) exit 1, print_red("Missing annotation file: ${annotationfile}")
@@ -303,11 +332,14 @@ if( !annotationfile.exists() ) exit 1, print_red("Missing annotation file: ${ann
 genomefile = file(params.genomefile) //the genomefile
 if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
 
-gtffile = file(params.gtffile) //the annotationfile
-if( !gtffile.exists() ) exit 1, print_red("Missing annotation file: ${gtffile}")
+gtffile = file(params.gtffile) //the annotationfile-gtf-format
+if( !gtffile.exists() ) exit 1, print_red("Missing gtf annotation file: ${gtffile}")
+
+bedfile = file(params.bedfile) //the annotationfile-bed-format
+if( !bedfile.exists() ) exit 1, print_red("Missing bed annotation file: ${bedfile}")
 
 
-
+//the environment directory
 condadir = file(params.condadir) //the python3 environment
 if( !condadir.exists() ) exit 1, print_red("Missing python3 environment: ${condadir}")
 
@@ -315,6 +347,7 @@ conda2dir = file(params.conda2dir) //the python2 environment
 if( !conda2dir.exists() ) exit 1, print_red("Missing python2 environment: ${conda2dir}")
 
 
+//the tools directory
 mapsdir = file(params.mapsdir) //the mapsplice directory
 if( !mapsdir.exists() ) exit 1, print_red("Missing Mapsplice Directory: ${mapsdir}")
 
@@ -326,6 +359,9 @@ if( !genomefile.exists() ) exit 1, print_red("Missing CIRI Directory: ${ciridir}
 
 find_circdir = file(params.find_circdir)
 if( !find_circdir.exists() ) exit 1, print_red("Missing find_circ Directory: ${find_circdir}")
+
+autocircdir = file(params.autocircdir)
+if( !autocircdir.exists() ) exit 1, print_red("Missing autocirc Directory: ${autocircdir}")
 
 
 
@@ -340,9 +376,11 @@ log.info print_purple("""\
          singleEnd : ${params.singleEnd}
          
          Tools selected :
-         star : ${params.star}
-         bwa : ${params.bwa}
-         bowtie2 : ${params.bowtie2}
+         circexplorer2 : ${params.circexplorer2}
+         find_circ : ${params.find_circ}
+         ciri : ${params.ciri}
+         autocirc : ${params.autocirc}
+         tophat : ${params.tophat}
          mapsplice : ${params.mapsplice}
          segemehl : ${params.segemehl}
          selectAll : ${params.selectAll}
@@ -403,15 +441,17 @@ process run_fastp{
 
     maxForks fork_number
 
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
     input:
     set pair_id, file(query_file) from read_pairs_fastp
 
     output:
-    set pair_id, file ('fastp_*') into fastpfiles_star
-    set pair_id, file ('fastp_*') into fastpfiles_bwa
-    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice
-    set pair_id, file ('unzip_fastp_*') into fastpfiles_segemehl
-    set pair_id, file ('fastp_*') into fastpfiles_bowtie2
+    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_tophat,fastpfiles_bowtie2
     file ('*.html') into fastp_for_waiting
     file ('*_fastp.json') into fastp_for_multiqc
 
@@ -420,11 +460,7 @@ process run_fastp{
         """
         fastp \
         -i ${query_file} \
-        -o unzip_fastp_${pair_id}.fq
-
-        fastp \
-        -i ${query_file} \
-        -o fastp_${pair_id}.fq.gz \
+        -o unzip_fastp_${pair_id}.fq \
         -h ${pair_id}_fastpreport.html \
         -j ${pair_id}_fastp.json
         """
@@ -434,15 +470,9 @@ process run_fastp{
         -i ${query_file[0]} \
         -I ${query_file[1]} \
         -o unzip_fastp_${pair_id}_1.fq \
-        -O unzip_fastp_${pair_id}_2.fq
-
-        fastp \
-        -i ${query_file[0]} \
-        -I ${query_file[1]} \
-        -o fastp_${pair_id}_1.fq.gz \
-        -O fastp_${pair_id}_2.fq.gz \
+        -O unzip_fastp_${pair_id}_2.fq \
         -h ${pair_id}_fastpreport.html \
-        -j ${pair_id}_fastp.json
+        -j ${pair_id}_fastp.json 
         """
     }
 
@@ -478,6 +508,12 @@ process run_star{
 
     maxForks fork_number
 
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
     input:
     set pair_id, file(query_file) from fastpfiles_star
     file starindex
@@ -496,7 +532,6 @@ process run_star{
         --runThreadN ${task.cpus} \
         --chimSegmentMin 10 \
         --genomeDir ${starindex} \
-        --readFilesCommand zcat \
         --readFilesIn ${query_file} \
         --outFileNamePrefix star_${pair_id}_
         """
@@ -506,7 +541,6 @@ process run_star{
         --runThreadN ${task.cpus} \
         --chimSegmentMin 10 \
         --genomeDir ${starindex} \
-        --readFilesCommand zcat \
         --readFilesIn ${query_file[0]} ${query_file[1]} \
         --outFileNamePrefix star_${pair_id}_
         """
@@ -520,6 +554,12 @@ process run_circexplorer2{
     publishDir "${params.outdir}/pipeline_tools/pipeline_circexplorer2", mode: 'copy', overwrite: true
 
     maxForks fork_number
+
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
 
     input:
     set pair_id, file (query_file) from starfiles
@@ -567,13 +607,13 @@ process run_modify_circexplorer2{
 
     shell :
     '''
-        grep circ !{query_file} \
-        | grep -v chrM \
-	    | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
-        > !{pair_id}_modify_circexplorer2.temp.bed
-        
-        python !{otherTools}/quchong.py !{pair_id}_modify_circexplorer2.temp.bed !{pair_id}_modify_circexplorer2.candidates.bed
-        '''
+    grep circ !{query_file} \
+    | grep -v chrM \
+    | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
+    > !{pair_id}_modify_circexplorer2.temp.bed
+    
+    python !{otherTools}/quchong.py !{pair_id}_modify_circexplorer2.temp.bed !{pair_id}_modify_circexplorer2.candidates.bed
+    '''
 }
 
 //produce the matrix
@@ -598,37 +638,78 @@ process matrix_circexplorer2{
 
     shell :
     '''
-		for file in !{query_file}
-		do
-			cat $file >> concatenate.bed
-		done
-		
-		python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
-		sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-		cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-		cat mergeconcatenate.bed > circexplorer2.txt
-		
-		for file in !{query_file}
-		do
-			python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
-			paste -d"\t" id.txt counts.txt > temp.txt
-			cat temp.txt > id.txt
-		done
-		
-		echo -e "id\\c" > merge_header.txt
-        for sampleid in !{pair_id}
-        do
-            echo -e "\\t$sampleid\\c" >> merge_header.txt    
-        done 
-        
-        sed -i 's/\\[//g' merge_header.txt
-        sed -i 's/\\,//g' merge_header.txt
-        sed -i 's/\\]//g' merge_header.txt
-        echo -e "\\n\\c" >> merge_header.txt
-         
-        cat merge_header.txt id.txt > circexplorer2_merge.matrix
-        echo -e "circexplorer2" > name_circexplorer2.txt
-        '''
+    for file in !{query_file}
+    do
+        cat $file >> concatenate.bed
+    done
+    
+    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+    cat mergeconcatenate.bed > circexplorer2.txt
+    
+    for file in !{query_file}
+    do
+        python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
+        paste -d"\t" id.txt counts.txt > temp.txt
+        cat temp.txt > id.txt
+    done
+    
+    echo -e "id\\c" > merge_header.txt
+    for sampleid in !{pair_id}
+    do
+        echo -e "\\t$sampleid\\c" >> merge_header.txt    
+    done 
+    
+    sed -i 's/\\[//g' merge_header.txt
+    sed -i 's/\\,//g' merge_header.txt
+    sed -i 's/\\]//g' merge_header.txt
+    echo -e "\\n\\c" >> merge_header.txt
+     
+    cat merge_header.txt id.txt > circexplorer2_merge.matrix
+    echo -e "circexplorer2" > name_circexplorer2.txt
+    '''
+}
+
+//draw the plot
+process circexplorer2_draw_plot{
+    publishDir "${params.outdir}/plot_separate", mode: 'copy', pattern:"circexplorer2_*", overwrite: true
+
+    maxForks fork_number
+
+    input:
+    file (query_file) from output_circexplorer2
+    file otherTools
+    file gtffile
+
+    output:
+    file ('circexplorer2_*') into circexplorer2_plot
+
+    when:
+    params.separate && (params.selectAll || params.circexplorer2)
+
+    shell:
+    '''
+    for file in !{query_file}
+    do
+        cat $file | awk 'NR==1' > id.txt
+        cat $file > temp.txt
+        sed -i '1d' temp.txt
+        cat temp.txt >> total_matrix.txt
+    done
+
+    Rscript !{otherTools}/changematrix.R total_matrix.txt change_reads.txt
+
+    python !{otherTools}/finalmerge.py change_reads.txt newmatrix.txt for_annotation.bed
+
+    cat id.txt newmatrix.txt > final.matrix
+
+    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R final.matrix circexplorer2_volcano.png circexplorer2_heatmap1.png circexplorer2_heatmap2.png circexplorer2_heatmap3.png circexplorer2_pca1.png circexplorer2_pca2.png circexplorer2_plots.pdf
+
+    java -jar !{otherTools}/bed1114.jar -i for_annotation.bed -o circexplorer2_ -gtf !{gtffile} -uniq
+
+    Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R circexplorer2_for_annotation_annote.txt circexplorer2_distribution.png circexplorer2_boxplot.png circexplorer2_spanningtree.png circexplorer2_hist.png circexplorer2_circos.png circexplorer2_calculates.pdf
+    '''
 }
 
 
@@ -640,8 +721,15 @@ process run_bwa{
 
     maxForks fork_number
 
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
     input:
     set pair_id, file (query_file) from fastpfiles_bwa
+    file bwaindex
 
     output:
     set pair_id, file ('*.sam') into bwafiles
@@ -658,7 +746,7 @@ process run_bwa{
         -k 15 \
         -T 19  -M -R \
         "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        /home/wqj/test/bwaindex/genome \
+        ${bwaindex}/genome \
         ${query_file} \
         > bwa_${pair_id}.mem.sam
         """
@@ -668,7 +756,7 @@ process run_bwa{
         mem -t ${task.cpus} \
         -T 19 -M -R \
         "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        /home/wqj/test/bwaindex/genome \
+        ${bwaindex}/genome \
         ${query_file[0]} ${query_file[1]} \
         > bwa_${pair_id}.mem.sam
         """
@@ -682,6 +770,12 @@ process run_ciri{
     publishDir "${params.outdir}/pipeline_tools/pipeline_ciri", mode: 'copy', overwrite: true
 
     maxForks fork_number
+
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
 
     input:
     set pair_id, file (query_file) from bwafiles
@@ -802,12 +896,19 @@ process run_mapsplice{
 
     maxForks fork_number
 
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
     input:
     set pair_id, file (query_file) from fastpfiles_mapsplice
     file mapsdir
     file gtffile
-    file refdir
+    file refmapsplice
     file outdir
+    file bowtieindex
 
     output:
     set pair_id, file('*.log') into mapsplicefiles
@@ -828,9 +929,9 @@ process run_mapsplice{
         --qual-scale phred33 \
         --non-canonical-double-anchor \
         --min-fusion-distance 200 \
-        -x /home/wqj/test/bowtieindex/chrX \
+        -x ${bowtieindex}/genome \
         --gene-gtf ${gtffile} \
-        -c ${refdir} \
+        -c ${refmapsplice} \
         -1 ${query_file} \
         -o ${outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_${pair_id} 2 \
         > ${pair_id}_mapsplice.log
@@ -843,9 +944,9 @@ process run_mapsplice{
         --fusion-non-canonical \
         --non-canonical-double-anchor \
         --min-fusion-distance 200 \
-        -x /home/wqj/test/bowtieindex/chrX \
+        -x ${bowtieindex}/genome \
         --gene-gtf ${gtffile} \
-        -c ${refdir} \
+        -c ${refmapsplice} \
         -1 ${query_file[0]} \
         -2 ${query_file[1]} \
         -o ${outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_${pair_id} 2 \
@@ -958,6 +1059,12 @@ process run_segemehl{
     publishDir "${params.outdir}/pipeline_tools/pipeline_segemehl", mode: 'copy', overwrite: true
 
     maxForks fork_number
+
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
 
     input:
     set pair_id, file (query_file) from fastpfiles_segemehl
@@ -1120,14 +1227,22 @@ process run_bowtie2{
 
     maxForks fork_number
 
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
     input:
     set pair_id, file (query_file) from fastpfiles_bowtie2
+    file bowtie2index
 
     output:
-    set pair_id, file ('bowtie2*') into bowtie2files
+    set pair_id, file ('bowtie2_unmapped_*') into bowtie2files
+    set pair_id, file ('bowtie2_unmapped_*') into bowtie2files_for_autocirc
 
     when:
-    params.find_circ || params.selectAll
+    params.find_circ || params.selectAll || params.autocirc
 
     shell:
     bowtie2_threads = idv_cpu - 1
@@ -1138,7 +1253,7 @@ process run_bowtie2{
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
-        -x /home/wqj/test/bowtie2index/chrX \
+        -x ${bowtie2index}/genome \
         -q \
         -U ${query_file} \
         | samtools view -hbuS - \
@@ -1157,7 +1272,7 @@ process run_bowtie2{
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
-        -x /home/wqj/test/bowtie2index/chrX \
+        -x ${bowtie2index}/genome \
         -q \
         -1 ${query_file[0]} \
         -2 ${query_file[1]} \
@@ -1181,10 +1296,17 @@ process run_find_circ{
 
     maxForks fork_number
 
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
     input:
     set pair_id, file (query_file) from bowtie2files
     file genomefile
     file find_circdir
+    file bowtie2index
 
     output:
     set pair_id, file ('*splice_sites.bed') into find_circfiles
@@ -1207,7 +1329,7 @@ process run_find_circ{
     --mm \
     --score-min=C,-15,0 \
     -q \
-    -x /home/wqj/test/bowtie2index/chrX \
+    -x ${bowtie2index}/genome \
     -U find_circ_${pair_id}_anchors.qfa.gz \
     | python ${find_circdir}/find_circ.py \
     -G ${genomefile} \
@@ -1235,7 +1357,7 @@ process run_modify_find_circ{
     val (pair_id) into modify_find_circ_id
 
     when:
-    params.bowtie2 || params.selectAll
+    params.find_circ || params.selectAll
 
     shell :
     '''
@@ -1306,6 +1428,254 @@ process matrix_find_circ{
     '''
 }
 
+//draw the plot
+process find_circ_draw_plot{
+    publishDir "${params.outdir}/plot_separate", mode: 'copy', pattern:"find_circ_*", overwrite: true
+
+    maxForks fork_number
+
+    input:
+    file (query_file) from output_find_circ
+    file otherTools
+    file gtffile
+
+    output:
+    file ('find_circ_*') into find_circ_plot
+
+    when:
+    params.separate && (params.selectAll || params.find_circ)
+
+    shell:
+    '''
+    for file in !{query_file}
+    do
+        cat $file | awk 'NR==1' > id.txt
+        cat $file > temp.txt
+        sed -i '1d' temp.txt
+        cat temp.txt >> total_matrix.txt
+    done
+
+    Rscript !{otherTools}/changematrix.R total_matrix.txt change_reads.txt
+
+    python !{otherTools}/finalmerge.py change_reads.txt newmatrix.txt for_annotation.bed
+
+    cat id.txt newmatrix.txt > final.matrix
+
+    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R final.matrix find_circ_volcano.png find_circ_heatmap1.png find_circ_heatmap2.png find_circ_heatmap3.png find_circ_pca1.png find_circ_pca2.png find_circ_plots.pdf
+
+    java -jar bed1114.jar -i for_annotation.bed -o find_circ_ -gtf !{gtffile} -uniq
+
+    Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R find_circ_for_annotation_annote.txt find_circ_distribution.png find_circ_boxplot.png find_circ_spanningtree.png find_circ_hist.png find_circ_circos.png find_circ_calculates.pdf
+    '''
+}
+
+
+//the sixth tool : bowtie2 - autocirc
+//bowtie2 is already designed
+//run the autocirc
+process run_autocirc{
+    tag "$pair_id"
+    publishDir "${params.outdir}/pipeline_tools/pipeline_autocirc", mode: 'copy', pattern: "*autocirc.final.bed", overwrite: true
+
+    maxForks fork_number
+
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
+    input:
+    set pair_id, file (query_file) from bowtie2files_for_autocirc
+    file autocircdir
+    file genomefile
+    file bowtie2index
+    file bedfile
+
+    output:
+    set pair_id, file ('*autocirc.final.bed') into autocircfiles
+
+    when:
+    params.autocirc || params.selectAll
+
+    script:
+    """  
+    ln -f ${query_file} ./AutoCirc
+    cd AutoCirc
+    
+    chmod 755 AutoCirc_v1.3.pl
+    chmod 755 script/*
+
+    perl ./AutoCirc_v1.3.pl \
+    -g ${params.genomefile} \
+    -I ${params.bowtie2index}/genome \
+    --bam bowtie2_unmapped_${pair_id}.bam \
+    -b ${params.bedfile} \
+    --mis 0 \
+    --min 100 \
+    --max 100000 \
+    -s 20 \
+    -o autocirc_output_${pair_id} &> standard.log
+
+    cd ../
+    cat ./AutoCirc/autocirc_output_${pair_id}/circ.final.bed > ${pair_id}_autocirc.final.bed
+    """
+}
+
+//produce the bed6 file
+process run_modify_autocirc{
+    tag "$pair_id"
+    publishDir "${params.outdir}/pipeline_tools/pipeline_autocirc", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+
+    maxForks fork_number
+
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
+    input:
+    set pair_id, file (query_file) from autocircfiles
+    file otherTools
+
+    output:
+    file ('*candidates.bed') into modify_autocircfiles
+    val (pair_id) into modify_autocirc_id
+
+    when:
+    params.autocirc || params.selectAll
+
+    shell:
+    '''
+    cat !{query_file} | grep -v chrM > test.txt
+    sed -i '1d' test.txt
+    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 test.txt > temp.bed 
+    cat temp.bed | awk '{print $1 "\t" $2 "\t" $3 "\t" "autocirc" "\t" $5 "\t" $6}\' > !{pair_id}_temp.bed
+    python !{otherTools}/quchong.py !{pair_id}_temp.bed !{pair_id}_modify_autocirc.candidates.bed
+    '''
+}
+
+//produce the matrix
+process matrix_autocirc{
+    tag "$pair_id"
+    publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+    maxForks fork_number
+
+    input:
+    file (query_file) from modify_autocircfiles.collect()
+    val (pair_id) from modify_autocirc_id.collect()
+
+    output:
+    file ('autocirc.txt') into merge_autocirc
+    file ('*.matrix') into output_autocirc
+    file ('name_autocirc.txt') into name_autocirc
+
+    when:
+    params.autocirc || params.selectAll
+
+    shell :
+    '''
+    for file in !{query_file}
+    do
+        cat $file >> concatenate.bed
+    done
+    
+    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+    cat mergeconcatenate.bed > autocirc.txt
+    
+    for file in !{query_file}
+    do
+        python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
+        paste -d"\t" id.txt counts.txt > temp.txt
+        cat temp.txt > id.txt
+    done
+    
+    echo -e "id\\c" > merge_header.txt
+    for sampleid in !{pair_id}
+    do
+        echo -e "\\t$sampleid\\c" >> merge_header.txt    
+    done 
+    
+    sed -i 's/\\[//g' merge_header.txt
+    sed -i 's/\\,//g' merge_header.txt
+    sed -i 's/\\]//g' merge_header.txt
+    echo -e "\\n\\c" >> merge_header.txt
+     
+    cat merge_header.txt id.txt > autocirc_merge.matrix
+    echo -e "autocirc" > name_autocirc.txt
+    '''
+}
+
+//draw the plot
+
+
+/*//the seventh tool : tophat - circexplorer2
+//run the tophat
+process run_tophat{
+    tag "$pair_id"
+    publishDir "${params.outdir}/pipeline_tools/pipeline_tophat", mode: 'copy', overwrite: true
+
+    maxForks fork_number
+
+    memory '20 GB'
+
+    cpus 8
+
+    time '2d'
+
+    input:
+    set pair_id, file (query_file) from fastpfiles_tophat
+    file gtffile
+    file outdir
+
+    output:
+    set pair_id, file ('*.fastq') into tophatfiles
+
+    conda params.conda2dir
+
+    when:
+    params.tophat || params.selectAll
+
+    shell:
+    tophat_threads = idv_cpu - 1
+    if(params.singleEnd){
+        """
+        tophat2 \
+        -a 6 \
+        --microexon-search \
+        -m 2 \
+        -p ${task.cpus} \
+        -G ${gtffile} \
+        -o tophat_${pair_id} \
+        /home/wqj/database/reference/tophatindex/genome \
+        ${query_file}
+
+        bamToFastq \
+        -i tophat_${pair_id}/unmapped.bam \
+        -fq ${pair_id}_unmapped.fastq
+
+        tophat2 \
+        -o ${outdir}/pipeline_tools/pipeline_tophat/tophat_fusion_${pair_id} \
+        -p ${task.cpus} \
+        --fusion-search \
+        --keep-fasta-order \
+        --bowtie1 \
+        --no-coverage-search \
+        /home/wqj/database/reference/tophatfusionindex/genome \
+        ${pair_id}_unmapped.fastq
+        """
+    }else{
+        """
+        """
+    }
+
+}
+*/
+
 
 //after running the tools
 //calculate the results by different tools
@@ -1315,8 +1685,8 @@ process calculate_tools{
     maxForks fork_number
 
     input:
-    file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl ).collect()
-    file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl ).collect()
+    file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl, merge_autocirc ).collect()
+    file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl, name_autocirc ).collect()
     file otherTools
 
     output:
@@ -1354,6 +1724,46 @@ process calculate_tools{
     '''
 }
 
+//merge the matrix and draw the plot
+/*process merge_draw_plot{
+    publishDir "${params.outdir}/plot_merge", mode: 'copy', pattern:"merge_*", overwrite: true
+
+    maxForks fork_number
+
+    input:
+    file (query_file) from output_find_circ.concat( output_circexplorer2, output_ciri, output_mapsplice, output_segemehl, output_autocirc ).collect()
+    file otherTools
+    file gtffile
+
+    output:
+    file ('merge_*') into merge_plot
+
+    when:
+    params.merge
+
+    shell:
+    '''
+    for file in !{query_file}
+    do
+        cat $file | awk 'NR==1' > id.txt
+        cat $file > temp.txt
+        sed -i '1d' temp.txt
+        cat temp.txt >> total_matrix.txt
+    done
+
+    Rscript !{otherTools}/changematrix.R total_matrix.txt change_reads.txt
+
+    python !{otherTools}/finalmerge.py change_reads.txt newmatrix.txt for_annotation.bed
+
+    cat id.txt newmatrix.txt > final.matrix
+
+    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R final.matrix merge_volcano.png merge_heatmap1.png merge_heatmap2.png merge_heatmap3.png merge_pca1.png merge_pca2.png merge_plots.pdf
+
+    java -jar bed1114.jar -i for_annotation.bed -o merge_ -gtf !{gtffile} -uniq
+
+    Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R merge_for_annotation_annote.txt merge_distribution.png merge_boxplot.png merge_spanningtree.png merge_hist.png merge_circos.png merge_calculates.pdf
+    '''
+}
 
 /*
 * Completion e-mail notification
