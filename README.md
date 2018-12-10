@@ -30,14 +30,14 @@ The nf-core/cirpipe pipeline comes with documentation about the pipeline, found 
 The pipeline allows you to choose between running either replicates or without replicates.
 Choose between workflows by using `--without_replicate` or not(default) .
 
-| Step                                         | Pipeline One     | Pipeline Two          | Pipeline Three        | Pipeline Four         | Pipeline Five         | Pipeline Six          |
-|----------------------------------------------|------------------|-----------------------|-----------------------|-----------------------|-----------------------|-----------------------|
-| Raw Data QC                                  | Fastp            | Fastp                 | Fastp                 | Fastp                 | Fastp                 | Fastp                 |
-| Reads Alignment                              | STAR             | BWA                   | Bowtie2               | -                     | -                     | Bowtie2               |
-| Reads counting                               | CIRCexplorer2    | CIRI                  | Find_circ             | Mapsplice             | Segemehl              | AutoCirc              |
-| Data Processing (in house script)            | Python,JAVA,R    | Python,JAVA,R         | Python,JAVA,R         | Python,JAVA,R         | Python,JAVA,R         | Python,JAVA,R         |
-| Differential expression                      | edgeR            | edgeR                 | edgeR                 | edgeR                 | edgeR                 | edgeR                 |
-| Summary Report                               | MultiQC          | MultiQC               | MultiQC               | MultiQC               | MultiQC               | MultiQC               |
+| Step                                         | Pipeline One     | Pipeline Two          | Pipeline Three        | Pipeline Four         | Pipeline Five         |
+|----------------------------------------------|------------------|-----------------------|-----------------------|-----------------------|-----------------------|
+| Raw Data QC                                  | Fastp            | Fastp                 | Fastp                 | Fastp                 | Fastp                 |
+| Reads Alignment                              | STAR             | BWA                   | Bowtie2               | -                     | -                     |
+| Reads counting                               | CIRCexplorer2    | CIRI                  | Find_circ             | Mapsplice             | Segemehl              |
+| Data Processing (in house script)            | Python,JAVA,R    | Python,JAVA,R         | Python,JAVA,R         | Python,JAVA,R         | Python,JAVA,R         |
+| Differential expression                      | edgeR            | edgeR                 | edgeR                 | edgeR                 | edgeR                 |
+| Summary Report                               | MultiQC          | MultiQC               | MultiQC               | MultiQC               | MultiQC               |
 
 
 ### Dependencies
