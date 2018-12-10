@@ -172,10 +172,11 @@ log.info """=======================================================
 
 nf-core/cirpipe v${workflow.manifest.version}"
 ======================================================="""
+
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/cirpipe'
 summary['Pipeline Version'] = workflow.manifest.version
-summary['Run Name']     = custom_runName ?: workflow.runName
+//summary['Run Name']     = custom_runName ?: workflow.runName
 summary['Reads']        = params.reads
 summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
@@ -193,12 +194,13 @@ summary['Output dir']     = params.outdir
 summary['Script dir']     = workflow.projectDir
 summary['Config Profile'] = workflow.profile
 
-/*
+
 if(workflow.profile == 'awsbatch'){
     summary['AWS Region'] = params.awsregion
     summary['AWS Queue'] = params.awsqueue
 }
 if(params.email) summary['E-mail Address'] = params.email
+
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "========================================="
 
@@ -671,7 +673,7 @@ process matrix_circexplorer2{
     '''
 }
 
-//draw the plot
+/*//draw the plot
 process circexplorer2_draw_plot{
     publishDir "${params.outdir}/plot_separate", mode: 'copy', pattern:"circexplorer2_*", overwrite: true
 
@@ -698,9 +700,7 @@ process circexplorer2_draw_plot{
         cat temp.txt >> total_matrix.txt
     done
 
-    Rscript !{otherTools}/changematrix.R total_matrix.txt change_reads.txt
-
-    python !{otherTools}/finalmerge.py change_reads.txt newmatrix.txt for_annotation.bed
+    python !{otherTools}/finalmerge.py total_matrix.txt newmatrix.txt for_annotation.bed
 
     cat id.txt newmatrix.txt > final.matrix
 
@@ -708,10 +708,10 @@ process circexplorer2_draw_plot{
 
     java -jar !{otherTools}/bed1114.jar -i for_annotation.bed -o circexplorer2_ -gtf !{gtffile} -uniq
 
-    Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R circexplorer2_for_annotation_annote.txt circexplorer2_distribution.png circexplorer2_boxplot.png circexplorer2_spanningtree.png circexplorer2_hist.png circexplorer2_circos.png circexplorer2_calculates.pdf
+    Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R circexplorer2_for_annotation_annote.txt circexplorer2_distribution.png circexplorer2_boxplot.png circexplorer2_spanningtree.png circexplorer2_hist.png total_matrix.txt circexplorer2_circos.png circexplorer2_calculates.pdf
     '''
 }
-
+*/
 
 //the second tool : bwa - ciri
 //run the bwa
@@ -1428,7 +1428,7 @@ process matrix_find_circ{
     '''
 }
 
-//draw the plot
+/*//draw the plot
 process find_circ_draw_plot{
     publishDir "${params.outdir}/plot_separate", mode: 'copy', pattern:"find_circ_*", overwrite: true
 
@@ -1468,7 +1468,7 @@ process find_circ_draw_plot{
     Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R find_circ_for_annotation_annote.txt find_circ_distribution.png find_circ_boxplot.png find_circ_spanningtree.png find_circ_hist.png find_circ_circos.png find_circ_calculates.pdf
     '''
 }
-
+*/
 
 //the sixth tool : bowtie2 - autocirc
 //bowtie2 is already designed
@@ -1768,11 +1768,84 @@ process calculate_tools{
 /*
 * Completion e-mail notification
 */
-params.email = false
+params.email = ''
+/*
+params.plaintext_email = false
+if(params.email) {
+    summary['E-mail Address'] = params.email
+}
+*/
 
 workflow.onComplete {
 
 println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" )
+
+    def msg = """\
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="nf-core/cirpipe: cirRNA analysis pipe">
+  <title>nf-core/cirpipe Pipeline Report</title>
+</head>
+<body>
+<div style="text-align:center; font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
+    <h1> Pipeline execution summary </h1>
+    <h2> ---------------------------------------------- </h2>
+    <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
+        <h4 style = "margin-top:0; color: inherit;" ><strong>nf-core/cirpipe</strong></h4>
+        <p>Completed at : <strong>${workflow.complete}</strong></p>
+        <p>Duration : <strong>${workflow.duration}</strong></p>
+        <p>Success : <strong>${workflow.success}</strong></p>
+        <p>Exit status : <strong>${workflow.exitStatus}</strong></p>       
+    </div>
+    <p>The command used to launch the workflow was as follows : </p>      
+    <pre style="white-space: pre-wrap; overflow: visible; background-color: #ededed; padding: 15px; border-radius: 4px; margin-bottom:0px;">${workflow.commandLine}</pre>
+    <h3> Tools selected : </h3>
+    <table style="width:100%; max-width:100%; border-spacing: 0; border-collapse: collapse; border:0; margin-bottom: 30px;">
+    <tbody style="border-bottom: 1px solid #ddd;">
+    <tr>
+    <th style='text-align:center; padding: 8px 0; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;'> SelectAll : ${params.selectAll} </th>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> circexplorer2 : ${params.circexplorer2} </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> find_circ : ${params.find_circ} </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> ciri : ${params.ciri} </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> autocirc : ${params.autocirc} </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> mapsplice : ${params.mapsplice} </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> segemehl : ${params.segemehl} </pre></td>
+    </tr>
+    </tbody>
+    </table>
+
+    <p> likelet/cirPipe </p>
+    <p><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/cirPipe</a></p>
+</div>
+</body>
+</html>
+        """
+            .stripIndent()
+
+    sendMail(to: '513848731@qq.com',
+             subject:'Breaking News in CirPipe Mission!',
+             body: msg,
+             attach: '/home/wqj/test/results/pipeline_fastp/multiqc_report.html')
+
+
+
+
+
 // Set up the e-mail variables
 /*   def subject = "[nf-core/cirpipe] Successful: $workflow.runName"
 if(!workflow.success){
@@ -1780,7 +1853,7 @@ if(!workflow.success){
 }
 def email_fields = [:]
 email_fields['version'] = workflow.manifest.version
-email_fields['runName'] = custom_runName ?: workflow.runName
+//email_fields['runName'] = custom_runName ?: workflow.runName
 email_fields['success'] = workflow.success
 email_fields['dateComplete'] = workflow.complete
 email_fields['duration'] = workflow.duration
@@ -1843,11 +1916,11 @@ def output_tf = new File( output_d, "pipeline_report.txt" )
 output_tf.withWriter { w -> w << email_txt }
 
 log.info "[nf-core/cirpipe] Pipeline Complete"
-
+*/
 }
 
 
-
+/*
 
 def create_workflow_summary(summary) {
 
@@ -1865,10 +1938,10 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 """.stripIndent()
 
 return yaml_file
-*/
+
 
 }
-
+*/
 
 /*
 * Parse software version numbers

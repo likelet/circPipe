@@ -31,4 +31,5 @@ dependencies:
   - r-rmarkdown=1.10
   - r-ggsci=2.9
   - r-circlize=0.4.5
+  - r-rcolorbrewer=1.1_2
   - tophat=2.1.1
