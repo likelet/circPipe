@@ -33,3 +33,4 @@ dependencies:
   - r-circlize=0.4.5
   - r-rcolorbrewer=1.1_2
   - tophat=2.1.1
+  - bedtools=2.27.1
