@@ -32,3 +32,4 @@ dependencies:
   - r-ggsci=2.9
   - r-circlize=0.4.5
   - tophat=2.1.1
+  - bedtools=2.27.1
