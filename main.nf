@@ -304,7 +304,11 @@ otherTools = file(params.otherTools) //the other tools directory
 if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
 
 
-//the index directory
+/*
+========================================================================================
+                         the index directory
+========================================================================================
+*/
 starindex = file(params.starindex) //the star index directory
 if( !starindex.exists() ) exit 1, print_red("Missing star index directory: ${starindex}")
 
@@ -321,7 +325,11 @@ segindex = file(params.segindex) //the segemehl index file
 if( !segindex.exists() ) exit 1, print_red("Missing Segemehl index file: ${segindex}")
 
 
-//the reference directory
+/*
+========================================================================================
+                         the reference directory
+========================================================================================
+*/
 refdir = file(params.refdir) //the reference genome directory
 if( !refdir.exists() ) exit 1, print_red("Missing Reference Genome Directory: ${refdir}")
 
@@ -341,7 +349,11 @@ bedfile = file(params.bedfile) //the annotationfile-bed-format
 if( !bedfile.exists() ) exit 1, print_red("Missing bed annotation file: ${bedfile}")
 
 
-//the environment directory
+/*
+========================================================================================
+                         the environment directory
+========================================================================================
+*/
 condadir = file(params.condadir) //the python3 environment
 if( !condadir.exists() ) exit 1, print_red("Missing python3 environment: ${condadir}")
 
@@ -349,7 +361,11 @@ conda2dir = file(params.conda2dir) //the python2 environment
 if( !conda2dir.exists() ) exit 1, print_red("Missing python2 environment: ${conda2dir}")
 
 
-//the tools directory
+/*
+========================================================================================
+                         the tools directory
+========================================================================================
+*/
 mapsdir = file(params.mapsdir) //the mapsplice directory
 if( !mapsdir.exists() ) exit 1, print_red("Missing Mapsplice Directory: ${mapsdir}")
 
@@ -366,9 +382,44 @@ autocircdir = file(params.autocircdir)
 if( !autocircdir.exists() ) exit 1, print_red("Missing autocirc Directory: ${autocircdir}")
 
 
+/*
+========================================================================================
+                         select the analysis tools
+========================================================================================
+*/
+if( params.selectTools ==~ /.*1.*/ ){
+    params.circexplorer2 = true
+}else{
+    params.circexplorer2 = false
+}
+if( params.selectTools ==~ /.*2.*/ ){
+    params.ciri = true
+}else{
+    params.ciri = false
+}
+if( params.selectTools ==~ /.*3.*/ ){
+    params.find_circ = true
+}else{
+    params.find_circ = false
+}
+if( params.selectTools ==~ /.*4.*/ ){
+    params.mapsplice = true
+}else{
+    params.mapsplice = false
+}
+if( params.selectTools ==~ /.*5.*/ ){
+    params.segemehl = true
+}else{
+    params.segemehl = false
+}
 
 
-//showing the process and files
+
+/*
+========================================================================================
+                         showing the process and files
+========================================================================================
+*/
 log.info print_purple("""\
          c i r P i p e   P I P E L I N E
          =============================
@@ -381,11 +432,8 @@ log.info print_purple("""\
          circexplorer2 : ${params.circexplorer2}
          find_circ : ${params.find_circ}
          ciri : ${params.ciri}
-         autocirc : ${params.autocirc}
-         tophat : ${params.tophat}
          mapsplice : ${params.mapsplice}
          segemehl : ${params.segemehl}
-         selectAll : ${params.selectAll}
 
          Input files selected :
          reads : ${params.reads}
@@ -402,9 +450,36 @@ log.info print_purple("""\
 
          """)
         .stripIndent()
+log.info print_purple("You are running cirPipe with the following parameters:")
+log.info print_purple("Checking parameters ...")
+log.info print_yellow("=====================================")
+log.info print_yellow("Reads types :")
+log.info print_yellow("singleEnd :                     ") + print_green(params.singleEnd)
+log.info "\n"
+log.info print_yellow("Tools selected :")
+log.info print_yellow("Circexplorer2 :                 ") + print_green(params.circexplorer2)
+log.info print_yellow("Find_circ :                     ") + print_green(params.find_circ)
+log.info print_yellow("Ciri :                          ") + print_green(params.ciri)
+log.info print_yellow("Mapsplice :                     ") + print_green(params.mapsplice)
+log.info print_yellow("Segemehl :                      ") + print_green(params.segemehl)
+log.info "\n"
+log.info print_yellow("Input files selected :")
+log.info print_yellow("Reads :                         ") + print_green(params.reads)
+log.info print_yellow("Annotation file :               ") + print_green(params.annotationfile)
+log.info print_yellow("Genome file :                   ") + print_green(params.genomefile)
+log.info print_yellow("Gtf file :                      ") + print_green(params.gtffile)
+log.info "\n"
+log.info print_yellow("Output files directory :")
+log.info print_yellow("Output directory :              ") + print_green(params.outdir)
+log.info print_yellow("=====================================")
+log.info "\n"
+log.info "\n"
+log.info "\n"
+log.info print_purple("Start running...")
 
 
 
+/*
 ava_cpu = Runtime.getRuntime().availableProcessors()
 // set individual cpu for fork run
 if ( params.cpu != null && ava_cpu > params.cpu ) {
@@ -417,6 +492,7 @@ int fork_number = ava_cpu / idv_cpu
 if (fork_number < 1) {
     fork_number = 1
 }
+*/
 
 /*
  * Create the `read_pairs` channel that emits tuples containing three elements:
@@ -436,18 +512,14 @@ if(params.singleEnd){
 
 
 
-//run the fastp
-process run_fastp{
+/*
+========================================================================================
+                       first step : run the fastp (QC tool)
+========================================================================================
+*/
+process Fastp{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_fastp", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file(query_file) from read_pairs_fastp
@@ -483,11 +555,13 @@ process run_fastp{
 
 fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process first
 
-//run the multiqc
-process run_multiqc{
+/*
+========================================================================================
+                    run the multiqc (merge the results of fastp)
+========================================================================================
+*/
+process Multiqc{
     publishDir "${params.outdir}/pipeline_fastp", mode: 'copy', pattern: "*.html", overwrite: true
-
-    maxForks fork_number
 
     input:
     file (query_file) from fastp_for_multiqc.collect()
@@ -502,19 +576,15 @@ process run_multiqc{
 }
 
 
-//the first tool : star - circexplorer2
-//run the star
-process run_star{
+/*
+========================================================================================
+                         the first tool : star - circexplorer2
+                                      run the star
+========================================================================================
+*/
+process Star{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_star", mode: 'link', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file(query_file) from fastpfiles_star
@@ -527,7 +597,6 @@ process run_star{
     params.circexplorer2 || params.selectAll
 
     shell:
-    star_threads = idv_cpu - 1
     if(params.singleEnd){
         """
         STAR \
@@ -550,18 +619,15 @@ process run_star{
 
 }
 
-//run the circexplorer2
-process run_circexplorer2{
+/*
+========================================================================================
+                         the first tool : star - circexplorer2
+                                 run the circexplorer2
+========================================================================================
+*/
+process Circexplorer2{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_circexplorer2", mode: 'copy', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file (query_file) from starfiles
@@ -589,12 +655,15 @@ process run_circexplorer2{
         """
 }
 
-//produce the bed6 file
-process run_modify_circexplorer2{
+/*
+========================================================================================
+                         the first tool : star - circexplorer2
+                                 produce the bed6 file
+========================================================================================
+*/
+process Circexplorer2_Bed{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_circexplorer2", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    maxForks fork_number
 
     input:
     set pair_id, file (query_file) from circexplorer2files
@@ -618,12 +687,15 @@ process run_modify_circexplorer2{
     '''
 }
 
-//produce the matrix
-process matrix_circexplorer2{
+/*
+========================================================================================
+                         the first tool : star - circexplorer2
+                                  produce the matrix
+========================================================================================
+*/
+process Circexplorer2_Matrix{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    maxForks fork_number
 
     input:
     file (query_file) from modify_circexplorer2.collect()
@@ -673,11 +745,14 @@ process matrix_circexplorer2{
     '''
 }
 
-/*//draw the plot
-process circexplorer2_draw_plot{
+/*
+========================================================================================
+                         the first tool : star - circexplorer2
+                                    draw the plot
+========================================================================================
+*/
+process Circexplorer2_Plot{
     publishDir "${params.outdir}/plot_separate", mode: 'copy', pattern:"circexplorer2_*", overwrite: true
-
-    maxForks fork_number
 
     input:
     file (query_file) from output_circexplorer2
@@ -711,21 +786,18 @@ process circexplorer2_draw_plot{
     Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R circexplorer2_for_annotation_annote.txt circexplorer2_distribution.png circexplorer2_boxplot.png circexplorer2_spanningtree.png circexplorer2_hist.png total_matrix.txt circexplorer2_circos.png circexplorer2_calculates.pdf
     '''
 }
-*/
 
-//the second tool : bwa - ciri
-//run the bwa
-process run_bwa{
+
+
+/*
+========================================================================================
+                              the second tool : bwa - ciri
+                                      run the bwa
+========================================================================================
+*/
+process Bwa{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_bwa", mode: 'link', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file (query_file) from fastpfiles_bwa
@@ -738,7 +810,6 @@ process run_bwa{
     params.ciri || params.selectAll
 
     shell:
-    bwa_threads = idv_cpu - 1
     if(params.singleEnd){
         """
         bwa \
@@ -764,18 +835,15 @@ process run_bwa{
 
 }
 
-//run the ciri
-process run_ciri{
+/*
+========================================================================================
+                              the second tool : bwa - ciri
+                                      run the ciri
+========================================================================================
+*/
+process Ciri{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_ciri", mode: 'copy', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file (query_file) from bwafiles
@@ -802,12 +870,15 @@ process run_ciri{
         """
 }
 
-//produce the bed6 file
-process run_modify_ciri{
+/*
+========================================================================================
+                              the second tool : bwa - ciri
+                                  produce the bed6 file
+========================================================================================
+*/
+process Ciri_Bed{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_ciri", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    maxForks fork_number
 
     input:
     set pair_id, file (query_file) from cirifiles
@@ -832,12 +903,15 @@ process run_modify_ciri{
         '''
 }
 
-//produce the matrix
-process matrix_ciri{
+/*
+========================================================================================
+                              the second tool : bwa - ciri
+                                  produce the matrix
+========================================================================================
+*/
+process Ciri_Matrix{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    maxForks fork_number
 
     input:
     file (query_file) from modify_ciri_file.collect()
@@ -888,19 +962,15 @@ process matrix_ciri{
 }
 
 
-//the third tool : mapsplice
-//run the mapsplice
-process run_mapsplice{
+/*
+========================================================================================
+                              the third tool : mapsplice
+                                  run the mapsplice
+========================================================================================
+*/
+process Mapsplice{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_mapsplice", mode: 'copy', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file (query_file) from fastpfiles_mapsplice
@@ -919,7 +989,6 @@ process run_mapsplice{
     params.mapsplice || params.selectAll
 
     shell:
-    mapsplice_threads = idv_cpu - 1
     if(params.singleEnd){
         """
         python ${mapsdir}/mapsplice.py \
@@ -956,12 +1025,15 @@ process run_mapsplice{
 
 }
 
-//produce the bed6 file
-process run_modify_mapsplice{
+/*
+========================================================================================
+                              the third tool : mapsplice
+                                 produce the bed6 file
+========================================================================================
+*/
+process Mapsplice_Bed{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    maxForks fork_number
 
     input:
     set pair_id, file (query_file) from mapsplicefiles
@@ -996,12 +1068,15 @@ process run_modify_mapsplice{
     '''
 }
 
-//produce the matrix
-process matrix_mapsplice{
+/*
+========================================================================================
+                              the third tool : mapsplice
+                                  produce the matrix
+========================================================================================
+*/
+process Mapsplice_Matrix{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    maxForks fork_number
 
     input:
     file (query_file) from modify_mapsplice.collect()
@@ -1052,19 +1127,15 @@ process matrix_mapsplice{
 }
 
 
-//the fourth tool : segemehl
-//run the segemehl
-process run_segemehl{
+/*
+========================================================================================
+                              the fourth tool : segemehl
+                                   run the segemehl
+========================================================================================
+*/
+process Segemehl{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_segemehl", mode: 'copy', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file (query_file) from fastpfiles_segemehl
@@ -1081,7 +1152,6 @@ process run_segemehl{
     params.segemehl || params.selectAll
 
     shell:
-    segemehl_threads = idv_cpu - 1
     if(params.singleEnd){
         """
         ${segdir}/segemehl.x \
@@ -1127,12 +1197,15 @@ process run_segemehl{
 
 }
 
-//produce the bed6 file
-process run_modify_segemehl{
+/*
+========================================================================================
+                              the fourth tool : segemehl
+                                 produce the bed6 file
+========================================================================================
+*/
+process Segemehl_Bed{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
-
-    maxForks fork_number
 
     input:
     set pair_id , file ( query_file ) from segemehlfiles
@@ -1163,12 +1236,15 @@ process run_modify_segemehl{
     '''
 }
 
-//produce the matrix
-process matrix_segemehl{
+/*
+========================================================================================
+                              the fourth tool : segemehl
+                                  produce the matrix
+========================================================================================
+*/
+process Segemehl_Matrix{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    maxForks fork_number
 
     input:
     file (query_file) from modify_segemehl.collect()
@@ -1219,19 +1295,15 @@ process matrix_segemehl{
 }
 
 
-//the fifth tool : bowtie2 - find_circ
-//run the bowtie2
-process run_bowtie2{
+/*
+========================================================================================
+                          the fifth tool : bowtie2 - find_circ
+                                   run the bowtie2
+========================================================================================
+*/
+process Bowtie2{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_bowtie2", mode: 'link', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file (query_file) from fastpfiles_bowtie2
@@ -1245,7 +1317,6 @@ process run_bowtie2{
     params.find_circ || params.selectAll || params.autocirc
 
     shell:
-    bowtie2_threads = idv_cpu - 1
     if(params.singleEnd){
         """
         bowtie2 \
@@ -1289,18 +1360,15 @@ process run_bowtie2{
 
 }
 
-//run the find_circ
-process run_find_circ{
+/*
+========================================================================================
+                          the fifth tool : bowtie2 - find_circ
+                                   run the find_circ
+========================================================================================
+*/
+process Find_circ{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_find_circ", mode: 'copy', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
 
     input:
     set pair_id, file (query_file) from bowtie2files
@@ -1317,7 +1385,6 @@ process run_find_circ{
     params.find_circ || params.selectAll
 
     shell:
-    bowtie2_threads = idv_cpu - 1
     """     
     python ${find_circdir}/unmapped2anchors.py ${query_file} \
     | gzip \
@@ -1341,12 +1408,15 @@ process run_find_circ{
     """
 }
 
-//produce the bed6 file
-process run_modify_find_circ{
+/*
+========================================================================================
+                          the fifth tool : bowtie2 - find_circ
+                                 produce the bed6 file
+========================================================================================
+*/
+process Find_circ_Bed{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_find_circ", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    maxForks fork_number
 
     input:
     set pair_id, file (query_file) from find_circfiles
@@ -1373,12 +1443,15 @@ process run_modify_find_circ{
     '''
 }
 
-//produce the matrix
-process matrix_find_circ{
+/*
+========================================================================================
+                          the fifth tool : bowtie2 - find_circ
+                                 produce the matrix
+========================================================================================
+*/
+process Find_circ_Matrix{
     tag "$pair_id"
     publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    maxForks fork_number
 
     input:
     file (query_file) from modify_find_circfiles.collect()
@@ -1428,8 +1501,14 @@ process matrix_find_circ{
     '''
 }
 
-/*//draw the plot
-process find_circ_draw_plot{
+/*
+========================================================================================
+                          the fifth tool : bowtie2 - find_circ
+                                    draw the plot
+========================================================================================
+*/
+/*
+process Find_circ_Plot{
     publishDir "${params.outdir}/plot_separate", mode: 'copy', pattern:"find_circ_*", overwrite: true
 
     maxForks fork_number
@@ -1470,6 +1549,7 @@ process find_circ_draw_plot{
 }
 */
 
+/*
 //the sixth tool : bowtie2 - autocirc
 //bowtie2 is already designed
 //run the autocirc
@@ -1611,7 +1691,7 @@ process matrix_autocirc{
 }
 
 //draw the plot
-
+*/
 
 /*//the seventh tool : tophat - circexplorer2
 //run the tophat
@@ -1677,16 +1757,19 @@ process run_tophat{
 */
 
 
-//after running the tools
-//calculate the results by different tools
-process calculate_tools{
+
+/*
+========================================================================================
+                                after running the tools
+                         calculate the results by different tools
+========================================================================================
+*/
+process Tools_Merge{
     publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
 
-    maxForks fork_number
-
     input:
-    file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl, merge_autocirc ).collect()
-    file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl, name_autocirc ).collect()
+    file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl ).collect()
+    file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl ).collect()
     file otherTools
 
     output:
@@ -1724,8 +1807,13 @@ process calculate_tools{
     '''
 }
 
-//merge the matrix and draw the plot
-/*process merge_draw_plot{
+/*
+========================================================================================
+                                after running the tools
+                            merge the matrix and draw the plot
+========================================================================================
+*/
+/*process Plot{
     publishDir "${params.outdir}/plot_merge", mode: 'copy', pattern:"merge_*", overwrite: true
 
     maxForks fork_number
@@ -1794,20 +1882,21 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
     <h1> Pipeline execution summary </h1>
     <h2> ---------------------------------------------- </h2>
     <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
-        <h4 style = "margin-top:0; color: inherit;" ><strong>nf-core/cirpipe</strong></h4>
+        <h3 style = "margin-top:0; color: inherit;" ><strong>cirPipe</strong></h3>
         <p>Completed at : <strong>${workflow.complete}</strong></p>
         <p>Duration : <strong>${workflow.duration}</strong></p>
         <p>Success : <strong>${workflow.success}</strong></p>
-        <p>Exit status : <strong>${workflow.exitStatus}</strong></p>       
+        <p>Exit status : <strong>${workflow.exitStatus}</strong></p>
+    </div>
+    <div style="text-align:center; color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
+        <p>Error report : </p>
+        <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${workflow.errorReport}</pre>
     </div>
     <p>The command used to launch the workflow was as follows : </p>      
     <pre style="white-space: pre-wrap; overflow: visible; background-color: #ededed; padding: 15px; border-radius: 4px; margin-bottom:0px;">${workflow.commandLine}</pre>
     <h3> Tools selected : </h3>
     <table style="width:100%; max-width:100%; border-spacing: 0; border-collapse: collapse; border:0; margin-bottom: 30px;">
     <tbody style="border-bottom: 1px solid #ddd;">
-    <tr>
-    <th style='text-align:center; padding: 8px 0; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;'> SelectAll : ${params.selectAll} </th>
-    </tr>
     <tr>
     <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> circexplorer2 : ${params.circexplorer2} </pre></td>
     </tr>
@@ -1816,9 +1905,6 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
     </tr>
     <tr>
     <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> ciri : ${params.ciri} </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> autocirc : ${params.autocirc} </pre></td>
     </tr>
     <tr>
     <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> mapsplice : ${params.mapsplice} </pre></td>
@@ -1984,5 +2070,81 @@ markdown_to_html.r $output_docs results_description.html
 }
 */
 
+workflow.onError {
 
+    println print_cyan(workflow.success ? "Done!" : "Oops .. something went wrong")
+
+    def msg = """\
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="nf-core/cirpipe: cirRNA analysis pipe">
+  <title>nf-core/cirpipe Pipeline Report</title>
+</head>
+<body>
+<div style="text-align:center; font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
+    <h1> Pipeline execution summary </h1>
+    <h2> ---------------------------------------------- </h2>
+    <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
+        <h3 style = "margin-top:0; color: inherit;" ><strong>cirPipe</strong></h3>
+        <p>Completed at : <strong>${workflow.complete}</strong></p>
+        <p>Duration : <strong>${workflow.duration}</strong></p>
+        <p>Success : <strong>${workflow.success}</strong></p>
+        <p>Exit status : <strong>${workflow.exitStatus}</strong></p>
+    </div>
+    <div style="text-align:center; color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
+        <p>Error report : </p>
+        <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${workflow.errorMessage}</pre>
+    </div>
+    <p>The command used to launch the workflow was as follows : </p>      
+    <pre style="white-space: pre-wrap; overflow: visible; background-color: #ededed; padding: 15px; border-radius: 4px; margin-bottom:0px;">${
+        workflow.commandLine
+    }</pre>
+    <h3> Tools selected : </h3>
+    <table style="width:100%; max-width:100%; border-spacing: 0; border-collapse: collapse; border:0; margin-bottom: 30px;">
+    <tbody style="border-bottom: 1px solid #ddd;">
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> circexplorer2 : ${
+        params.circexplorer2
+    } </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> find_circ : ${
+        params.find_circ
+    } </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> ciri : ${
+        params.ciri
+    } </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> mapsplice : ${
+        params.mapsplice
+    } </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> segemehl : ${
+        params.segemehl
+    } </pre></td>
+    </tr>
+    </tbody>
+    </table>
+
+    <p> likelet/cirPipe </p>
+    <p><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/cirPipe</a></p>
+</div>
+</body>
+</html>
+        """
+            .stripIndent()
+
+    sendMail(to: '513848731@qq.com',
+            subject: 'Breaking News in CirPipe Mission!',
+            body: msg,
+            attach: '/home/wqj/test/results/pipeline_fastp/multiqc_report.html')
+
+}
 

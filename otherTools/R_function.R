@@ -95,7 +95,7 @@ volcano_plot <- function(res_df,contrast_factor,ylab_variable="FDR",pval = 0.05,
   down_count = length(which(signGenes_down))
   #plot
   par(mar = c(5, 6, 5, 5))
-  plot(tab, pch = 21, xlab = expression(log[2]~fold~change), ylab = expression(-log[10]~pvalue), cex.lab = 1.5, col = alpha("black", 0))
+  plot(tab, pch = 21, xlab = expression(log[2]~fold~change), ylab = expression(-log[10]~pvalue), cex.lab = 0.5, col = alpha("black", 0))
   points(tab[nosigGene, ], pch = 21, xlab = expression(log[2]~fold~change), ylab = expression(-log[10]~pvalue), col = "black", bg = "grey")
   if (length(unique(signGenes_up)) > 1){
     points(tab[signGenes_up, ], pch = 21, col = "black", bg = "red")

@@ -35,7 +35,7 @@ Choose between workflows by using `--without_replicate` or not(default) .
 | Raw Data QC                                  | Fastp            | Fastp                 | Fastp                 | Fastp                 | Fastp                 |
 | Reads Alignment                              | STAR             | BWA                   | Bowtie2               | -                     | -                     |
 | Reads counting                               | CIRCexplorer2    | CIRI                  | Find_circ             | Mapsplice             | Segemehl              |
-| Data Processing (in house script)            | Python,JAVA,R    | Python,JAVA,R         | Python,JAVA,R         | Python,JAVA,R         | Python,JAVA,R         |
+| Data Processing (in house script)            | Python,Java,R    | Python,Java,R         | Python,Java,R         | Python,Java,R         | Python,Java,R         |
 | Differential expression                      | edgeR            | edgeR                 | edgeR                 | edgeR                 | edgeR                 |
 | Summary Report                               | MultiQC          | MultiQC               | MultiQC               | MultiQC               | MultiQC               |
 
