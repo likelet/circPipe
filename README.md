@@ -1,7 +1,7 @@
 # nf-core/cirpipe
 **cirRNA analysis pipe**
 
-[![Build Status](https://travis-ci.org/nf-core/cirpipe.svg?branch=master)](https://travis-ci.org/nf-core/cirpipe)
+[![Build Status](https://travis-ci.org/likelet/cirpipe.svg?branch=master)](https://travis-ci.org/likelet/cirpipe)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
 
 [![Docker](https://img.shields.io/docker/automated/likelet/cirpipe.svg)](https://hub.docker.com/r/likelet/cirpipe)
