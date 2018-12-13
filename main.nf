@@ -414,45 +414,57 @@ if( params.selectTools ==~ /.*5.*/ ){
 }
 
 
+/*
+========================================================================================
+                         checking the design and compare file
+========================================================================================
+*/
+//design file
+if(params.designfile) {
+    designfile = file(params.designfile)
+    if( !designfile.exists() ) exit 1, print_red("Design file not found: ${params.designfile}")
+}
+//compare.txt
+if(params.comparefile){
+    File comparefile = new File(params.comparefile)
+    if( !comparefile.exists() ) exit 1, print_red("Compare file not found: ${params.comparefile}")
+    compareLines = Channel.from(comparefile.readLines())
+    compareLines.into{compareLines_for_DE; compareLines_for_GSEA;compareLines_for_DE_without_REP}
+}
+
+
+
+
+
+
 
 /*
 ========================================================================================
                          showing the process and files
 ========================================================================================
 */
-log.info print_purple("""\
-         c i r P i p e   P I P E L I N E
-         =============================
+log.info print_cyan("""
+========================================================================
+    ________                          _______
+   |  ____  |                        |  ___  |
+   | |    |_|   _                    | |   | |   _
+   | |         |_|                   | |   | |  |_|
+   | |          _    _  __   _____   | |___| |   _    ______    _____
+   | |         | |  | |/ /  |  ___|  |  _____|  | |  |  __  |  |  _  |
+   | |         | |  |   /   | |      | |        | |  | |  | |  | |_| |
+   | |     _   | |  |  /    | |      | |        | |  | |  | |  |  ___|
+   | |____| |  | |  | |     | |___   | |        | |  | |__| |  | |___ 
+   |________|  |_|  |_|     |_____|  |_|        |_|  |  ____|  |_____|
+                                                     | |
+                                                     | |
+                                                     |_|
 
-
-         Reads types :
-         singleEnd : ${params.singleEnd}
-         
-         Tools selected :
-         circexplorer2 : ${params.circexplorer2}
-         find_circ : ${params.find_circ}
-         ciri : ${params.ciri}
-         mapsplice : ${params.mapsplice}
-         segemehl : ${params.segemehl}
-
-         Input files selected :
-         reads : ${params.reads}
-         annotation file : ${params.annotationfile}
-         genome file : ${params.genomefile}
-         gtf file : ${params.gtffile}
-
-         Output files directory :
-         output directory : ${params.outdir}
-
-
-         Start running...
-
-
+ =======================================================================
          """)
         .stripIndent()
 log.info print_purple("You are running cirPipe with the following parameters:")
 log.info print_purple("Checking parameters ...")
-log.info print_yellow("=====================================")
+log.info "\n"
 log.info print_yellow("Reads types :")
 log.info print_yellow("singleEnd :                     ") + print_green(params.singleEnd)
 log.info "\n"
@@ -471,8 +483,6 @@ log.info print_yellow("Gtf file :                      ") + print_green(params.g
 log.info "\n"
 log.info print_yellow("Output files directory :")
 log.info print_yellow("Output directory :              ") + print_green(params.outdir)
-log.info print_yellow("=====================================")
-log.info "\n"
 log.info "\n"
 log.info "\n"
 log.info print_purple("Start running...")
@@ -1874,15 +1884,15 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="nf-core/cirpipe: cirRNA analysis pipe">
-  <title>nf-core/cirpipe Pipeline Report</title>
+  <meta name="description" content="circpipe: cirRNA analysis pipe">
+  <title>circpipe Pipeline Report</title>
 </head>
 <body>
 <div style="text-align:center; font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
     <h1> Pipeline execution summary </h1>
     <h2> ---------------------------------------------- </h2>
     <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
-        <h3 style = "margin-top:0; color: inherit;" ><strong>cirPipe</strong></h3>
+        <h3 style = "margin-top:0; color: inherit;" ><strong>CircPipe</strong></h3>
         <p>Completed at : <strong>${workflow.complete}</strong></p>
         <p>Duration : <strong>${workflow.duration}</strong></p>
         <p>Success : <strong>${workflow.success}</strong></p>
@@ -1898,25 +1908,25 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
     <table style="width:100%; max-width:100%; border-spacing: 0; border-collapse: collapse; border:0; margin-bottom: 30px;">
     <tbody style="border-bottom: 1px solid #ddd;">
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> circexplorer2 : ${params.circexplorer2} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Circexplorer2 : ${params.circexplorer2} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> find_circ : ${params.find_circ} </pre></td>
+    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Find_circ : ${params.find_circ} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> ciri : ${params.ciri} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Ciri : ${params.ciri} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> mapsplice : ${params.mapsplice} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Mapsplice : ${params.mapsplice} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> segemehl : ${params.segemehl} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Segemehl : ${params.segemehl} </pre></td>
     </tr>
     </tbody>
     </table>
 
-    <p> likelet/cirPipe </p>
-    <p><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/cirPipe</a></p>
+    <p> likelet/circPipe </p>
+    <p><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></p>
 </div>
 </body>
 </html>
@@ -1924,7 +1934,7 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
             .stripIndent()
 
     sendMail(to: '513848731@qq.com',
-             subject:'Breaking News in CirPipe Mission!',
+             subject:'Breaking News in CircPipe Mission!',
              body: msg,
              attach: '/home/wqj/test/results/pipeline_fastp/multiqc_report.html')
 
@@ -2080,15 +2090,15 @@ workflow.onError {
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="nf-core/cirpipe: cirRNA analysis pipe">
-  <title>nf-core/cirpipe Pipeline Report</title>
+  <meta name="description" content="circpipe: cirRNA analysis pipe">
+  <title>circpipe Pipeline Report</title>
 </head>
 <body>
 <div style="text-align:center; font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
     <h1> Pipeline execution summary </h1>
     <h2> ---------------------------------------------- </h2>
     <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
-        <h3 style = "margin-top:0; color: inherit;" ><strong>cirPipe</strong></h3>
+        <h3 style = "margin-top:0; color: inherit;" ><strong>CircPipe</strong></h3>
         <p>Completed at : <strong>${workflow.complete}</strong></p>
         <p>Duration : <strong>${workflow.duration}</strong></p>
         <p>Success : <strong>${workflow.success}</strong></p>
@@ -2106,35 +2116,35 @@ workflow.onError {
     <table style="width:100%; max-width:100%; border-spacing: 0; border-collapse: collapse; border:0; margin-bottom: 30px;">
     <tbody style="border-bottom: 1px solid #ddd;">
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> circexplorer2 : ${
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Circexplorer2 : ${
         params.circexplorer2
     } </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> find_circ : ${
+    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Find_circ : ${
         params.find_circ
     } </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> ciri : ${
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Ciri : ${
         params.ciri
     } </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> mapsplice : ${
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Mapsplice : ${
         params.mapsplice
     } </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> segemehl : ${
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Segemehl : ${
         params.segemehl
     } </pre></td>
     </tr>
     </tbody>
     </table>
 
-    <p> likelet/cirPipe </p>
-    <p><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/cirPipe</a></p>
+    <p> likelet/circPipe </p>
+    <p><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></p>
 </div>
 </body>
 </html>
@@ -2142,7 +2152,7 @@ workflow.onError {
             .stripIndent()
 
     sendMail(to: '513848731@qq.com',
-            subject: 'Breaking News in CirPipe Mission!',
+            subject: 'Breaking News in CircPipe Mission!',
             body: msg,
             attach: '/home/wqj/test/results/pipeline_fastp/multiqc_report.html')
 

@@ -19,8 +19,8 @@ A full tutorial of CircPipe can be found at Wiki page of this project. plz go to
 
 ### Pipeline Steps
 
-The pipeline allows you to choose between running either replicates or without replicates.
-Choose between workflows by using `--without_replicate` or not(default) .
+CircPipe allows you to run arbitrary pipelines among five pipelines.
+Choose between workflows by using `--selectTools` or not(default) .
 
 | Step                                         | Pipeline One     | Pipeline Two          | Pipeline Three        | Pipeline Four         | Pipeline Five         |
 |----------------------------------------------|------------------|-----------------------|-----------------------|-----------------------|-----------------------|
@@ -46,3 +46,4 @@ Choose between workflows by using `--without_replicate` or not(default) .
     * [AutoCirc](https://github.com/chanzhou/AutoCirc)
     * [MultiQC](https://github.com/ewels/MultiQC)
     * Several R packages for downstream analysis.
+

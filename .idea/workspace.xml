@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="readme">
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="choose tools;config parameters;annotation;ignore the failed process;some bugs with email">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/base.config" beforeDir="false" afterPath="$PROJECT_DIR$/conf/base.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/R_function.R" beforeDir="false" afterPath="$PROJECT_DIR$/otherTools/R_function.R" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -21,139 +18,121 @@
     <session id="-62073305">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="5" />
+          <entry key="project.closed" value="6" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.21" value="1" />
           <entry key="project.open.time.26" value="1" />
           <entry key="project.open.time.27" value="1" />
           <entry key="project.open.time.28" value="1" />
           <entry key="project.open.time.29" value="1" />
+          <entry key="project.open.time.39" value="1" />
           <entry key="project.open.time.42" value="1" />
           <entry key="project.open.time.43" value="1" />
           <entry key="project.open.time.8" value="1" />
           <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="10" />
+          <entry key="project.opened" value="11" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Singularity" value="94" />
-          <entry key="config" value="1056" />
+          <entry key="config" value="1070" />
           <entry key="matrix" value="3" />
-          <entry key="md" value="419" />
-          <entry key="nf" value="10566" />
-          <entry key="txt" value="330" />
+          <entry key="md" value="492" />
+          <entry key="nf" value="10634" />
+          <entry key="txt" value="428" />
           <entry key="yml" value="122" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Groovy" value="10566" />
-          <entry key="PLAIN_TEXT" value="1902" />
+          <entry key="Groovy" value="10634" />
+          <entry key="PLAIN_TEXT" value="2087" />
           <entry key="YAML" value="122" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages" />
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="Dockerfile" value="4" />
+          <entry key="Dockerfile" value="5" />
           <entry key="LICENSE" value="1" />
-          <entry key="R" value="9" />
-          <entry key="Singularity" value="4" />
+          <entry key="R" value="13" />
+          <entry key="Singularity" value="5" />
           <entry key="bed" value="33" />
           <entry key="config" value="27" />
           <entry key="html" value="12" />
           <entry key="matrix" value="4" />
-          <entry key="md" value="11" />
-          <entry key="nf" value="1" />
+          <entry key="md" value="13" />
+          <entry key="nf" value="2" />
           <entry key="py" value="24" />
           <entry key="r" value="5" />
           <entry key="txt" value="8" />
           <entry key="yaml" value="5" />
-          <entry key="yml" value="10" />
+          <entry key="yml" value="11" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Groovy" value="1" />
+          <entry key="Groovy" value="2" />
           <entry key="HTML" value="12" />
-          <entry key="PLAIN_TEXT" value="130" />
-          <entry key="YAML" value="15" />
+          <entry key="PLAIN_TEXT" value="138" />
+          <entry key="YAML" value="16" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="410">
-              <caret line="477" column="39" selection-start-line="477" selection-start-column="39" selection-end-line="477" selection-end-column="39" />
+            <state relative-caret-position="146">
+              <caret line="1042" column="1" selection-start-line="1042" selection-start-column="1" selection-end-line="1042" selection-end-column="1" />
               <folding>
                 <element signature="e#25#410#0" />
                 <element signature="e#412#828#0" />
                 <element signature="e#831#950#0" />
                 <element signature="e#6009#7811#0" />
-                <element signature="e#15240#16268#0" />
-                <element signature="e#16391#16683#0" />
-                <element signature="e#16757#17706#0" />
-                <element signature="e#17757#18570#0" />
-                <element signature="e#18628#19404#0" />
-                <element signature="e#19455#21057#0" />
-                <element signature="e#24306#25687#0" />
-                <element signature="e#22613#23625#0" />
-                <element signature="e#23658#24334#0" />
-                <element signature="e#24383#25126#0" />
-                <element signature="e#25168#26671#0" />
-                <element signature="e#26744#28323#0" />
-                <element signature="e#28377#29722#0" />
-                <element signature="e#29769#31323#0" />
-                <element signature="e#31394#33060#0" />
-                <element signature="e#33113#34032#0" />
-                <element signature="e#34078#35620#0" />
-                <element signature="e#35699#37254#0" />
-                <element signature="e#37297#38385#0" />
-                <element signature="e#38439#39279#0" />
-                <element signature="e#39326#40885#0" />
-                <element signature="e#47633#49007#0" />
-                <element signature="e#48477#52109#0" />
-                <element signature="e#42390#43430#0" />
-                <element signature="e#43483#44319#0" />
-                <element signature="e#44365#45892#0" />
-                <element signature="e#45912#47238#0" />
-                <element signature="e#48742#50139#0" />
+                <element signature="e#19579#20534#0" />
+                <element signature="e#20884#21150#0" />
+                <element signature="e#21463#22308#0" />
+                <element signature="e#22633#23373#0" />
+                <element signature="e#23702#24452#0" />
+                <element signature="e#24782#26358#0" />
+                <element signature="e#26683#28038#0" />
+                <element signature="e#28346#29255#0" />
+                <element signature="e#29563#30166#0" />
+                <element signature="e#30483#31200#0" />
+                <element signature="e#31517#32994#0" />
+                <element signature="e#33307#34777#0" />
+                <element signature="e#35096#36415#0" />
+                <element signature="e#36735#38263#0" />
+                <element signature="e#38575#40133#0" />
+                <element signature="e#40451#41344#0" />
+                <element signature="e#41663#43179#0" />
+                <element signature="e#43495#44943#0" />
+                <element signature="e#45262#46243#0" />
+                <element signature="e#46568#47382#0" />
+                <element signature="e#47707#49240#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/assets/email_template.html">
+        <entry file="file://$PROJECT_DIR$/README.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="280">
-              <caret line="22" column="15" selection-start-line="22" selection-start-column="15" selection-end-line="22" selection-end-column="15" />
-              <folding>
-                <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#h4#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#pre#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#pre#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#table#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#tbody#0;n#table#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#th#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#td#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-              </folding>
+            <state relative-caret-position="532">
+              <caret line="48" lean-forward="true" selection-start-line="48" selection-end-line="48" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-841">
-              <caret line="56" column="19" selection-start-line="56" selection-start-column="19" selection-end-line="56" selection-end-column="19" />
+            <state relative-caret-position="627">
+              <caret line="56" column="15" lean-forward="true" selection-start-line="56" selection-start-column="15" selection-end-line="56" selection-end-column="15" />
             </state>
           </provider>
         </entry>
@@ -161,8 +140,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/conf/base.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="21" column="18" lean-forward="true" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
+            <state relative-caret-position="399">
+              <caret line="21" column="18" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -175,6 +154,9 @@
       <find>=====</find>
       <find>conda</find>
     </findStrings>
+    <replaceStrings>
+      <replace />
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="UPDATE_TYPE" value="MERGE" />
@@ -187,15 +169,15 @@
         <option value="$PROJECT_DIR$/conf/test.config" />
         <option value="$USER_HOME$/Desktop/脚本/RNAseq-master/final.matrix" />
         <option value="$PROJECT_DIR$/environment.yml" />
-        <option value="$PROJECT_DIR$/nextflow.config" />
         <option value="$PROJECT_DIR$/conf/base.config" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/main.nf" />
+        <option value="$PROJECT_DIR$/nextflow.config" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="582" />
+    <option name="x" value="581" />
     <option name="width" value="980" />
     <option name="height" value="1040" />
   </component>
@@ -204,7 +186,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -212,27 +193,18 @@
               <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
               <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
-              <item name="assets" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
-              <item name="otherTools" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
       <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1544622346466" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1544698934566" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -489,14 +461,21 @@
       <option name="project" value="LOCAL" />
       <updated>1544436717301</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="choose tools;config parameters;annotation;ignore the failed process;some bugs with email">
+      <created>1544622489066</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1544622489066</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.19772118" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20040214" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -575,7 +554,8 @@
     <MESSAGE value="some bugs with draw_plot" />
     <MESSAGE value="environment" />
     <MESSAGE value="readme" />
-    <option name="LAST_COMMIT_MESSAGE" value="readme" />
+    <MESSAGE value="choose tools;config parameters;annotation;ignore the failed process;some bugs with email" />
+    <option name="LAST_COMMIT_MESSAGE" value="choose tools;config parameters;annotation;ignore the failed process;some bugs with email" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/Desktop/脚本/results/temp.bed" />
@@ -633,20 +613,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="361">
           <caret line="19" column="48" lean-forward="true" selection-start-line="19" selection-start-column="48" selection-end-line="19" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Singularity">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="21" column="47" selection-start-line="21" selection-start-column="47" selection-end-line="21" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Dockerfile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="5" column="57" selection-start-line="5" selection-start-column="57" selection-end-line="5" selection-end-column="57" />
         </state>
       </provider>
     </entry>
@@ -767,27 +733,6 @@
     <entry file="file://$PROJECT_DIR$/otherTools/hebinglist.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/F1_plot.R">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="995">
-          <caret line="339" column="32" selection-start-line="339" selection-start-column="32" selection-end-line="339" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/m6A_feature_stats.R">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2242">
-          <caret line="121" selection-start-line="121" selection-end-line="121" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/environment.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="437">
-          <caret line="29" column="17" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/otherTools/finalmerge.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1064" />
@@ -798,84 +743,100 @@
         <state relative-caret-position="-1368" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/nextflow.config">
+    <entry file="file://$PROJECT_DIR$/assets/email_template.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-841">
-          <caret line="56" column="19" selection-start-line="56" selection-start-column="19" selection-end-line="56" selection-end-column="19" />
+        <state relative-caret-position="337">
+          <caret line="25" column="7" selection-start-line="25" selection-start-column="7" selection-end-line="25" selection-end-column="7" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/conf/base.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="21" column="18" lean-forward="true" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
+        <state relative-caret-position="399">
+          <caret line="21" column="18" selection-start-line="21" selection-start-column="18" selection-end-line="21" selection-end-column="18" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
+    <entry file="file://$PROJECT_DIR$/Dockerfile">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="570">
-          <caret line="56" lean-forward="true" selection-start-line="56" selection-end-line="56" />
+        <state relative-caret-position="95">
+          <caret line="5" column="57" selection-start-line="5" selection-start-column="57" selection-end-line="5" selection-end-column="57" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/assets/email_template.html">
+    <entry file="file://$PROJECT_DIR$/Singularity">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="22" column="15" selection-start-line="22" selection-start-column="15" selection-end-line="22" selection-end-column="15" />
-          <folding>
-            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h4#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#pre#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#pre#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#table#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#tbody#0;n#table#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#th#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#td#0;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
+        <state relative-caret-position="399">
+          <caret line="21" column="47" selection-start-line="21" selection-start-column="47" selection-end-line="21" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/environment.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="427">
+          <caret line="31" column="14" selection-start-line="31" selection-start-column="14" selection-end-line="31" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/F1_plot.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2655">
+          <caret line="373" selection-start-line="373" selection-end-line="373" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/m6A_feature_stats.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="722">
+          <caret line="119" column="53" selection-start-line="119" selection-start-column="53" selection-end-line="119" selection-end-column="53" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="410">
-          <caret line="477" column="39" selection-start-line="477" selection-start-column="39" selection-end-line="477" selection-end-column="39" />
+        <state relative-caret-position="146">
+          <caret line="1042" column="1" selection-start-line="1042" selection-start-column="1" selection-end-line="1042" selection-end-column="1" />
           <folding>
             <element signature="e#25#410#0" />
             <element signature="e#412#828#0" />
             <element signature="e#831#950#0" />
             <element signature="e#6009#7811#0" />
-            <element signature="e#15240#16268#0" />
-            <element signature="e#16391#16683#0" />
-            <element signature="e#16757#17706#0" />
-            <element signature="e#17757#18570#0" />
-            <element signature="e#18628#19404#0" />
-            <element signature="e#19455#21057#0" />
-            <element signature="e#24306#25687#0" />
-            <element signature="e#22613#23625#0" />
-            <element signature="e#23658#24334#0" />
-            <element signature="e#24383#25126#0" />
-            <element signature="e#25168#26671#0" />
-            <element signature="e#26744#28323#0" />
-            <element signature="e#28377#29722#0" />
-            <element signature="e#29769#31323#0" />
-            <element signature="e#31394#33060#0" />
-            <element signature="e#33113#34032#0" />
-            <element signature="e#34078#35620#0" />
-            <element signature="e#35699#37254#0" />
-            <element signature="e#37297#38385#0" />
-            <element signature="e#38439#39279#0" />
-            <element signature="e#39326#40885#0" />
-            <element signature="e#47633#49007#0" />
-            <element signature="e#48477#52109#0" />
-            <element signature="e#42390#43430#0" />
-            <element signature="e#43483#44319#0" />
-            <element signature="e#44365#45892#0" />
-            <element signature="e#45912#47238#0" />
-            <element signature="e#48742#50139#0" />
+            <element signature="e#19579#20534#0" />
+            <element signature="e#20884#21150#0" />
+            <element signature="e#21463#22308#0" />
+            <element signature="e#22633#23373#0" />
+            <element signature="e#23702#24452#0" />
+            <element signature="e#24782#26358#0" />
+            <element signature="e#26683#28038#0" />
+            <element signature="e#28346#29255#0" />
+            <element signature="e#29563#30166#0" />
+            <element signature="e#30483#31200#0" />
+            <element signature="e#31517#32994#0" />
+            <element signature="e#33307#34777#0" />
+            <element signature="e#35096#36415#0" />
+            <element signature="e#36735#38263#0" />
+            <element signature="e#38575#40133#0" />
+            <element signature="e#40451#41344#0" />
+            <element signature="e#41663#43179#0" />
+            <element signature="e#43495#44943#0" />
+            <element signature="e#45262#46243#0" />
+            <element signature="e#46568#47382#0" />
+            <element signature="e#47707#49240#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="532">
+          <caret line="48" lean-forward="true" selection-start-line="48" selection-end-line="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nextflow.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="627">
+          <caret line="56" column="15" lean-forward="true" selection-start-line="56" selection-start-column="15" selection-end-line="56" selection-end-column="15" />
         </state>
       </provider>
     </entry>
