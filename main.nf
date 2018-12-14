@@ -212,10 +212,11 @@ log.info "========================================="
  * Adding input files error exceptions Here
  */
 
-outdir = file(params.outdir) //the output directory
-if( !outdir.exists() ) exit 1, print_red("Missing output directory: ${output}")
 
-def fastpoutdir = new File( "${params.outdir}/pipeline_fastp/" )
+outdir = file(params.outdir) //the output directory
+
+/*
+def fastpoutdir = new File( "${params.outdir}/QC/" )
 if( !fastpoutdir.exists() ) {
     fastpoutdir.mkdirs()
 }
@@ -299,7 +300,7 @@ def REPORToutdir = new File( "${params.outdir}/REPORT/" )
 if( !REPORToutdir.exists() ) {
     REPORToutdir.mkdirs()
 }
-
+*/
 otherTools = file(params.otherTools) //the other tools directory
 if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
 
@@ -378,8 +379,6 @@ if( !genomefile.exists() ) exit 1, print_red("Missing CIRI Directory: ${ciridir}
 find_circdir = file(params.find_circdir)
 if( !find_circdir.exists() ) exit 1, print_red("Missing find_circ Directory: ${find_circdir}")
 
-autocircdir = file(params.autocircdir)
-if( !autocircdir.exists() ) exit 1, print_red("Missing autocirc Directory: ${autocircdir}")
 
 
 /*
@@ -529,7 +528,7 @@ if(params.singleEnd){
 */
 process Fastp{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_fastp", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
+    publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
 
     input:
     set pair_id, file(query_file) from read_pairs_fastp
@@ -571,7 +570,7 @@ fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process fir
 ========================================================================================
 */
 process Multiqc{
-    publishDir "${params.outdir}/pipeline_fastp", mode: 'copy', pattern: "*.html", overwrite: true
+    publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
     file (query_file) from fastp_for_multiqc.collect()
@@ -594,7 +593,7 @@ process Multiqc{
 */
 process Star{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_star", mode: 'link', overwrite: true
+    publishDir "${params.outdir}/Alignment/STAR", mode: 'link', overwrite: true
 
     input:
     set pair_id, file(query_file) from fastpfiles_star
@@ -637,7 +636,7 @@ process Star{
 */
 process Circexplorer2{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_circexplorer2", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', overwrite: true
 
     input:
     set pair_id, file (query_file) from starfiles
@@ -673,7 +672,7 @@ process Circexplorer2{
 */
 process Circexplorer2_Bed{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_circexplorer2", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
     input:
     set pair_id, file (query_file) from circexplorer2files
@@ -705,7 +704,7 @@ process Circexplorer2_Bed{
 */
 process Circexplorer2_Matrix{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
     file (query_file) from modify_circexplorer2.collect()
@@ -760,7 +759,7 @@ process Circexplorer2_Matrix{
                          the first tool : star - circexplorer2
                                     draw the plot
 ========================================================================================
-*/
+
 process Circexplorer2_Plot{
     publishDir "${params.outdir}/plot_separate", mode: 'copy', pattern:"circexplorer2_*", overwrite: true
 
@@ -796,7 +795,7 @@ process Circexplorer2_Plot{
     Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R circexplorer2_for_annotation_annote.txt circexplorer2_distribution.png circexplorer2_boxplot.png circexplorer2_spanningtree.png circexplorer2_hist.png total_matrix.txt circexplorer2_circos.png circexplorer2_calculates.pdf
     '''
 }
-
+*/
 
 
 /*
@@ -807,7 +806,7 @@ process Circexplorer2_Plot{
 */
 process Bwa{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_bwa", mode: 'link', overwrite: true
+    publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
 
     input:
     set pair_id, file (query_file) from fastpfiles_bwa
@@ -853,7 +852,7 @@ process Bwa{
 */
 process Ciri{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_ciri", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', overwrite: true
 
     input:
     set pair_id, file (query_file) from bwafiles
@@ -888,7 +887,7 @@ process Ciri{
 */
 process Ciri_Bed{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_ciri", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
     input:
     set pair_id, file (query_file) from cirifiles
@@ -921,7 +920,7 @@ process Ciri_Bed{
 */
 process Ciri_Matrix{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
     file (query_file) from modify_ciri_file.collect()
@@ -980,7 +979,7 @@ process Ciri_Matrix{
 */
 process Mapsplice{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_mapsplice", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', overwrite: true
 
     input:
     set pair_id, file (query_file) from fastpfiles_mapsplice
@@ -991,7 +990,7 @@ process Mapsplice{
     file bowtieindex
 
     output:
-    set pair_id, file('*.log') into mapsplicefiles
+    set pair_id, file('*') into mapsplicefiles
 
     conda params.condadir
 
@@ -1012,7 +1011,7 @@ process Mapsplice{
         --gene-gtf ${gtffile} \
         -c ${refmapsplice} \
         -1 ${query_file} \
-        -o ${outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_${pair_id} 2 \
+        -o output_mapsplice_${pair_id} 2 \
         > ${pair_id}_mapsplice.log
         """
     }else{
@@ -1028,7 +1027,7 @@ process Mapsplice{
         -c ${refmapsplice} \
         -1 ${query_file[0]} \
         -2 ${query_file[1]} \
-        -o ${outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_${pair_id} 2 \
+        -o output_mapsplice_${pair_id} 2 \
         > ${pair_id}_mapsplice.log
         """
     }
@@ -1043,7 +1042,7 @@ process Mapsplice{
 */
 process Mapsplice_Bed{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
     input:
     set pair_id, file (query_file) from mapsplicefiles
@@ -1059,17 +1058,17 @@ process Mapsplice_Bed{
 
     shell :
     '''
-    cat !{outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+    cat output_mapsplice_!{pair_id}/circular_RNAs.txt \
     | awk '{print $6}' \
     | sed -e 's/.//' \
     > !{pair_id}_mapsplice_temp1.bed
 
-    cat !{outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+    cat output_mapsplice_!{pair_id}/circular_RNAs.txt \
     | awk '{print $1}' \
     | awk -F"~" '{print $2}' \
     > !{pair_id}_mapsplice_temp.bed
 
-    paste !{pair_id}_mapsplice_temp.bed !{pair_id}_mapsplice_temp1.bed !{outdir}/pipeline_tools/pipeline_mapsplice/output_mapsplice_!{pair_id}/circular_RNAs.txt \
+    paste !{pair_id}_mapsplice_temp.bed !{pair_id}_mapsplice_temp1.bed output_mapsplice_!{pair_id}/circular_RNAs.txt \
     | grep -v chrM \
     | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
     > !{pair_id}_modify_mapsplice.temp.bed
@@ -1086,7 +1085,7 @@ process Mapsplice_Bed{
 */
 process Mapsplice_Matrix{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
     file (query_file) from modify_mapsplice.collect()
@@ -1145,7 +1144,7 @@ process Mapsplice_Matrix{
 */
 process Segemehl{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_segemehl", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
 
     input:
     set pair_id, file (query_file) from fastpfiles_segemehl
@@ -1215,7 +1214,7 @@ process Segemehl{
 */
 process Segemehl_Bed{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
 
     input:
     set pair_id , file ( query_file ) from segemehlfiles
@@ -1254,7 +1253,7 @@ process Segemehl_Bed{
 */
 process Segemehl_Matrix{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
     file (query_file) from modify_segemehl.collect()
@@ -1313,7 +1312,7 @@ process Segemehl_Matrix{
 */
 process Bowtie2{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_bowtie2", mode: 'link', overwrite: true
+    publishDir "${params.outdir}/Alignment/Bowtie2", mode: 'link', overwrite: true
 
     input:
     set pair_id, file (query_file) from fastpfiles_bowtie2
@@ -1378,7 +1377,7 @@ process Bowtie2{
 */
 process Find_circ{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_find_circ", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', overwrite: true
 
     input:
     set pair_id, file (query_file) from bowtie2files
@@ -1426,7 +1425,7 @@ process Find_circ{
 */
 process Find_circ_Bed{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_find_circ", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
     input:
     set pair_id, file (query_file) from find_circfiles
@@ -1461,7 +1460,7 @@ process Find_circ_Bed{
 */
 process Find_circ_Matrix{
     tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+    publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
     file (query_file) from modify_find_circfiles.collect()
@@ -1559,212 +1558,7 @@ process Find_circ_Plot{
 }
 */
 
-/*
-//the sixth tool : bowtie2 - autocirc
-//bowtie2 is already designed
-//run the autocirc
-process run_autocirc{
-    tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_autocirc", mode: 'copy', pattern: "*autocirc.final.bed", overwrite: true
 
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
-
-    input:
-    set pair_id, file (query_file) from bowtie2files_for_autocirc
-    file autocircdir
-    file genomefile
-    file bowtie2index
-    file bedfile
-
-    output:
-    set pair_id, file ('*autocirc.final.bed') into autocircfiles
-
-    when:
-    params.autocirc || params.selectAll
-
-    script:
-    """  
-    ln -f ${query_file} ./AutoCirc
-    cd AutoCirc
-    
-    chmod 755 AutoCirc_v1.3.pl
-    chmod 755 script/*
-
-    perl ./AutoCirc_v1.3.pl \
-    -g ${params.genomefile} \
-    -I ${params.bowtie2index}/genome \
-    --bam bowtie2_unmapped_${pair_id}.bam \
-    -b ${params.bedfile} \
-    --mis 0 \
-    --min 100 \
-    --max 100000 \
-    -s 20 \
-    -o autocirc_output_${pair_id} &> standard.log
-
-    cd ../
-    cat ./AutoCirc/autocirc_output_${pair_id}/circ.final.bed > ${pair_id}_autocirc.final.bed
-    """
-}
-
-//produce the bed6 file
-process run_modify_autocirc{
-    tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_autocirc", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
-
-    input:
-    set pair_id, file (query_file) from autocircfiles
-    file otherTools
-
-    output:
-    file ('*candidates.bed') into modify_autocircfiles
-    val (pair_id) into modify_autocirc_id
-
-    when:
-    params.autocirc || params.selectAll
-
-    shell:
-    '''
-    cat !{query_file} | grep -v chrM > test.txt
-    sed -i '1d' test.txt
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 test.txt > temp.bed 
-    cat temp.bed | awk '{print $1 "\t" $2 "\t" $3 "\t" "autocirc" "\t" $5 "\t" $6}\' > !{pair_id}_temp.bed
-    python !{otherTools}/quchong.py !{pair_id}_temp.bed !{pair_id}_modify_autocirc.candidates.bed
-    '''
-}
-
-//produce the matrix
-process matrix_autocirc{
-    tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    maxForks fork_number
-
-    input:
-    file (query_file) from modify_autocircfiles.collect()
-    val (pair_id) from modify_autocirc_id.collect()
-
-    output:
-    file ('autocirc.txt') into merge_autocirc
-    file ('*.matrix') into output_autocirc
-    file ('name_autocirc.txt') into name_autocirc
-
-    when:
-    params.autocirc || params.selectAll
-
-    shell :
-    '''
-    for file in !{query_file}
-    do
-        cat $file >> concatenate.bed
-    done
-    
-    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-    cat mergeconcatenate.bed > autocirc.txt
-    
-    for file in !{query_file}
-    do
-        python !{otherTools}/quchongsamples.py mergeconcatenate.bed $file counts.txt
-        paste -d"\t" id.txt counts.txt > temp.txt
-        cat temp.txt > id.txt
-    done
-    
-    echo -e "id\\c" > merge_header.txt
-    for sampleid in !{pair_id}
-    do
-        echo -e "\\t$sampleid\\c" >> merge_header.txt    
-    done 
-    
-    sed -i 's/\\[//g' merge_header.txt
-    sed -i 's/\\,//g' merge_header.txt
-    sed -i 's/\\]//g' merge_header.txt
-    echo -e "\\n\\c" >> merge_header.txt
-     
-    cat merge_header.txt id.txt > autocirc_merge.matrix
-    echo -e "autocirc" > name_autocirc.txt
-    '''
-}
-
-//draw the plot
-*/
-
-/*//the seventh tool : tophat - circexplorer2
-//run the tophat
-process run_tophat{
-    tag "$pair_id"
-    publishDir "${params.outdir}/pipeline_tools/pipeline_tophat", mode: 'copy', overwrite: true
-
-    maxForks fork_number
-
-    memory '20 GB'
-
-    cpus 8
-
-    time '2d'
-
-    input:
-    set pair_id, file (query_file) from fastpfiles_tophat
-    file gtffile
-    file outdir
-
-    output:
-    set pair_id, file ('*.fastq') into tophatfiles
-
-    conda params.conda2dir
-
-    when:
-    params.tophat || params.selectAll
-
-    shell:
-    tophat_threads = idv_cpu - 1
-    if(params.singleEnd){
-        """
-        tophat2 \
-        -a 6 \
-        --microexon-search \
-        -m 2 \
-        -p ${task.cpus} \
-        -G ${gtffile} \
-        -o tophat_${pair_id} \
-        /home/wqj/database/reference/tophatindex/genome \
-        ${query_file}
-
-        bamToFastq \
-        -i tophat_${pair_id}/unmapped.bam \
-        -fq ${pair_id}_unmapped.fastq
-
-        tophat2 \
-        -o ${outdir}/pipeline_tools/pipeline_tophat/tophat_fusion_${pair_id} \
-        -p ${task.cpus} \
-        --fusion-search \
-        --keep-fasta-order \
-        --bowtie1 \
-        --no-coverage-search \
-        /home/wqj/database/reference/tophatfusionindex/genome \
-        ${pair_id}_unmapped.fastq
-        """
-    }else{
-        """
-        """
-    }
-
-}
-*/
 
 
 
@@ -1775,7 +1569,7 @@ process run_tophat{
 ========================================================================================
 */
 process Tools_Merge{
-    publishDir "${params.outdir}/pipeline_tools/pipeline_merge", mode: 'copy', pattern: "*.matrix", overwrite: true
+    publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
     file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl ).collect()

@@ -14,7 +14,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 ### Documentation   
 
-A full tutorial of CircPipe can be found at Wiki page of this project. plz go to the https://github.com/likelet/cirPipe/wiki 
+A full tutorial of CircPipe can be found at Wiki page of this project. plz go to the https://github.com/likelet/circPipe/wiki
 
 
 ### Pipeline Steps
