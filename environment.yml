@@ -4,7 +4,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - fastp=0.19.4
+  - fastp=0.19.5
   - multiqc=1.6
   - pysam=0.15.1
   - segemehl=0.2.0
@@ -26,6 +26,8 @@ dependencies:
   - bioconductor-fgsea=1.6.0
   - bioconductor-bsgenome.hsapiens.ucsc.hg38=1.4.1
   - bioconductor-clusterprofiler=3.8.1
+  - bioconductor-reactomepa=1.24.0
+  - bioconductor-pathview=1.20.0
   - r-dplyr=0.7.6
   - r-readr=1.1.1
   - r-rmarkdown=1.10
