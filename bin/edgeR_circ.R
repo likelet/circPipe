@@ -17,7 +17,7 @@ args <-commandArgs(T)
 source(args[1])
 
 ########load data
-# args[2]<-"/home/wqj/code/mapsplice_merge.matrix"
+# args[2]<-"/home/wqj/code/segemehl_merge.matrix"
 # args[2]<-"/home/wqj/code/circPipe-master/onlychrx.matrix"
 # countData1 <- as.data.frame(read.table(args[2],sep = "\t"))
 countData1 <- as.data.frame(read_delim(args[2],delim = "\t"))
@@ -96,9 +96,9 @@ if( sum(colData$Type==group1)< 3 || sum(colData$Type==group2)< 3 ){
     dev.off()
     
     ########heatmap
-    png("heatmap1.png", width=1800, height=1800, res = 300)
-    heatmap_house(Circ_norm_edgeR[DE_list,],colData,title_hp = "Heatmap of Different expressed all DE circRNA")
-    dev.off()
+    # png("heatmap1.png", width=1800, height=1800, res = 300)
+    # heatmap_house(Circ_norm_edgeR[DE_list,],colData,title_hp = "Heatmap of Different expressed all DE circRNA")
+    # dev.off()
     png("heatmap2.png", width=1800, height=1800, res = 300)
     heatmap_house(Circ_norm_edgeR[DE_list,],colData,
                   title_hp = "Heatmap of Different expressed all DE circRNA",cluster_rule = "row")
@@ -107,20 +107,20 @@ if( sum(colData$Type==group1)< 3 || sum(colData$Type==group2)< 3 ){
     heatmap_house(sharedCirc_DE_edgeR,colData,title_hp = "Heatmap of Different expressed shared_circRNA")
     dev.off()
     ########PCA
-    png("pca1.png", width=1800, height=1800, res = 300)
-    PCA_plot(DE_list,Circ_norm_edgeR,colData,withtext=FALSE)
-    dev.off()
+    # png("pca1.png", width=1800, height=1800, res = 300)
+    # PCA_plot(DE_list,Circ_norm_edgeR,colData,withtext=FALSE)
+    # dev.off()
     png("pca2.png", width=1800, height=1800, res = 300)
     PCA_plot(DE_list,Circ_norm_edgeR,colData,withtext=TRUE)
     dev.off()
     
     pdf("all_plot.pdf")
     volcano_plot(sharedCirc_edgeR,c(group1,group2))
-    heatmap_house(Circ_norm_edgeR[DE_list,],get_pheno(colnames(sharedCirc_DE_edgeR),label1 = "T",label2 = "N",group1 = "Tumor",group2 = "Normal"),title_hp = "Heatmap of Different expressed all DE circRNA")
+    # heatmap_house(Circ_norm_edgeR[DE_list,],get_pheno(colnames(sharedCirc_DE_edgeR),label1 = "T",label2 = "N",group1 = "Tumor",group2 = "Normal"),title_hp = "Heatmap of Different expressed all DE circRNA")
     heatmap_house(Circ_norm_edgeR[DE_list,],get_pheno(colnames(sharedCirc_DE_edgeR),label1 = "T",label2 = "N",group1 = "Tumor",group2 = "Normal"),
                   title_hp = "Heatmap of Different expressed all DE circRNA",cluster_rule = "row")
     heatmap_house(sharedCirc_DE_edgeR,get_pheno(colnames(sharedCirc_DE_edgeR),label1 = "T",label2 = "N",group1 = "Tumor",group2 = "Normal"),title_hp = "Heatmap of Different expressed shared_circRNA")
-    PCA_plot(DE_list,Circ_norm_edgeR,colData,withtext=FALSE)
+    # PCA_plot(DE_list,Circ_norm_edgeR,colData,withtext=FALSE)
     PCA_plot(DE_list,Circ_norm_edgeR,colData,withtext=TRUE)
     dev.off()
     

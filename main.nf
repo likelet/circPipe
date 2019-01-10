@@ -57,7 +57,7 @@ def print_white = {  str -> ANSI_WHITE + str + ANSI_RESET }
 def helpMessage() {
     log.info"""
     =========================================
-     nf-core/cirpipe v${workflow.manifest.version}
+     nf-core/circpipe v${workflow.manifest.version}
     =========================================
     Usage:
 
@@ -304,6 +304,12 @@ if( !REPORToutdir.exists() ) {
 otherTools = file(params.otherTools) //the other tools directory
 if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
 
+if(params.mRNA){
+    mRNA = file(params.mRNA) //the mRNA file
+    if( !mRNA.exists() ) exit 1, print_red("Missing mRNA expression file: ${mRNA}")
+
+}
+
 
 /*
 ========================================================================================
@@ -344,6 +350,11 @@ if(params.segindex){
             .ifEmpty { exit 1, "Segemehl index not found: ${params.segindex}" }
 }
 
+if(params.knifeindex){
+    knifeindex = Channel
+            .fromPath(params.knifeindex)
+            .ifEmpty { exit 1, "KNIFE index not found: ${params.knifeindex}" }
+}
 
 
 /*
@@ -374,13 +385,13 @@ if( !bedfile.exists() ) exit 1, print_red("Missing bed annotation file: ${bedfil
 ========================================================================================
                          the environment directory
 ========================================================================================
-*/
+
 condadir = file(params.condadir) //the python3 environment
 if( !condadir.exists() ) exit 1, print_red("Missing python3 environment: ${condadir}")
 
 conda2dir = file(params.conda2dir) //the python2 environment
 if( !conda2dir.exists() ) exit 1, print_red("Missing python2 environment: ${conda2dir}")
-
+*/
 
 /*
 ========================================================================================
@@ -398,6 +409,9 @@ if( !genomefile.exists() ) exit 1, print_red("Missing CIRI Directory: ${ciridir}
 
 find_circdir = file(params.find_circdir)
 if( !find_circdir.exists() ) exit 1, print_red("Missing find_circ Directory: ${find_circdir}")
+
+knifedir = file(params.knifedir)
+if( !knifedir.exists() ) exit 1, print_red("Missing KNIFE Directory: ${knifedir}")
 
 
 
@@ -430,6 +444,11 @@ if( params.selectTools ==~ /.*5.*/ ){
     params.segemehl = true
 }else{
     params.segemehl = false
+}
+if( params.selectTools ==~ /.*6.*/ ){
+    params.knife = true
+}else{
+    params.knife = false
 }
 
 
@@ -479,27 +498,27 @@ log.info print_cyan("""
  =======================================================================
          """)
         .stripIndent()
-log.info print_purple("You are running cirPipe with the following parameters:")
+log.info print_purple("============You are running cirPipe with the following parameters===============")
 log.info print_purple("Checking parameters ...")
 log.info "\n"
-log.info print_yellow("Reads types :")
+log.info print_yellow("========Reads types=======")
 log.info print_yellow("singleEnd :                     ") + print_green(params.singleEnd)
 log.info "\n"
-log.info print_yellow("Tools selected :")
+log.info print_yellow("========Tools selected========")
 log.info print_yellow("Circexplorer2 :                 ") + print_green(params.circexplorer2)
 log.info print_yellow("Find_circ :                     ") + print_green(params.find_circ)
 log.info print_yellow("Ciri :                          ") + print_green(params.ciri)
 log.info print_yellow("Mapsplice :                     ") + print_green(params.mapsplice)
 log.info print_yellow("Segemehl :                      ") + print_green(params.segemehl)
 log.info "\n"
-log.info print_yellow("Input files selected :")
+log.info print_yellow("=========Input files selected=========")
 log.info print_yellow("Reads :                         ") + print_green(params.reads)
 log.info print_yellow("Annotation file :               ") + print_green(params.annotationfile)
 log.info print_yellow("Genome file :                   ") + print_green(params.genomefile)
 log.info print_yellow("Gtf file :                      ") + print_green(params.gtffile)
 log.info print_yellow("Bed file :                      ") + print_green(params.bedfile)
 log.info "\n"
-log.info print_yellow("Output files directory :")
+log.info print_yellow("==========Output files directory=========")
 log.info print_yellow("Output directory :              ") + print_green(params.outdir)
 log.info "\n"
 log.info "\n"
@@ -601,6 +620,7 @@ if(!params.bowtie2index){
         output:
         file "bowtie2index" into bowtie2index
         file "bowtie2index" into bowtie2index_fc
+        file "bowtie2index" into bowtie2_build_knife
 
         script:
         """
@@ -627,6 +647,7 @@ if(!params.bowtieindex){
 
         output:
         file "bowtieindex" into bowtieindex
+        file "bowtieindex" into bowtie_build_knife
 
         script:
         """
@@ -641,7 +662,7 @@ if(!params.bowtieindex){
 }
 
 /*
- * PREPROCESSING - Build Bowtie index
+ * PREPROCESSING - Build Segemehl index
  */
 if(!params.segindex){
     process makeSegemehlindex {
@@ -659,6 +680,32 @@ if(!params.segindex){
         ${segdir}/segemehl.x \
             -d ${genomefile} \
             -x genome.idx
+        """
+    }
+}
+
+/*
+ * PREPROCESSING - Build KNIFE index
+ */
+if(!params.knifeindex){
+    process makeKNIFEindex {
+
+        input:
+        file (bowtie_file) from bowtie_build_knife
+        file (bowtie2_file) from bowtie2_build_knife
+        file knifedir
+        file gtffile
+
+        output:
+        file "KNIFE" into knife_use
+
+        script:
+        """
+        mkdir KNIFE/circularRNApipeline_Standalone/denovo_scripts/index
+        cp bowtieindex/* KNIFE/circularRNApipeline_Standalone/denovo_scripts/index
+        mkdir KNIFE/circularRNApipeline_Standalone/index
+        cp bowtie2index/* KNIFE/circularRNApipeline_Standalone/index
+        cp ${gtffile} KNIFE/circularRNApipeline_Standalone/denovo_scripts
         """
     }
 }
@@ -1174,7 +1221,6 @@ process Mapsplice{
     output:
     set pair_id, file('*') into mapsplicefiles
 
-    conda params.condadir
 
     when:
     params.mapsplice
@@ -1182,6 +1228,7 @@ process Mapsplice{
     shell:
     if(params.singleEnd){
         """
+        source activate tools_in_python3
         python ${mapsdir}/mapsplice.py \
         -p ${task.cpus} \
         -k 1 \
@@ -1195,9 +1242,11 @@ process Mapsplice{
         -1 ${query_file} \
         -o output_mapsplice_${pair_id} 2 \
         > ${pair_id}_mapsplice.log
+        source deactivate      
         """
     }else{
         """
+        source activate tools_in_python3
         python ${mapsdir}/mapsplice.py \
         -p ${task.cpus} \
         -k 1 \
@@ -1211,6 +1260,7 @@ process Mapsplice{
         -2 ${query_file[1]} \
         -o output_mapsplice_${pair_id} 2 \
         > ${pair_id}_mapsplice.log
+        source deactivate
         """
     }
 
@@ -1381,7 +1431,6 @@ process Segemehl{
     output:
     set pair_id, file ('*splicesites.bed') into segemehlfiles
 
-    conda params.condadir
 
     when:
     params.segemehl
@@ -1389,6 +1438,7 @@ process Segemehl{
     shell:
     if(params.singleEnd){
         """
+        source activate tools_in_python3
         ${segdir}/segemehl.x \
         -d ${genomefile} \
         -i ${index} \
@@ -1406,9 +1456,11 @@ process Segemehl{
         -n \
         -U segemehl_${pair_id}_splicesites.bed \
         -T segemehl_${pair_id}_transrealigned.bed
+        source deactivate
         """
     }else{
         """
+        source activate tools_in_python3
         ${segdir}/segemehl.x \
         -d ${genomefile} \
         -i ${index} \
@@ -1427,6 +1479,7 @@ process Segemehl{
         -n \
         -U segemehl_${pair_id}_splicesites.bed \
         -T segemehl_${pair_id}_transrealigned.bed
+        source deactivate
         """
     }
 
@@ -1654,13 +1707,13 @@ process Find_circ{
     output:
     set pair_id, file ('*splice_sites.bed') into find_circfiles
 
-    conda params.conda2dir
 
     when:
     params.find_circ
 
     shell:
     """     
+    source activate tools_in_python2
     python ${find_circdir}/unmapped2anchors.py ${query_file} \
     | gzip \
     > find_circ_${pair_id}_anchors.qfa.gz
@@ -1680,6 +1733,8 @@ process Find_circ{
     -n find_circ \
     -R find_circ_${pair_id}_spliced_reads.fa \
     > find_circ_${pair_id}_splice_sites.bed   
+
+    source deactivate
     """
 }
 
@@ -1742,6 +1797,8 @@ process Find_circ_Matrix{
     file ('*.matrix') into output_find_circ
     file ('*.matrix') into plot_find_circ
     file ('name_find_circ.txt') into name_find_circ
+    file ('*annote.txt') into cor_find_circ
+    file ('*.matrix') into plot_find_circ_cor
 
 
     when:
@@ -1818,6 +1875,32 @@ process Find_circ_DE{
     '''
 }
 
+/*
+========================================================================================
+                          the fifth tool : bowtie2 - find_circ
+                                        Correlation
+========================================================================================
+*/
+process Find_circ_Cor{
+    publishDir "${params.outdir}/Corrrelation_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (matrix_file) from plot_find_circ_cor
+    file (anno_file) from cor_find_circ
+    file mRNA
+    file otherTools
+
+    when:
+    params.mRNA && params.find_circ
+
+    output:
+    file ('*') into cor_plot
+
+    shell:
+    '''
+    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    '''
+}
 
 
 /*
@@ -1840,6 +1923,8 @@ process Tools_Merge{
     file ('for_annotation.bed') into bed_for_annotation
     file ('final.matrix') into matrix_for_circos
 
+    when:
+    params.merge
 
     shell :
     '''
@@ -1893,73 +1978,49 @@ process Tools_Merge{
                                         annoation
 ========================================================================================
 */
-process Annotation{
+process Annotation_Merge{
     publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (matrix_file) from tools_merge
     file (bed_file) from bed_for_annotation
     file (query_file) from matrix_for_circos
     file otherTools
     file gtffile
+
+    when:
+    params.merge
 
     output:
     file ('*') into annotation_plot
 
     shell:
     '''
-    java -jar !{otherTools}/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq
-    Rscript !{otherTools}/venn.R !{matrix_file} venn.png
+    java -jar !{otherTools}/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
     Rscript !{otherTools}/circos.R !{query_file}
     Rscript !{otherTools}/circRNA_feature.R !{otherTools}/R_function.R merge_for_annotation_annote.txt
     '''
 }
 
-/*
-========================================================================================
-                                after running the tools
-                            merge the matrix and draw the plot
-========================================================================================
-*/
-/*process Plot{
-    publishDir "${params.outdir}/plot_merge", mode: 'copy', pattern:"merge_*", overwrite: true
-
-    maxForks fork_number
+process Venn{
+    publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (query_file) from output_find_circ.concat( output_circexplorer2, output_ciri, output_mapsplice, output_segemehl ).collect()
-    file otherTools
-    file gtffile
+    file (matrix_file) from tools_merge
 
-    output:
-    file ('merge_*') into merge_plot
 
     when:
     params.merge
 
+    output:
+    file ('*') into annotation_plot
+
     shell:
     '''
-    for file in !{query_file}
-    do
-        cat $file | awk 'NR==1' > id.txt
-        cat $file > temp.txt
-        sed -i '1d' temp.txt
-        cat temp.txt >> total_matrix.txt
-    done
-
-    Rscript !{otherTools}/changematrix.R total_matrix.txt change_reads.txt
-
-    python !{otherTools}/finalmerge.py change_reads.txt newmatrix.txt for_annotation.bed
-
-    cat id.txt newmatrix.txt > final.matrix
-
-    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R final.matrix merge_volcano.png merge_heatmap1.png merge_heatmap2.png merge_heatmap3.png merge_pca1.png merge_pca2.png merge_plots.pdf
-
-    java -jar bed1114.jar -i for_annotation.bed -o merge_ -gtf !{gtffile} -uniq
-
-    Rscript !{otherTools}/circ_feature_stats.R !{otherTools}/R_function.R merge_for_annotation_annote.txt merge_distribution.png merge_boxplot.png merge_spanningtree.png merge_hist.png merge_circos.png merge_calculates.pdf
+    Rscript !{otherTools}/venn.R !{matrix_file} venn.png
     '''
 }
+
+
 
 /*
 * Completion e-mail notification

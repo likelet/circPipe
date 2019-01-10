@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="optimize the parameter">
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="optimize the pipeline">
+      <change afterPath="$PROJECT_DIR$/enrivonment1.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/environment2.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/base.config" beforeDir="false" afterPath="$PROJECT_DIR$/conf/base.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/R_function.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/R_function.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/edgeR_circ.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/edgeR_circ.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/venn.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/venn.R" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/R_function.R" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/bed1114.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/changematrix.R" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/countnumbers.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/edgeR_circ.R" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/finalmerge.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/hebinglist.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/hebingtoolsid.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/quchong.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/otherTools/quchongsamples.py" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -29,67 +25,71 @@
     <session id="-62073305">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="7" />
+          <entry key="project.closed" value="10" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.21" value="1" />
           <entry key="project.open.time.25" value="1" />
           <entry key="project.open.time.26" value="2" />
           <entry key="project.open.time.27" value="1" />
-          <entry key="project.open.time.28" value="1" />
-          <entry key="project.open.time.29" value="1" />
+          <entry key="project.open.time.28" value="2" />
+          <entry key="project.open.time.29" value="2" />
           <entry key="project.open.time.39" value="1" />
           <entry key="project.open.time.42" value="1" />
           <entry key="project.open.time.43" value="1" />
+          <entry key="project.open.time.7" value="1" />
           <entry key="project.open.time.8" value="1" />
           <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="13" />
+          <entry key="project.opened" value="16" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
+          <entry key="Dockerfile" value="224" />
           <entry key="Singularity" value="94" />
-          <entry key="config" value="1292" />
+          <entry key="config" value="1352" />
           <entry key="matrix" value="3" />
-          <entry key="md" value="493" />
-          <entry key="nf" value="13248" />
+          <entry key="md" value="494" />
+          <entry key="nf" value="14231" />
           <entry key="py" value="39" />
-          <entry key="txt" value="496" />
-          <entry key="yml" value="131" />
+          <entry key="txt" value="503" />
+          <entry key="yml" value="182" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Groovy" value="13248" />
-          <entry key="PLAIN_TEXT" value="2417" />
-          <entry key="YAML" value="131" />
+          <entry key="Groovy" value="14231" />
+          <entry key="PLAIN_TEXT" value="2709" />
+          <entry key="YAML" value="182" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages" />
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="Dockerfile" value="5" />
+          <entry key="Dockerfile" value="10" />
           <entry key="LICENSE" value="1" />
-          <entry key="R" value="20" />
+          <entry key="R" value="23" />
           <entry key="Singularity" value="5" />
           <entry key="bed" value="33" />
-          <entry key="config" value="31" />
+          <entry key="config" value="36" />
           <entry key="html" value="12" />
           <entry key="matrix" value="4" />
-          <entry key="md" value="13" />
+          <entry key="md" value="14" />
           <entry key="nf" value="3" />
+          <entry key="pl" value="1" />
           <entry key="py" value="35" />
           <entry key="r" value="5" />
-          <entry key="txt" value="8" />
+          <entry key="txt" value="11" />
           <entry key="yaml" value="5" />
-          <entry key="yml" value="12" />
+          <entry key="yml" value="17" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="Groovy" value="3" />
           <entry key="HTML" value="12" />
-          <entry key="PLAIN_TEXT" value="160" />
-          <entry key="YAML" value="17" />
+          <entry key="PLAIN_TEXT" value="177" />
+          <entry key="Perl" value="1" />
+          <entry key="YAML" value="22" />
         </counts>
       </usages-collector>
     </session>
@@ -99,52 +99,88 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-736">
-              <caret line="1370" column="16" selection-start-line="1370" selection-start-column="16" selection-end-line="1370" selection-end-column="16" />
+            <state relative-caret-position="324">
+              <caret line="1233" column="14" lean-forward="true" selection-start-line="1233" selection-start-column="14" selection-end-line="1233" selection-end-column="14" />
               <folding>
                 <element signature="e#25#410#0" />
                 <element signature="e#412#828#0" />
                 <element signature="e#831#950#0" />
-                <element signature="e#1838#3465#0" />
-                <element signature="e#3546#3578#0" />
-                <element signature="e#3580#6007#0" />
-                <element signature="e#6009#7811#0" />
-                <element signature="e#7867#10253#0" />
-                <element signature="e#18988#19931#0" />
-                <element signature="e#20281#20535#0" />
-                <element signature="e#20848#21659#0" />
-                <element signature="e#21984#22703#0" />
-                <element signature="e#23032#23761#0" />
-                <element signature="e#24091#26311#0" />
-                <element signature="e#26642#27151#0" />
-                <element signature="e#27458#28334#0" />
-                <element signature="e#28642#29224#0" />
-                <element signature="e#29541#30237#0" />
-                <element signature="e#30554#32615#0" />
-                <element signature="e#32933#33397#0" />
-                <element signature="e#33710#35067#0" />
-                <element signature="e#35386#36707#0" />
-                <element signature="e#39493#39982#0" />
-                <element signature="e#43176#44731#0" />
-                <element signature="e#42149#43021#0" />
-                <element signature="e#46583#47978#0" />
-                <element signature="e#48297#49257#0" />
-                <element signature="e#49582#50375#0" />
-                <element signature="e#50701#52847#0" />
-                <element signature="e#53173#53662#0" />
-                <element signature="e#53998#55979#0" />
-                <element signature="e#59859#60161#0" />
-                <element signature="e#60162#61531#0" />
+                <element signature="e#19376#19900#0" />
+                <element signature="e#19993#20356#0" />
+                <element signature="e#21471#21810#0" />
+                <element signature="e#22074#23017#0" />
+                <element signature="e#23367#23621#0" />
+                <element signature="e#23934#24754#0" />
+                <element signature="e#25079#25798#0" />
+                <element signature="e#26127#26856#0" />
+                <element signature="e#27186#29406#0" />
+                <element signature="e#29737#30246#0" />
+                <element signature="e#30553#31444#0" />
+                <element signature="e#32651#33347#0" />
+                <element signature="e#33664#35725#0" />
+                <element signature="e#36043#36507#0" />
+                <element signature="e#38516#39837#0" />
+                <element signature="e#40157#42301#0" />
+                <element signature="e#42623#43112#0" />
+                <element signature="e#45294#46166#0" />
+                <element signature="e#46485#48609#0" />
+                <element signature="e#48928#49412#0" />
+                <element signature="e#49728#51130#0" />
+                <element signature="e#51449#52426#0" />
+                <element signature="e#52751#53544#0" />
+                <element signature="e#53870#56106#0" />
+                <element signature="e#56432#56921#0" />
+                <element signature="e#57243#57690#0" />
+                <element signature="e#58025#60033#0" />
+                <element signature="e#60349#61021#0" />
+                <element signature="e#61035#61043#0" />
+                <element signature="e#62850#66374#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Dockerfile">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="494">
+              <caret line="26" column="9" selection-start-line="26" selection-start-column="9" selection-end-line="26" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="266">
-              <caret line="29" lean-forward="true" selection-start-line="29" selection-end-line="29" />
+            <state relative-caret-position="399">
+              <caret line="60" column="16" selection-start-line="60" selection-start-column="16" selection-end-line="60" selection-end-column="16" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/environment.yml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="323">
+              <caret line="17" column="23" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/enrivonment1.yml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="304">
+              <caret line="16" column="7" selection-start-line="16" selection-start-column="7" selection-end-line="16" selection-end-column="7" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/environment2.yml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="190">
+              <caret line="10" column="3" selection-start-line="10" selection-start-column="3" selection-end-line="10" selection-end-column="3" />
             </state>
           </provider>
         </entry>
@@ -171,19 +207,22 @@
         <option value="$PROJECT_DIR$/Singularity" />
         <option value="$PROJECT_DIR$/conf/test.config" />
         <option value="$USER_HOME$/Desktop/脚本/RNAseq-master/final.matrix" />
-        <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/environment.yml" />
         <option value="$PROJECT_DIR$/conf/base.config" />
         <option value="$PROJECT_DIR$/bin/createzero.py" />
-        <option value="$PROJECT_DIR$/main.nf" />
+        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/nextflow.config" />
+        <option value="$PROJECT_DIR$/enrivonment1.yml" />
+        <option value="$PROJECT_DIR$/environment2.yml" />
+        <option value="$PROJECT_DIR$/environment.yml" />
+        <option value="$PROJECT_DIR$/main.nf" />
+        <option value="$PROJECT_DIR$/Dockerfile" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="103" />
-    <option name="y" value="21" />
-    <option name="width" value="1278" />
+    <option name="x" value="100" />
+    <option name="y" value="20" />
+    <option name="width" value="1280" />
     <option name="height" value="1040" />
   </component>
   <component name="ProjectView">
@@ -191,6 +230,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -201,25 +241,19 @@
             <path>
               <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
               <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
-              <item name="bin" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
               <item name="conf" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="AndroidView" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545914096783" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1547102703628" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -497,14 +531,28 @@
       <option name="project" value="LOCAL" />
       <updated>1544794738876</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="optimize the parameter">
+      <created>1545914235435</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1545914235435</updated>
+    </task>
+    <task id="LOCAL-00014" summary="optimize the pipeline">
+      <created>1545914261500</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1545914261500</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="26" width="1022" height="832" extended-state="0" />
+    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.3412863" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1494638" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -596,35 +644,10 @@
     <MESSAGE value="choose tools;config parameters;annotation;ignore the failed process;some bugs with email" />
     <MESSAGE value="add design file and compare file." />
     <MESSAGE value="optimize the parameter" />
-    <option name="LAST_COMMIT_MESSAGE" value="optimize the parameter" />
+    <MESSAGE value="optimize the pipeline" />
+    <option name="LAST_COMMIT_MESSAGE" value="optimize the pipeline" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/Desktop/脚本/results/circular_RNAs.txt" />
-    <entry file="file://$USER_HOME$/Desktop/脚本/results/R1126_N_chrX_R_modify_segemehl.candidates.bed">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4204">
-          <caret line="150" column="49" selection-start-line="150" selection-start-column="49" selection-end-line="150" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Desktop/脚本/R1126_N_chrX_R_modify_finc_circ.candidates.bed" />
-    <entry file="file://$USER_HOME$/Desktop/脚本/results/R1126_N_chrX_R_modify_finc_circ.candidates.bed">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3287">
-          <caret line="173" column="8" selection-start-line="173" selection-start-column="8" selection-end-line="173" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docs/configuration/reference_genomes.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10">
-          <caret line="22" column="4" selection-start-line="22" selection-start-column="4" selection-end-line="22" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/LICENSE">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$USER_HOME$/Desktop/脚本/results/R1126_N_chrX_R_modify_mapsplice.candidates.bed">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="418">
@@ -643,13 +666,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="608">
           <caret line="32" column="49" selection-start-line="32" selection-start-column="49" selection-end-line="32" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/conf/igenomes.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="361">
-          <caret line="19" column="48" lean-forward="true" selection-start-line="19" selection-start-column="48" selection-end-line="19" selection-end-column="48" />
         </state>
       </provider>
     </entry>
@@ -732,13 +748,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Dockerfile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="5" column="57" selection-start-line="5" selection-start-column="57" selection-end-line="5" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Singularity">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="399">
@@ -761,20 +770,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/environment.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="29" column="26" selection-start-line="29" selection-start-column="26" selection-end-line="29" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="16" column="116" selection-start-line="16" selection-start-column="116" selection-end-line="16" selection-end-column="116" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/bin/circos.R">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-57" />
@@ -784,13 +779,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="228">
           <caret line="12" column="16" selection-start-line="12" selection-start-column="16" selection-end-line="12" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/conf/base.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="16" column="25" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
         </state>
       </provider>
     </entry>
@@ -823,57 +811,120 @@
         <state relative-caret-position="-1050" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/bin/edgeR_circ.R">
+    <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-114" />
+        <state relative-caret-position="489">
+          <caret line="44" column="69" selection-start-line="44" selection-start-column="69" selection-end-line="44" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bin/edgeR_circ.R">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://D:/CIRI-2.0/bin/CIRI_v2.0.6/CIRI2.pl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-43092" />
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/GO_KEGG/kegg.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/GO_KEGG/clust_BP.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bin/correlation.R">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-513" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/igenomes.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="318">
+          <caret line="19" column="48" lean-forward="true" selection-start-line="19" selection-start-column="48" selection-end-line="19" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/environment2.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="10" column="3" selection-start-line="10" selection-start-column="3" selection-end-line="10" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/enrivonment1.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="16" column="7" selection-start-line="16" selection-start-column="7" selection-end-line="16" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/base.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="16" column="25" selection-start-line="16" selection-start-column="25" selection-end-line="16" selection-end-column="25" />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-736">
-          <caret line="1370" column="16" selection-start-line="1370" selection-start-column="16" selection-end-line="1370" selection-end-column="16" />
+        <state relative-caret-position="324">
+          <caret line="1233" column="14" lean-forward="true" selection-start-line="1233" selection-start-column="14" selection-end-line="1233" selection-end-column="14" />
           <folding>
             <element signature="e#25#410#0" />
             <element signature="e#412#828#0" />
             <element signature="e#831#950#0" />
-            <element signature="e#1838#3465#0" />
-            <element signature="e#3546#3578#0" />
-            <element signature="e#3580#6007#0" />
-            <element signature="e#6009#7811#0" />
-            <element signature="e#7867#10253#0" />
-            <element signature="e#18988#19931#0" />
-            <element signature="e#20281#20535#0" />
-            <element signature="e#20848#21659#0" />
-            <element signature="e#21984#22703#0" />
-            <element signature="e#23032#23761#0" />
-            <element signature="e#24091#26311#0" />
-            <element signature="e#26642#27151#0" />
-            <element signature="e#27458#28334#0" />
-            <element signature="e#28642#29224#0" />
-            <element signature="e#29541#30237#0" />
-            <element signature="e#30554#32615#0" />
-            <element signature="e#32933#33397#0" />
-            <element signature="e#33710#35067#0" />
-            <element signature="e#35386#36707#0" />
-            <element signature="e#39493#39982#0" />
-            <element signature="e#43176#44731#0" />
-            <element signature="e#42149#43021#0" />
-            <element signature="e#46583#47978#0" />
-            <element signature="e#48297#49257#0" />
-            <element signature="e#49582#50375#0" />
-            <element signature="e#50701#52847#0" />
-            <element signature="e#53173#53662#0" />
-            <element signature="e#53998#55979#0" />
-            <element signature="e#59859#60161#0" />
-            <element signature="e#60162#61531#0" />
+            <element signature="e#19376#19900#0" />
+            <element signature="e#19993#20356#0" />
+            <element signature="e#21471#21810#0" />
+            <element signature="e#22074#23017#0" />
+            <element signature="e#23367#23621#0" />
+            <element signature="e#23934#24754#0" />
+            <element signature="e#25079#25798#0" />
+            <element signature="e#26127#26856#0" />
+            <element signature="e#27186#29406#0" />
+            <element signature="e#29737#30246#0" />
+            <element signature="e#30553#31444#0" />
+            <element signature="e#32651#33347#0" />
+            <element signature="e#33664#35725#0" />
+            <element signature="e#36043#36507#0" />
+            <element signature="e#38516#39837#0" />
+            <element signature="e#40157#42301#0" />
+            <element signature="e#42623#43112#0" />
+            <element signature="e#45294#46166#0" />
+            <element signature="e#46485#48609#0" />
+            <element signature="e#48928#49412#0" />
+            <element signature="e#49728#51130#0" />
+            <element signature="e#51449#52426#0" />
+            <element signature="e#52751#53544#0" />
+            <element signature="e#53870#56106#0" />
+            <element signature="e#56432#56921#0" />
+            <element signature="e#57243#57690#0" />
+            <element signature="e#58025#60033#0" />
+            <element signature="e#60349#61021#0" />
+            <element signature="e#61035#61043#0" />
+            <element signature="e#62850#66374#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/nextflow.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="29" lean-forward="true" selection-start-line="29" selection-end-line="29" />
+        <state relative-caret-position="399">
+          <caret line="60" column="16" selection-start-line="60" selection-start-column="16" selection-end-line="60" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Dockerfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="494">
+          <caret line="26" column="9" selection-start-line="26" selection-start-column="9" selection-end-line="26" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/environment.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="17" column="23" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
         </state>
       </provider>
     </entry>

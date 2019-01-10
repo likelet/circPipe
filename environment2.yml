@@ -1,0 +1,19 @@
+name: tools_in_python3
+channels:
+- bioconda
+- conda-forge
+- defaults
+dependencies:
+- pysam=0.15.1
+- segemehl=0.2.0
+- numpy=1.15.2
+- bwa=0.7.17
+- nextflow=0.32.0
+- bowtie=1.2.2
+- bowtie2=2.3.4.3
+- samtools=1.9
+- mapsplice=2.2.0
+- bedtools=2.27.1
+- biopython=1.72
+- bcbiogff=0.6.4
+- perl=5.26.2.1

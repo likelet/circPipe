@@ -43,7 +43,6 @@ Choose between workflows by using `--selectTools` or not(default) .
     * [Find_circ](https://github.com/marvin-jens/find_circ)
     * [Mapsplice](http://www.netlab.uky.edu/p/bioinfo/MapSplice2)
     * [Segemehl](http://www.bioinf.uni-leipzig.de/Software/segemehl/)
-    * [AutoCirc](https://github.com/chanzhou/AutoCirc)
     * [MultiQC](https://github.com/ewels/MultiQC)
     * Several R packages for downstream analysis.
 

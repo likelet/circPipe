@@ -261,7 +261,7 @@ Cor_plot <- function(CoxExpPlotData,gene1,gene2,cormethod="spearman"){
   }
   
   print(paste("pvalue =", round(CoxTest$p.value, 4)))
-  if(CoxTest$p.value <= pcutoff){
+  if(CoxTest$p.value <= 1){
     CoxExpPoint = ggplot(data = CoxExpPlotData, aes_string(x= gene1, y = gene2))+theme_classic()+
       geom_point(size = 2, color = "gray36")+
       annotate("text",x=-Inf,y=Inf,label=plottitle,hjust=-.2,vjust=2)+
