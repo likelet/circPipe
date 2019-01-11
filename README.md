@@ -22,14 +22,14 @@ A full tutorial of CircPipe can be found at Wiki page of this project. plz go to
 CircPipe allows you to run arbitrary pipelines among five pipelines.
 Choose between workflows by using `--selectTools` or not(default) .
 
-| Step                                         | Pipeline One     | Pipeline Two          | Pipeline Three        | Pipeline Four         | Pipeline Five         |
-|----------------------------------------------|------------------|-----------------------|-----------------------|-----------------------|-----------------------|
-| Raw Data QC                                  | Fastp            | Fastp                 | Fastp                 | Fastp                 | Fastp                 |
-| Reads Alignment                              | STAR             | BWA                   | Bowtie2               | -                     | -                     |
-| Reads counting                               | CIRCexplorer2    | CIRI                  | Find_circ             | Mapsplice             | Segemehl              |
-| Data Processing (in house script)            | Python,Java,R    | Python,Java,R         | Python,Java,R         | Python,Java,R         | Python,Java,R         |
-| Differential expression                      | edgeR            | edgeR                 | edgeR                 | edgeR                 | edgeR                 |
-| Summary Report                               | MultiQC          | MultiQC               | MultiQC               | MultiQC               | MultiQC               |
+| Step                                         | Pipeline One     | Pipeline Two          | Pipeline Three        | Pipeline Four         | Pipeline Five         |Pipeline Six         |
+|----------------------------------------------|------------------|-----------------------|-----------------------|-----------------------|-----------------------|---------------------|
+| Raw Data QC                                  | Fastp            | Fastp                 | Fastp                 | Fastp                 | Fastp                 |Fastp                |
+| Reads Alignment                              | STAR             | BWA                   | Bowtie2               | -                     | -                     | -                   |
+| Reads counting                               | CIRCexplorer2    | CIRI                  | Find_circ             | Mapsplice             | Segemehl              |KNIFE                |
+| Data Processing (in house script)            | Python,Java,R    | Python,Java,R         | Python,Java,R         | Python,Java,R         | Python,Java,R         |Python,Java,R        |
+| Differential expression                      | edgeR            | edgeR                 | edgeR                 | edgeR                 | edgeR                 |edgeR                |
+| Summary Report                               | MultiQC          | MultiQC               | MultiQC               | MultiQC               | MultiQC               |MultiQC              |
 
 
 ### Dependencies
@@ -43,6 +43,7 @@ Choose between workflows by using `--selectTools` or not(default) .
     * [Find_circ](https://github.com/marvin-jens/find_circ)
     * [Mapsplice](http://www.netlab.uky.edu/p/bioinfo/MapSplice2)
     * [Segemehl](http://www.bioinf.uni-leipzig.de/Software/segemehl/)
+    * [KNIFE](https://github.com/lindaszabo/KNIFE)
     * [MultiQC](https://github.com/ewels/MultiQC)
     * Several R packages for downstream analysis.
 

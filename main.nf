@@ -57,28 +57,47 @@ def print_white = {  str -> ANSI_WHITE + str + ANSI_RESET }
 def helpMessage() {
     log.info"""
     =========================================
-     nf-core/circpipe v${workflow.manifest.version}
+     CircPipe v${workflow.manifest.version}
     =========================================
     Usage:
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/cirpipe --reads '*_R{1,2}.fastq.gz' -profile standard,docker
+    nextflow path/to/circPipe/main.nf --reads="path/to/*{1,2}.fq.gz" -profile standard,docker
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      --genome                      Name of iGenomes reference
-      -profile                      Configuration profile to use. Can use multiple (comma separated)
-                                    Available: standard, conda, docker, singularity, awsbatch, test
+      --designfile                  A txt file that stored experimental design information
+      --comparefile                 A txt file that stored experimental compare information
+
+    Configuration:
+      --redir                       The folder containing all reference files and index
+      --genomefile                  Path to Fasta reference (required if not set in config file)
+      --gtffile/--bedfile/
+      --annotationfile              Different annotation files from GENCODE database for annotating circRNAs. 
+                                    e.g. [gencode.v25.annotation.gtf]/[gencode.v25.annotation.bed]/[hg38_gencode.txt]
+      --ciridir/--find_circdir/
+      --mapsdir/--knifedir          Home folder of ciri/find_circ/mapsplice/knife installed location
 
     Options:
-      --singleEnd                   Specifies that the input is single end reads
+      -profile                      Configuration profile to use. Can use multiple (comma separated)
+                                    Available: standard, conda, docker, singularity, awsbatch, test
+      --starindex/--bowtie2index/
+      --bwaindex/--segindex/
+      --bowtieindex/
+      --refmapsplice/--knifeindex   Path to STAR/bowtie2/segemehl/bowtie/bwa/mapsplice/knife index. 
+                                    If not set, the pipeline will create the index itself.
+      --singleEnd                   Specify that the reads are single ended
+      --merge                       Merge the different matrixes produce by different tools and draw the venn graph
+      --separate                    Annotate the results separately
+      --selectTools                 Specify which tools should be use. 
+                                    1 for circexplorer2, 2 for ciri, 3 for find_circ, 4 for mapsplice, 5 for segemehl, 6 for knife. 
+                                    For example, you can set 1,2,3,4,5 for running five tools in the same time.
+      --outdir                      The output directory of the results
+      --mRNA                        Path to the mRNA expression matrix. Only need to be set when you want to do the correlation.
 
-    References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --fasta                       Path to Fasta reference
 
     Other options:
-      --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
