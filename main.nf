@@ -84,8 +84,7 @@ def helpMessage() {
                                     Available: standard, conda, docker, singularity, awsbatch, test
       --starindex/--bowtie2index/
       --bwaindex/--segindex/
-      --bowtieindex/
-      --refmapsplice/--knifeindex   Path to STAR/bowtie2/segemehl/bowtie/bwa/mapsplice/knife index. 
+      --bowtieindex/--refmapsplice  Path to STAR/bowtie2/segemehl/bowtie/bwa/mapsplice index. 
                                     If not set, the pipeline will create the index itself.
       --singleEnd                   Specify that the reads are single ended
       --merge                       Merge the different matrixes produce by different tools and draw the venn graph
@@ -320,119 +319,6 @@ if( !REPORToutdir.exists() ) {
     REPORToutdir.mkdirs()
 }
 */
-otherTools = file(params.otherTools) //the other tools directory
-if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
-
-if(params.mRNA){
-    mRNA = file(params.mRNA) //the mRNA file
-    if( !mRNA.exists() ) exit 1, print_red("Missing mRNA expression file: ${mRNA}")
-
-}
-
-
-/*
-========================================================================================
-                            check the index directory
-========================================================================================
-*/
-if(params.starindex){
-    starindex = Channel
-            .fromPath(params.starindex)
-            .ifEmpty { exit 1, "STAR index not found: ${params.starindex}" }
-}
-
-if(params.bowtie2index){
-    bowtie2index = Channel
-            .fromPath(params.bowtie2index)
-            .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}" }
-
-    bowtie2index_fc = Channel
-            .fromPath(params.bowtie2index)
-            .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}" }
-}
-
-if(params.bowtieindex){
-    bowtieindex = Channel
-            .fromPath(params.bowtieindex)
-            .ifEmpty { exit 1, "Bowtie index not found: ${params.bowtieindex}" }
-}
-
-if(params.bwaindex){
-    bwaindex = Channel
-            .fromPath(params.bwaindex)
-            .ifEmpty { exit 1, "BWA index not found: ${params.bwaindex}" }
-}
-
-if(params.segindex){
-    segindex = Channel
-            .fromPath(params.segindex)
-            .ifEmpty { exit 1, "Segemehl index not found: ${params.segindex}" }
-}
-
-if(params.knifeindex){
-    knifeindex = Channel
-            .fromPath(params.knifeindex)
-            .ifEmpty { exit 1, "KNIFE index not found: ${params.knifeindex}" }
-}
-
-
-/*
-========================================================================================
-                         the reference directory
-========================================================================================
-*/
-refdir = file(params.refdir) //the reference genome directory
-if( !refdir.exists() ) exit 1, print_red("Missing Reference Genome Directory: ${refdir}")
-
-refmapsplice = file(params.refmapsplice) //the mapsplice reference genome directory
-if( !refmapsplice.exists() ) exit 1, print_red("Missing Mapsplice Reference Genome Directory: ${refmapsplice}")
-
-annotationfile = file(params.annotationfile) //the annotationfile
-if( !annotationfile.exists() ) exit 1, print_red("Missing annotation file: ${annotationfile}")
-
-genomefile = file(params.genomefile) //the genomefile
-if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
-
-gtffile = file(params.gtffile) //the annotationfile-gtf-format
-if( !gtffile.exists() ) exit 1, print_red("Missing gtf annotation file: ${gtffile}")
-
-bedfile = file(params.bedfile) //the annotationfile-bed-format
-if( !bedfile.exists() ) exit 1, print_red("Missing bed annotation file: ${bedfile}")
-
-
-/*
-========================================================================================
-                         the environment directory
-========================================================================================
-
-condadir = file(params.condadir) //the python3 environment
-if( !condadir.exists() ) exit 1, print_red("Missing python3 environment: ${condadir}")
-
-conda2dir = file(params.conda2dir) //the python2 environment
-if( !conda2dir.exists() ) exit 1, print_red("Missing python2 environment: ${conda2dir}")
-*/
-
-/*
-========================================================================================
-                         the tools directory
-========================================================================================
-*/
-mapsdir = file(params.mapsdir) //the mapsplice directory
-if( !mapsdir.exists() ) exit 1, print_red("Missing Mapsplice Directory: ${mapsdir}")
-
-segdir = file(params.mapsdir) //the segemehl directory
-if( !segdir.exists() ) exit 1, print_red("Missing Segemehl Directory: ${segdir}")
-
-ciridir = file(params.ciridir)
-if( !genomefile.exists() ) exit 1, print_red("Missing CIRI Directory: ${ciridir}")
-
-find_circdir = file(params.find_circdir)
-if( !find_circdir.exists() ) exit 1, print_red("Missing find_circ Directory: ${find_circdir}")
-
-knifedir = file(params.knifedir)
-if( !knifedir.exists() ) exit 1, print_red("Missing KNIFE Directory: ${knifedir}")
-
-
 
 /*
 ========================================================================================
@@ -471,23 +357,121 @@ if( params.selectTools ==~ /.*6.*/ ){
 }
 
 
+
+
+otherTools = file(params.otherTools) //the other tools directory
+if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
+
+if(params.mRNA){
+    mRNA = file(params.mRNA) //the mRNA file
+    if( !mRNA.exists() ) exit 1, print_red("Missing mRNA expression file: ${mRNA}")
+
+}
+
+
+
+/*
+if(params.knifeindex){
+    knifeindex = Channel
+            .fromPath(params.knifeindex)
+            .ifEmpty { exit 1, "KNIFE index not found: ${params.knifeindex}" }
+}
+*/
+
+/*
+========================================================================================
+                         the reference directory
+========================================================================================
+*/
+refdir = file(params.refdir) //the reference genome directory
+if( !refdir.exists() ) exit 1, print_red("Missing Reference Genome Directory: ${refdir}")
+
+refmapsplice = file(params.refmapsplice) //the mapsplice reference genome directory
+if(params.mapsplice){
+    if( !refmapsplice.exists() ) exit 1, print_red("Missing Mapsplice Reference Genome Directory: ${refmapsplice}")
+}
+
+annotationfile = file(params.annotationfile) //the annotationfile
+if(params.circexplorer2){
+    if( !annotationfile.exists() ) exit 1, print_red("Missing annotation file: ${annotationfile}")
+}
+
+genomefile = file(params.genomefile) //the genomefile
+if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
+
+gtffile = file(params.gtffile) //the annotationfile-gtf-format
+if( !gtffile.exists() ) exit 1, print_red("Missing gtf annotation file: ${gtffile}")
+
+bedfile = file(params.bedfile) //the annotationfile-bed-format
+if( !bedfile.exists() ) exit 1, print_red("Missing bed annotation file: ${bedfile}")
+
+
+/*
+========================================================================================
+                         the environment directory
+========================================================================================
+
+condadir = file(params.condadir) //the python3 environment
+if( !condadir.exists() ) exit 1, print_red("Missing python3 environment: ${condadir}")
+
+conda2dir = file(params.conda2dir) //the python2 environment
+if( !conda2dir.exists() ) exit 1, print_red("Missing python2 environment: ${conda2dir}")
+*/
+
+/*
+========================================================================================
+                         the tools directory
+========================================================================================
+*/
+mapsdir = file(params.mapsdir) //the mapsplice directory
+if(params.mapsplice){
+    if( !mapsdir.exists() ) exit 1, print_red("Missing Mapsplice Directory: ${mapsdir}")
+}
+
+segdir = file(params.mapsdir) //the segemehl directory
+if(params.segemehl){
+    if( !segdir.exists() ) exit 1, print_red("Missing Segemehl Directory: ${segdir}")
+}
+
+ciridir = file(params.ciridir)
+if(params.ciri){
+    if( !genomefile.exists() ) exit 1, print_red("Missing CIRI Directory: ${ciridir}")
+}
+
+find_circdir = file(params.find_circdir)
+if(params.find_circ){
+    if( !find_circdir.exists() ) exit 1, print_red("Missing find_circ Directory: ${find_circdir}")
+}
+
+if(params.knife){
+    knifedir = Channel
+            .fromPath(params.knifedir)
+            .ifEmpty { exit 1, "The KNIFE not found: ${params.knife}" }
+}else{
+    knifedir = Channel
+            .fromPath(params.knifedir)
+}
+
+
+
+
 /*
 ========================================================================================
                          checking the design and compare file
 ========================================================================================
 */
 //design file
+designfile = file(params.designfile)
 if(params.designfile) {
-    designfile = file(params.designfile)
+
     if( !designfile.exists() ) exit 1, print_red("Design file not found: ${params.designfile}")
 }
-//compare.txt
+//compare file
+comparefile = file(params.comparefile)
 if(params.comparefile){
-    comparefile = file(params.comparefile)
+
     if( !comparefile.exists() ) exit 1, print_red("Compare file not found: ${params.comparefile}")
 }
-
-
 
 
 
@@ -541,7 +525,7 @@ log.info print_yellow("==========Output files directory=========")
 log.info print_yellow("Output directory :              ") + print_green(params.outdir)
 log.info "\n"
 log.info "\n"
-log.info print_purple("Start running...")
+log.info print_purple("==========Start running...==========")
 
 
 
@@ -564,29 +548,37 @@ if (fork_number < 1) {
  * Create the `read_pairs` channel that emits tuples containing three elements:
  * the pair ID, the first read-pair file and the second read-pair file
  */
-
 Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
         .set { read_pairs_fastp }
 
 
+
+log.info print_yellow("===================check or build the index===============================")
 /*
- * PREPROCESSING - Build STAR index
- */
-if(!params.starindex){
-    process makeSTARindex {
-        publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+========================================================================================
+                             check or build the index
+========================================================================================
+*/
+if(params.circexplorer2){
+    if(params.starindex){
+        starindex = Channel
+                .fromPath(params.starindex)
+                .ifEmpty { exit 1, "STAR index not found: ${params.starindex}" }
+    }else{
+        process makeSTARindex {
+            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
 
-        input:
-        file genomefile
-        file gtffile
+            input:
+            file genomefile
+            file gtffile
 
-        output:
-        file "starindex" into starindex
+            output:
+            file "starindex" into starindex
 
-        script:
-        """
+            script:
+            """
         mkdir starindex
         STAR \
             --runMode genomeGenerate \
@@ -596,53 +588,38 @@ if(!params.starindex){
             --genomeFastaFiles ${genomefile} \
             --sjdbOverhang 149
         """
+        }
     }
+}else{
+    starindex = Channel
+            .fromPath(params.starindex)
 }
 
-/*
- * PREPROCESSING - Build BWA index
- */
-if(!params.bwaindex){
-    process makeBWAindex {
-        publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
 
-        input:
-        file genomefile
+if(params.find_circ){
+    if(params.bowtie2index){
+        bowtie2index = Channel
+                .fromPath(params.bowtie2index)
+                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}" }
 
+        bowtie2index_fc = Channel
+                .fromPath(params.bowtie2index)
+                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}" }
+    }else{
+        process makeBowtie2index {
+            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
 
-        output:
-        file "bwaindex" into bwaindex
-
-        script:
-        """
-        mkdir bwaindex
-        cd ./bwaindex
-        bwa \
-            index ../${genomefile} \
-            -p genome
-        cd ../
-        """
-    }
-}
-
-/*
- * PREPROCESSING - Build Bowtie2 index
- */
-if(!params.bowtie2index){
-    process makeBowtie2index {
-        publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
-
-        input:
-        file genomefile
+            input:
+            file genomefile
 
 
-        output:
-        file "bowtie2index" into bowtie2index
-        file "bowtie2index" into bowtie2index_fc
-        file "bowtie2index" into bowtie2_build_knife
+            output:
+            file "bowtie2index" into bowtie2index
+            file "bowtie2index" into bowtie2index_fc
+            file "bowtie2index" into bowtie2_build_knife
 
-        script:
-        """
+            script:
+            """
         mkdir bowtie2index
         cd ./bowtie2index
         bowtie2-build -f \
@@ -650,26 +627,38 @@ if(!params.bowtie2index){
             genome
         cd ../
         """
+        }
     }
+}else{
+    bowtie2index = Channel
+            .fromPath(params.bowtie2index)
+
+
+    bowtie2index_fc = Channel
+            .fromPath(params.bowtie2index)
+
+
 }
 
-/*
- * PREPROCESSING - Build Bowtie index
- */
-if(!params.bowtieindex){
-    process makeBowtieindex {
-        publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+if(params.mapsplice){
+    if(params.bowtieindex){
+        bowtieindex = Channel
+                .fromPath(params.bowtieindex)
+                .ifEmpty { exit 1, "Bowtie index not found: ${params.bowtieindex}" }
+    }else{
+        process makeBowtieindex {
+            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
 
-        input:
-        file genomefile
+            input:
+            file genomefile
 
 
-        output:
-        file "bowtieindex" into bowtieindex
-        file "bowtieindex" into bowtie_build_knife
+            output:
+            file "bowtieindex" into bowtieindex
+            file "bowtieindex" into bowtie_build_knife
 
-        script:
-        """
+            script:
+            """
         mkdir bowtieindex
         cd ./bowtieindex
         bowtie-build \
@@ -677,35 +666,79 @@ if(!params.bowtieindex){
             genome
         cd ../
         """
+        }
     }
+}else{
+    bowtieindex = Channel
+            .fromPath(params.bowtieindex)
+
 }
 
-/*
- * PREPROCESSING - Build Segemehl index
- */
-if(!params.segindex){
-    process makeSegemehlindex {
-        publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+if(params.ciri){
+    if(params.bwaindex){
+        bwaindex = Channel
+                .fromPath(params.bwaindex)
+                .ifEmpty { exit 1, "BWA index not found: ${params.bwaindex}" }
+    }else{
+        process makeBWAindex {
+            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
 
-        input:
-        file genomefile
-        file segdir
+            input:
+            file genomefile
 
-        output:
-        file "genome.idx" into segindex
 
-        script:
+            output:
+            file "bwaindex" into bwaindex
+
+            script:
+            """
+        mkdir bwaindex
+        cd ./bwaindex
+        bwa \
+            index ../${genomefile} \
+            -p genome
+        cd ../
         """
+        }
+    }
+}else{
+    bwaindex = Channel
+            .fromPath(params.bwaindex)
+}
+
+if(params.segemehl){
+    if(params.segindex){
+        segindex = Channel
+                .fromPath(params.segindex)
+                .ifEmpty { exit 1, "Segemehl index not found: ${params.segindex}" }
+    }else{
+        process makeSegemehlindex {
+            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+
+            input:
+            file genomefile
+            file segdir
+
+            output:
+            file "genome.idx" into segindex
+
+            script:
+            """
         ${segdir}/segemehl.x \
             -d ${genomefile} \
             -x genome.idx
         """
+        }
     }
+}else{
+    segindex = Channel
+            .fromPath(params.segindex)
 }
+
 
 /*
  * PREPROCESSING - Build KNIFE index
- */
+
 if(!params.knifeindex){
     process makeKNIFEindex {
 
@@ -728,10 +761,11 @@ if(!params.knifeindex){
         """
     }
 }
+*/
 
 
-
-
+log.info print_purple("==========Index pass!...==========")
+log.info print_purple("==========Start running CircPipe...==========")
 /*
 ========================================================================================
                        first step : run the fastp (QC tool)
@@ -745,7 +779,7 @@ process Fastp{
     set pair_id, file(query_file) from read_pairs_fastp
 
     output:
-    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_tophat,fastpfiles_bowtie2
+    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,fastpfiles_bowtie2
     file ('*.html') into fastp_for_waiting
     file ('*_fastp.json') into fastp_for_multiqc
 
@@ -1798,7 +1832,6 @@ process Find_circ_Bed{
                                  produce the matrix
 ========================================================================================
 */
-
 process Find_circ_Matrix{
     tag "$pair_id"
     publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*.matrix", overwrite: true
@@ -1913,13 +1946,299 @@ process Find_circ_Cor{
     params.mRNA && params.find_circ
 
     output:
-    file ('*') into cor_plot
+    file ('*') into cor_plot_find_circ
 
     shell:
     '''
     Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
+
+
+/*
+========================================================================================
+                              the sixth tool : knife
+                                   run the knife
+========================================================================================
+*/
+process Knife{
+    tag "$pair_id"
+    publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', overwrite: true
+
+    input:
+    set pair_id, file (query_file) from fastpfiles_knife
+    file index from knifedir.collect()
+
+
+    output:
+    set pair_id, file ('*circJuncProbs.txt') into knifefiles
+
+
+    when:
+    params.knife
+
+    shell:
+    if(params.singleEnd){
+        """
+        source activate tools_in_python2
+        
+        sh completeRun.sh ./ complete ./ testData 15 hg38_phred33_skipGLM circReads 40 2>&1
+
+        cp ./testData/circReads/combinedReports/*report.txt ./
+
+        source deactivate
+        """
+    }else{
+        """
+        source activate tools_in_python2
+       
+        sh completeRun.sh ./ appended ./ testData 13 hg38_phred33 circReads 40 1 2>&1
+        
+        cp ./testData/circReads/combinedReports/*circJuncProbs.txt ./
+        
+        source deactivate
+        """
+    }
+
+}
+
+/*
+========================================================================================
+                              the sixth tool : knife
+                              produce the bed6 file
+========================================================================================
+*/
+process Knife_Bed{
+    tag "$pair_id"
+    publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', pattern:"*candidates.bed", overwrite: true
+
+    input:
+    set pair_id , file ( query_file ) from knifefiles
+    file otherTools
+
+    output:
+    file ('*candidates.bed') into modify_knifefiles
+    val (pair_id) into modify_knife_id
+
+    when:
+    params.knife
+
+    shell :
+    if(params.singleEnd){
+        '''
+    cat !{query_file} \
+    | grep rev \
+    | awk '{print $10}' \
+    > reads.txt
+
+    cat !{query_file} \
+    | grep rev \
+    | awk '{print $1}' \
+    | awk -F"|" '{print $1}' \
+    > chr.txt
+
+    cat !{query_file} \
+    | grep rev \
+    | awk '{print $1}' \
+    | awk -F"|" '{print $5}' \
+    > strand.txt
+
+    cat !{query_file} \
+    | grep rev \
+    | awk '{print $1}' \
+    | awk -F"|" '{print $2}' \
+    | awk -F":" '{print $2}' \
+    > start.txt
+
+    cat !{query_file} \
+    | grep rev \
+    | awk '{print $1}' \
+    | awk -F"|" '{print $3}' \
+    | awk -F":" '{print $2}' \
+    > end.txt
+
+    paste chr.txt start.txt end.txt reads.txt strand.txt \
+    | grep -v chrM \
+    | awk '{if($5=="-") print $1 "\t" $2 "\t" $3 "\t" "knife" "\t" $4 "\t" $5 ; else print $1 "\t" $3 "\t" $2 "\t" "knife" "\t" $4 "\t" $5 }' \
+    > temp.bed
+
+    python !{otherTools}/quchong.py temp.bed !{pair_id}_modify_knife.candidates.bed
+    '''
+    }else{
+        '''
+    cat !{query_file} \
+    | sed -e '1d' \
+    | awk '{print $6}' \
+    > reads.txt
+
+    cat !{query_file} \
+    | sed -e '1d' \
+    | awk '{print $1}' \
+    | awk -F"|" '{print $1}' \
+    > chr.txt
+
+    cat !{query_file} \
+    | sed -e '1d' \
+    | awk '{print $1}' \
+    | awk -F"|" '{print $5}' \
+    > strand.txt
+
+    cat !{query_file} \
+    | sed -e '1d' \
+    | awk '{print $1}' \
+    | awk -F"|" '{print $2}' \
+    | awk -F":" '{print $2}' \
+    > start.txt
+
+    cat !{query_file} \
+    | sed -e '1d' \
+    | awk '{print $1}' \
+    | awk -F"|" '{print $3}' \
+    | awk -F":" '{print $2}' \
+    > end.txt
+
+    paste chr.txt start.txt end.txt reads.txt strand.txt \
+    | grep -v chrM \
+    | awk '{if($5=="-") print $1 "\t" $2 "\t" $3 "\t" "knife" "\t" $4 "\t" $5 ; else print $1 "\t" $3 "\t" $2 "\t" "knife" "\t" $4 "\t" $5 }' \
+    > temp.bed
+
+    python !{otherTools}/quchong.py temp.bed !{pair_id}_modify_knife.candidates.bed
+    '''
+    }
+
+}
+
+/*
+========================================================================================
+                               the sixth tool : knife
+                                 produce the matrix
+========================================================================================
+*/
+process Knife_Matrix{
+    tag "$pair_id"
+    publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+    input:
+    file (query_file) from modify_knifefiles.collect()
+    val (pair_id) from modify_knife_id.collect()
+    file otherTools
+    file designfile
+    file gtffile
+
+    output:
+    file ('knife.txt') into merge_knife
+    file ('*annote.txt') into de_knife
+    file ('*.matrix') into output_knife
+    file ('*.matrix') into plot_knife
+    file ('name_knife.txt') into name_knife
+    file ('*annote.txt') into cor_knife
+    file ('*.matrix') into plot_knife_cor
+
+
+    when:
+    params.knife
+
+    shell :
+    '''
+    for file in !{query_file}
+    do
+        cat $file >> concatenate.bed
+    done
+    
+    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+    cat mergeconcatenate.bed > knife.txt
+    
+    cat find_circ.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
+    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o find_circ_ -gtf !{gtffile} -uniq
+
+    cat !{designfile} > designfile.txt
+    sed -i '1d' designfile.txt
+    cat designfile.txt | awk '{print $1}' > samplename.txt
+    
+    echo -e "id\\c" > merge_header.txt
+    
+    cat samplename.txt | while read line
+    do
+        if [ $((`cat ${line}_modify_knife.candidates.bed | wc -l`)) == 0 ];then
+        python !{otherTools}/createzero.py mergeconcatenate.bed counts.txt
+        else
+        python !{otherTools}/quchongsamples.py mergeconcatenate.bed ${line}_modify_knife.candidates.bed counts.txt
+        fi
+        paste -d"\t" id.txt counts.txt > temp.txt
+        cat temp.txt > id.txt
+        echo -e "\\t${line}\\c" >> merge_header.txt
+    done   
+    
+    sed -i 's/\\[//g' merge_header.txt
+    sed -i 's/\\,//g' merge_header.txt
+    sed -i 's/\\]//g' merge_header.txt
+    echo -e "\\n\\c" >> merge_header.txt
+     
+    cat merge_header.txt id.txt > knife_merge.matrix
+    echo -e "knife" > name_knife.txt
+    '''
+}
+
+/*
+========================================================================================
+                                 the sixth tool : knife
+                                 Differential Expression
+========================================================================================
+*/
+process Knife_DE{
+    publishDir "${params.outdir}/DE_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (anno_file) from de_knife
+    file otherTools
+    file designfile
+    file comparefile
+    file (matrix_file) from plot_knife
+
+    output:
+    file ('*') into end_knife
+
+    when:
+    params.knife
+
+    shell:
+    '''
+    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    '''
+}
+
+/*
+========================================================================================
+                                  the sixth tool : knife
+                                        Correlation
+========================================================================================
+*/
+process Knife_Cor{
+    publishDir "${params.outdir}/Corrrelation_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (matrix_file) from plot_knife_cor
+    file (anno_file) from cor_knife
+    file mRNA
+    file otherTools
+
+    when:
+    params.mRNA && params.knife
+
+    output:
+    file ('*') into cor_plot_knife
+
+    shell:
+    '''
+    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    '''
+}
+
+
+
+
 
 
 /*
@@ -2028,10 +2347,10 @@ process Venn{
 
 
     when:
-    params.merge
+    params.selectTools=='1,2,3,4,6'
 
     output:
-    file ('*') into annotation_plot
+    file ('*') into venn_plot
 
     shell:
     '''

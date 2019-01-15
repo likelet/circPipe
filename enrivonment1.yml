@@ -15,3 +15,4 @@ dependencies:
 - biopython=1.72
 - bcbiogff=0.6.4
 - perl=5.26.2.1
+- scipy=1.2.0

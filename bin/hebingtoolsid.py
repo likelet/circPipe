@@ -44,7 +44,6 @@ def chachong(x1,x2,x3,x4,x5):
                     print(x2[i])
                     print(x2[j+1+i])
                     print(abs(int(x2[i])-int(x2[j+1+i])))
-                    #print(abs(int(x3[i])-int(x3[j+1+i])>5))为什么是0
                     #same.append(j)
                     same.append(j+1+i)
                     dele.append(j+1+i)
