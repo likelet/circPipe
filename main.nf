@@ -443,6 +443,7 @@ if(params.find_circ){
     if( !find_circdir.exists() ) exit 1, print_red("Missing find_circ Directory: ${find_circdir}")
 }
 
+/*
 if(params.knife){
     knifedir = Channel
             .fromPath(params.knifedir)
@@ -451,7 +452,7 @@ if(params.knife){
     knifedir = Channel
             .fromPath(params.knifedir)
 }
-
+*/
 
 
 
@@ -504,28 +505,26 @@ log.info print_cyan("""
 log.info print_purple("============You are running cirPipe with the following parameters===============")
 log.info print_purple("Checking parameters ...")
 log.info "\n"
-log.info print_yellow("========Reads types=======")
+log.info print_yellow("=====================================Reads types================================")
 log.info print_yellow("singleEnd :                     ") + print_green(params.singleEnd)
 log.info "\n"
-log.info print_yellow("========Tools selected========")
+log.info print_yellow("====================================Tools selected==============================")
 log.info print_yellow("Circexplorer2 :                 ") + print_green(params.circexplorer2)
 log.info print_yellow("Find_circ :                     ") + print_green(params.find_circ)
 log.info print_yellow("Ciri :                          ") + print_green(params.ciri)
 log.info print_yellow("Mapsplice :                     ") + print_green(params.mapsplice)
 log.info print_yellow("Segemehl :                      ") + print_green(params.segemehl)
 log.info "\n"
-log.info print_yellow("=========Input files selected=========")
+log.info print_yellow("==================================Input files selected==========================")
 log.info print_yellow("Reads :                         ") + print_green(params.reads)
 log.info print_yellow("Annotation file :               ") + print_green(params.annotationfile)
 log.info print_yellow("Genome file :                   ") + print_green(params.genomefile)
 log.info print_yellow("Gtf file :                      ") + print_green(params.gtffile)
 log.info print_yellow("Bed file :                      ") + print_green(params.bedfile)
 log.info "\n"
-log.info print_yellow("==========Output files directory=========")
+log.info print_yellow("==================================Output files directory========================")
 log.info print_yellow("Output directory :              ") + print_green(params.outdir)
 log.info "\n"
-log.info "\n"
-log.info print_purple("==========Start running...==========")
 
 
 
@@ -932,12 +931,16 @@ process Circexplorer2_Bed{
 
     shell :
     '''
+    if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
+    touch !{pair_id}_modify_circexplorer2.candidates.bed
+    else
     grep circ !{query_file} \
     | grep -v chrM \
     | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
     > !{pair_id}_modify_circexplorer2.temp.bed
     
     python !{otherTools}/quchong.py !{pair_id}_modify_circexplorer2.temp.bed !{pair_id}_modify_circexplorer2.candidates.bed
+    fi
     '''
 }
 
@@ -1144,6 +1147,9 @@ process Ciri_Bed{
 
     shell :
     '''
+        if [ $((`cat !{query_file} | wc -l`)) == 1 ];then
+        touch !{pair_id}_modify_ciri.candidates.bed
+        else
         cat !{query_file} \
 	    | sed -e '1d' \
         | grep -v chrM \
@@ -1151,6 +1157,7 @@ process Ciri_Bed{
         > !{pair_id}_modify_ciri.temp.bed
         
         python !{otherTools}/quchong.py !{pair_id}_modify_ciri.temp.bed !{pair_id}_modify_ciri.candidates.bed
+        fi
         '''
 }
 
@@ -1561,6 +1568,9 @@ process Segemehl_Bed{
 
     shell :
     '''
+    if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
+    touch !{pair_id}_modify_segemehl.candidates.bed
+    else
     cat !{query_file} \
     | awk '{print $4}' \
     | awk -F":" '{print $2 "\t" $5 "\t" $6}' \
@@ -1574,6 +1584,7 @@ process Segemehl_Bed{
     > !{pair_id}_modify_segemehl.temp.bed
     
     python !{otherTools}/quchong.py !{pair_id}_modify_segemehl.temp.bed !{pair_id}_modify_segemehl.candidates.bed
+    fi
     '''
 }
 
@@ -1814,6 +1825,9 @@ process Find_circ_Bed{
 
     shell :
     '''
+    if [ $((`cat !{query_file} | wc -l`)) == 1 ];then
+    touch !{pair_id}_modify_find_circ.candidates.bed
+    else
     grep CIRCULAR !{query_file} \
     | grep -v chrM \
     | grep UNAMBIGUOUS_BP \
@@ -1823,6 +1837,7 @@ process Find_circ_Bed{
     > !{pair_id}_modify_find_circ.temp.bed
     
     python !{otherTools}/quchong.py !{pair_id}_modify_find_circ.temp.bed !{pair_id}_modify_find_circ.candidates.bed
+    fi
     '''
 }
 
@@ -1967,37 +1982,37 @@ process Knife{
 
     input:
     set pair_id, file (query_file) from fastpfiles_knife
-    file index from knifedir.collect()
+
 
 
     output:
-    set pair_id, file ('*circJuncProbs.txt') into knifefiles
+    set pair_id, file ('*.txt') into knifefiles
 
 
     when:
     params.knife
 
     shell:
+    knifedir = params.knifedir
     if(params.singleEnd){
-        """
-        source activate tools_in_python2
+        '''
+        ln -s !{knifedir} ./
         
-        sh completeRun.sh ./ complete ./ testData 15 hg38_phred33_skipGLM circReads 40 2>&1
+        pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 15 hg38_phred33_skipGLM circReads 40 1 2>&1"}' | bash
 
-        cp ./testData/circReads/combinedReports/*report.txt ./
+        cp ./testData/circReads/combinedReports/naiveunzip* ./
 
-        source deactivate
-        """
+
+        '''
     }else{
-        """
-        source activate tools_in_python2
+        '''
+        ln -s !{knifedir} ./
        
-        sh completeRun.sh ./ appended ./ testData 13 hg38_phred33 circReads 40 1 2>&1
+        pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 13 hg38_phred33 circReads 40 1 2>&1"}' | bash
         
-        cp ./testData/circReads/combinedReports/*circJuncProbs.txt ./
-        
-        source deactivate
-        """
+        cp ./testData/circReads/combinedReports/naiveunzip* ./
+
+        '''
     }
 
 }
@@ -2024,8 +2039,10 @@ process Knife_Bed{
     params.knife
 
     shell :
-    if(params.singleEnd){
-        '''
+    '''
+    if [ $((`cat !{query_file} | grep rev | wc -l`)) == 0 ];then
+    touch !{pair_id}_modify_knife.candidates.bed
+    else
     cat !{query_file} \
     | grep rev \
     | awk '{print $10}' \
@@ -2063,48 +2080,8 @@ process Knife_Bed{
     > temp.bed
 
     python !{otherTools}/quchong.py temp.bed !{pair_id}_modify_knife.candidates.bed
+    fi
     '''
-    }else{
-        '''
-    cat !{query_file} \
-    | sed -e '1d' \
-    | awk '{print $6}' \
-    > reads.txt
-
-    cat !{query_file} \
-    | sed -e '1d' \
-    | awk '{print $1}' \
-    | awk -F"|" '{print $1}' \
-    > chr.txt
-
-    cat !{query_file} \
-    | sed -e '1d' \
-    | awk '{print $1}' \
-    | awk -F"|" '{print $5}' \
-    > strand.txt
-
-    cat !{query_file} \
-    | sed -e '1d' \
-    | awk '{print $1}' \
-    | awk -F"|" '{print $2}' \
-    | awk -F":" '{print $2}' \
-    > start.txt
-
-    cat !{query_file} \
-    | sed -e '1d' \
-    | awk '{print $1}' \
-    | awk -F"|" '{print $3}' \
-    | awk -F":" '{print $2}' \
-    > end.txt
-
-    paste chr.txt start.txt end.txt reads.txt strand.txt \
-    | grep -v chrM \
-    | awk '{if($5=="-") print $1 "\t" $2 "\t" $3 "\t" "knife" "\t" $4 "\t" $5 ; else print $1 "\t" $3 "\t" $2 "\t" "knife" "\t" $4 "\t" $5 }' \
-    > temp.bed
-
-    python !{otherTools}/quchong.py temp.bed !{pair_id}_modify_knife.candidates.bed
-    '''
-    }
 
 }
 
@@ -2150,8 +2127,8 @@ process Knife_Matrix{
     cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
     cat mergeconcatenate.bed > knife.txt
     
-    cat find_circ.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o find_circ_ -gtf !{gtffile} -uniq
+    cat knife.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
+    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o knife_ -gtf !{gtffile} -uniq
 
     cat !{designfile} > designfile.txt
     sed -i '1d' designfile.txt
@@ -2388,7 +2365,7 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
 </head>
 <body>
 <div style="text-align:center; font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
-    <h1> Pipeline execution summary </h1>
+    <h1> CircPipe execution summary </h1>
     <h2> ---------------------------------------------- </h2>
     <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
         <h3 style = "margin-top:0; color: inherit;" ><strong>CircPipe</strong></h3>
@@ -2594,7 +2571,7 @@ workflow.onError {
 </head>
 <body>
 <div style="text-align:center; font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
-    <h1> Pipeline execution summary </h1>
+    <h1> CircPipe execution summary </h1>
     <h2> ---------------------------------------------- </h2>
     <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
         <h3 style = "margin-top:0; color: inherit;" ><strong>CircPipe</strong></h3>

@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="change readme and help message.">
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add knife.need to be tested">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/hebinglist.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/hebinglist.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/hebingtoolsid.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/hebingtoolsid.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/quchong.py" beforeDir="false" afterPath="$PROJECT_DIR$/bin/quchong.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/conf/base.config" beforeDir="false" afterPath="$PROJECT_DIR$/conf/base.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/enrivonment1.yml" beforeDir="false" afterPath="$PROJECT_DIR$/enrivonment1.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
     </list>
@@ -44,19 +39,19 @@
         <counts>
           <entry key="Dockerfile" value="224" />
           <entry key="Singularity" value="94" />
-          <entry key="config" value="1394" />
+          <entry key="config" value="1403" />
           <entry key="matrix" value="3" />
           <entry key="md" value="523" />
-          <entry key="nf" value="15769" />
+          <entry key="nf" value="16177" />
           <entry key="py" value="42" />
-          <entry key="txt" value="619" />
+          <entry key="txt" value="656" />
           <entry key="yml" value="190" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Groovy" value="15769" />
-          <entry key="PLAIN_TEXT" value="2899" />
+          <entry key="Groovy" value="16177" />
+          <entry key="PLAIN_TEXT" value="2945" />
           <entry key="YAML" value="190" />
         </counts>
       </usages-collector>
@@ -65,10 +60,10 @@
         <counts>
           <entry key="Dockerfile" value="11" />
           <entry key="LICENSE" value="1" />
-          <entry key="R" value="23" />
+          <entry key="R" value="24" />
           <entry key="Singularity" value="5" />
           <entry key="bed" value="33" />
-          <entry key="config" value="37" />
+          <entry key="config" value="40" />
           <entry key="html" value="12" />
           <entry key="matrix" value="4" />
           <entry key="md" value="15" />
@@ -86,7 +81,7 @@
         <counts>
           <entry key="Groovy" value="3" />
           <entry key="HTML" value="12" />
-          <entry key="PLAIN_TEXT" value="190" />
+          <entry key="PLAIN_TEXT" value="194" />
           <entry key="Perl" value="1" />
           <entry key="YAML" value="24" />
         </counts>
@@ -95,25 +90,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2344">
-              <caret line="768" column="2" lean-forward="true" selection-start-line="768" selection-start-column="2" selection-end-line="768" selection-end-column="2" />
+            <state relative-caret-position="162">
+              <caret line="2093" column="20" selection-start-line="2093" selection-start-column="20" selection-end-line="2093" selection-end-column="20" />
               <folding>
                 <element signature="e#25#410#0" />
                 <element signature="e#412#828#0" />
                 <element signature="e#831#950#0" />
-                <element signature="e#20345#21135#0" />
-                <element signature="e#21238#21246#0" />
                 <element signature="e#22356#22364#0" />
                 <element signature="e#23153#23161#0" />
                 <element signature="e#23862#23870#0" />
-                <element signature="e#22074#23017#0" />
                 <element signature="e#23367#23621#0" />
                 <element signature="e#23934#24754#0" />
-                <element signature="e#25079#25798#0" />
-                <element signature="e#26127#26856#0" />
                 <element signature="e#27186#29406#0" />
                 <element signature="e#29737#30246#0" />
                 <element signature="e#30553#31444#0" />
@@ -134,7 +124,10 @@
                 <element signature="e#52751#53544#0" />
                 <element signature="e#53870#56106#0" />
                 <element signature="e#56432#56921#0" />
-                <element signature="e#62850#66374#0" />
+                <element signature="e#57243#57690#0" />
+                <element signature="e#62064#62995#0" />
+                <element signature="e#63303#64617#0" />
+                <element signature="e#64929#67089#0" />
               </folding>
             </state>
           </provider>
@@ -158,11 +151,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-176">
-              <caret line="23" column="49" lean-forward="true" selection-start-line="23" selection-start-column="49" selection-end-line="23" selection-end-column="49" />
+            <state relative-caret-position="950">
+              <caret line="50" column="68" selection-start-line="50" selection-start-column="68" selection-end-line="50" selection-end-column="68" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/conf/base.config">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="356">
+              <caret line="33" column="73" lean-forward="true" selection-start-line="33" selection-start-column="73" selection-end-line="33" selection-end-column="73" />
             </state>
           </provider>
         </entry>
@@ -198,15 +200,15 @@
         <option value="$PROJECT_DIR$/bin/hebinglist.py" />
         <option value="$PROJECT_DIR$/enrivonment1.yml" />
         <option value="$PROJECT_DIR$/environment.yml" />
-        <option value="$PROJECT_DIR$/conf/base.config" />
         <option value="$PROJECT_DIR$/nextflow.config" />
+        <option value="$PROJECT_DIR$/conf/base.config" />
         <option value="$PROJECT_DIR$/main.nf" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="607" />
-    <option name="y" value="75" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="677" />
+    <option name="y" value="7" />
     <option name="width" value="1280" />
     <option name="height" value="1040" />
   </component>
@@ -226,7 +228,7 @@
             <path>
               <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
               <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
-              <item name="conf" type="462c0819:PsiDirectoryNode" />
+              <item name="bin" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -238,7 +240,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1547520052983" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1547609714756" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -544,7 +546,14 @@
       <option name="project" value="LOCAL" />
       <updated>1547174744380</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="add knife.need to be tested">
+      <created>1547520149265</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1547520149265</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -646,16 +655,10 @@
     <MESSAGE value="optimize the pipeline" />
     <MESSAGE value="update the Dockerfile and environment1.yml &amp; environment2.yml &amp; environment.yml" />
     <MESSAGE value="change readme and help message." />
-    <option name="LAST_COMMIT_MESSAGE" value="change readme and help message." />
+    <MESSAGE value="add knife.need to be tested" />
+    <option name="LAST_COMMIT_MESSAGE" value="add knife.need to be tested" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/Desktop/脚本/results/R1126_N_chrX_R_modify_circexplorer2.candidates.bed">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="456">
-          <caret line="30" column="52" selection-start-line="30" selection-start-column="52" selection-end-line="30" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Desktop/脚本/results/R1126_N_chrX_R_modify_ciri.candidates.bed">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="608">
@@ -863,10 +866,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/conf/base.config">
+    <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
-          <caret line="26" column="25" selection-start-line="26" selection-start-column="25" selection-end-line="26" selection-end-column="25" />
+        <state relative-caret-position="413">
+          <caret line="40" column="17" lean-forward="true" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
         </state>
       </provider>
     </entry>
@@ -877,38 +880,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
+    <entry file="file://$PROJECT_DIR$/bin/changematrix.R">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="413">
-          <caret line="40" column="17" lean-forward="true" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nextflow.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-176">
-          <caret line="23" column="49" lean-forward="true" selection-start-line="23" selection-start-column="49" selection-end-line="23" selection-end-column="49" />
+        <state relative-caret-position="494">
+          <caret line="26" column="35" selection-start-line="26" selection-start-column="35" selection-end-line="26" selection-end-column="35" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2344">
-          <caret line="768" column="2" lean-forward="true" selection-start-line="768" selection-start-column="2" selection-end-line="768" selection-end-column="2" />
+        <state relative-caret-position="162">
+          <caret line="2093" column="20" selection-start-line="2093" selection-start-column="20" selection-end-line="2093" selection-end-column="20" />
           <folding>
             <element signature="e#25#410#0" />
             <element signature="e#412#828#0" />
             <element signature="e#831#950#0" />
-            <element signature="e#20345#21135#0" />
-            <element signature="e#21238#21246#0" />
             <element signature="e#22356#22364#0" />
             <element signature="e#23153#23161#0" />
             <element signature="e#23862#23870#0" />
-            <element signature="e#22074#23017#0" />
             <element signature="e#23367#23621#0" />
             <element signature="e#23934#24754#0" />
-            <element signature="e#25079#25798#0" />
-            <element signature="e#26127#26856#0" />
             <element signature="e#27186#29406#0" />
             <element signature="e#29737#30246#0" />
             <element signature="e#30553#31444#0" />
@@ -929,8 +920,25 @@
             <element signature="e#52751#53544#0" />
             <element signature="e#53870#56106#0" />
             <element signature="e#56432#56921#0" />
-            <element signature="e#62850#66374#0" />
+            <element signature="e#57243#57690#0" />
+            <element signature="e#62064#62995#0" />
+            <element signature="e#63303#64617#0" />
+            <element signature="e#64929#67089#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/base.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="356">
+          <caret line="33" column="73" lean-forward="true" selection-start-line="33" selection-start-column="73" selection-end-line="33" selection-end-column="73" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nextflow.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="950">
+          <caret line="50" column="68" selection-start-line="50" selection-start-column="68" selection-end-line="50" selection-end-column="68" />
         </state>
       </provider>
     </entry>
