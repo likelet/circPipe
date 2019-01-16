@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add knife.need to be tested">
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add knife. pass test">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/conf/base.config" beforeDir="false" afterPath="$PROJECT_DIR$/conf/base.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -39,20 +39,20 @@
         <counts>
           <entry key="Dockerfile" value="224" />
           <entry key="Singularity" value="94" />
-          <entry key="config" value="1403" />
+          <entry key="config" value="1438" />
           <entry key="matrix" value="3" />
           <entry key="md" value="523" />
-          <entry key="nf" value="16177" />
+          <entry key="nf" value="16356" />
           <entry key="py" value="42" />
-          <entry key="txt" value="656" />
-          <entry key="yml" value="190" />
+          <entry key="txt" value="667" />
+          <entry key="yml" value="194" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Groovy" value="16177" />
-          <entry key="PLAIN_TEXT" value="2945" />
-          <entry key="YAML" value="190" />
+          <entry key="Groovy" value="16356" />
+          <entry key="PLAIN_TEXT" value="2991" />
+          <entry key="YAML" value="194" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages" />
@@ -74,7 +74,7 @@
           <entry key="r" value="5" />
           <entry key="txt" value="11" />
           <entry key="yaml" value="5" />
-          <entry key="yml" value="19" />
+          <entry key="yml" value="20" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
@@ -83,7 +83,7 @@
           <entry key="HTML" value="12" />
           <entry key="PLAIN_TEXT" value="194" />
           <entry key="Perl" value="1" />
-          <entry key="YAML" value="24" />
+          <entry key="YAML" value="25" />
         </counts>
       </usages-collector>
     </session>
@@ -93,8 +93,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="2093" column="20" selection-start-line="2093" selection-start-column="20" selection-end-line="2093" selection-end-column="20" />
+            <state relative-caret-position="3027">
+              <caret line="2025" column="17" selection-start-line="2025" selection-start-column="17" selection-end-line="2025" selection-end-column="17" />
               <folding>
                 <element signature="e#25#410#0" />
                 <element signature="e#412#828#0" />
@@ -102,8 +102,11 @@
                 <element signature="e#22356#22364#0" />
                 <element signature="e#23153#23161#0" />
                 <element signature="e#23862#23870#0" />
+                <element signature="e#22074#23017#0" />
                 <element signature="e#23367#23621#0" />
                 <element signature="e#23934#24754#0" />
+                <element signature="e#25079#25798#0" />
+                <element signature="e#26127#26856#0" />
                 <element signature="e#27186#29406#0" />
                 <element signature="e#29737#30246#0" />
                 <element signature="e#30553#31444#0" />
@@ -128,7 +131,21 @@
                 <element signature="e#62064#62995#0" />
                 <element signature="e#63303#64617#0" />
                 <element signature="e#64929#67089#0" />
+                <element signature="e#67404#67873#0" />
+                <element signature="e#68185#68642#0" />
+                <element signature="e#68981#70989#0" />
+                <element signature="e#71305#71881#0" />
+                <element signature="e#71895#72216#0" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/environment.yml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="541">
+              <caret line="42" column="13" selection-start-line="42" selection-start-column="13" selection-end-line="42" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -151,20 +168,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="950">
-              <caret line="50" column="68" selection-start-line="50" selection-start-column="68" selection-end-line="50" selection-end-column="68" />
+            <state relative-caret-position="19">
+              <caret line="13" column="8" lean-forward="true" selection-start-line="13" selection-start-column="8" selection-end-line="13" selection-end-column="8" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/conf/base.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="356">
-              <caret line="33" column="73" lean-forward="true" selection-start-line="33" selection-start-column="73" selection-end-line="33" selection-end-column="73" />
+            <state relative-caret-position="19">
+              <caret line="19" column="27" selection-start-line="19" selection-start-column="27" selection-end-line="19" selection-end-column="27" />
             </state>
           </provider>
         </entry>
@@ -199,16 +216,16 @@
         <option value="$PROJECT_DIR$/bin/hebingtoolsid.py" />
         <option value="$PROJECT_DIR$/bin/hebinglist.py" />
         <option value="$PROJECT_DIR$/enrivonment1.yml" />
-        <option value="$PROJECT_DIR$/environment.yml" />
         <option value="$PROJECT_DIR$/nextflow.config" />
-        <option value="$PROJECT_DIR$/conf/base.config" />
+        <option value="$PROJECT_DIR$/environment.yml" />
         <option value="$PROJECT_DIR$/main.nf" />
+        <option value="$PROJECT_DIR$/conf/base.config" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="677" />
-    <option name="y" value="7" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="666" />
+    <option name="y" value="1" />
     <option name="width" value="1280" />
     <option name="height" value="1040" />
   </component>
@@ -240,7 +257,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1547609714756" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1547629063217" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -553,7 +570,14 @@
       <option name="project" value="LOCAL" />
       <updated>1547520149265</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="add knife. pass test">
+      <created>1547609756465</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1547609756465</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -656,7 +680,8 @@
     <MESSAGE value="update the Dockerfile and environment1.yml &amp; environment2.yml &amp; environment.yml" />
     <MESSAGE value="change readme and help message." />
     <MESSAGE value="add knife.need to be tested" />
-    <option name="LAST_COMMIT_MESSAGE" value="add knife.need to be tested" />
+    <MESSAGE value="add knife. pass test" />
+    <option name="LAST_COMMIT_MESSAGE" value="add knife. pass test" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/Desktop/脚本/results/R1126_N_chrX_R_modify_ciri.candidates.bed">
@@ -852,13 +877,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/environment.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="13" column="13" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Documents/WeChat Files/wzh6529/Files/nohup.out">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1368">
@@ -887,10 +905,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/nextflow.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="19">
+          <caret line="13" column="8" lean-forward="true" selection-start-line="13" selection-start-column="8" selection-end-line="13" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/environment.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="541">
+          <caret line="42" column="13" selection-start-line="42" selection-start-column="13" selection-end-line="42" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="2093" column="20" selection-start-line="2093" selection-start-column="20" selection-end-line="2093" selection-end-column="20" />
+        <state relative-caret-position="3027">
+          <caret line="2025" column="17" selection-start-line="2025" selection-start-column="17" selection-end-line="2025" selection-end-column="17" />
           <folding>
             <element signature="e#25#410#0" />
             <element signature="e#412#828#0" />
@@ -898,8 +930,11 @@
             <element signature="e#22356#22364#0" />
             <element signature="e#23153#23161#0" />
             <element signature="e#23862#23870#0" />
+            <element signature="e#22074#23017#0" />
             <element signature="e#23367#23621#0" />
             <element signature="e#23934#24754#0" />
+            <element signature="e#25079#25798#0" />
+            <element signature="e#26127#26856#0" />
             <element signature="e#27186#29406#0" />
             <element signature="e#29737#30246#0" />
             <element signature="e#30553#31444#0" />
@@ -924,21 +959,19 @@
             <element signature="e#62064#62995#0" />
             <element signature="e#63303#64617#0" />
             <element signature="e#64929#67089#0" />
+            <element signature="e#67404#67873#0" />
+            <element signature="e#68185#68642#0" />
+            <element signature="e#68981#70989#0" />
+            <element signature="e#71305#71881#0" />
+            <element signature="e#71895#72216#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/conf/base.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="356">
-          <caret line="33" column="73" lean-forward="true" selection-start-line="33" selection-start-column="73" selection-end-line="33" selection-end-column="73" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nextflow.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="950">
-          <caret line="50" column="68" selection-start-line="50" selection-start-column="68" selection-end-line="50" selection-end-column="68" />
+        <state relative-caret-position="19">
+          <caret line="19" column="27" selection-start-line="19" selection-start-column="27" selection-end-line="19" selection-end-column="27" />
         </state>
       </provider>
     </entry>

@@ -2040,41 +2040,42 @@ process Knife_Bed{
 
     shell :
     '''
-    if [ $((`cat !{query_file} | grep rev | wc -l`)) == 0 ];then
+    if [ $((`cat !{query_file} | grep -v reg | wc -l`)) == 1 ];then
     touch !{pair_id}_modify_knife.candidates.bed
     else
     cat !{query_file} \
-    | grep rev \
-    | awk '{print $10}' \
+    | awk 'NR>1{print $10}' \
     > reads.txt
 
     cat !{query_file} \
-    | grep rev \
-    | awk '{print $1}' \
+    | awk 'NR>1{print $1}' \
     | awk -F"|" '{print $1}' \
     > chr.txt
 
     cat !{query_file} \
-    | grep rev \
-    | awk '{print $1}' \
+    | awk 'NR>1{print $1}' \
     | awk -F"|" '{print $5}' \
     > strand.txt
 
     cat !{query_file} \
-    | grep rev \
-    | awk '{print $1}' \
+    | awk 'NR>1{print $1}' \
     | awk -F"|" '{print $2}' \
     | awk -F":" '{print $2}' \
     > start.txt
 
     cat !{query_file} \
-    | grep rev \
-    | awk '{print $1}' \
+    | awk 'NR>1{print $1}' \
     | awk -F"|" '{print $3}' \
     | awk -F":" '{print $2}' \
     > end.txt
 
-    paste chr.txt start.txt end.txt reads.txt strand.txt \
+    cat !{query_file} \
+    | awk 'NR>1{print $1}' \
+    | awk -F"|" '{print $4}' \
+    > kind.txt
+
+    paste chr.txt start.txt end.txt reads.txt strand.txt kind.txt \
+    | grep -v reg \
     | grep -v chrM \
     | awk '{if($5=="-") print $1 "\t" $2 "\t" $3 "\t" "knife" "\t" $4 "\t" $5 ; else print $1 "\t" $3 "\t" $2 "\t" "knife" "\t" $4 "\t" $5 }' \
     > temp.bed
