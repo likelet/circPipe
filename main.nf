@@ -180,51 +180,6 @@ if(params.readPaths){
 */
 
 /*
-// Header log info
-log.info """=======================================================
-                                          ,--./,-.
-          ___     __   __   __   ___     /,-._.--~\'
-    |\\ | |__  __ /  ` /  \\ |__) |__         }  {
-    | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
-                                          `._,._,\'
-
-nf-core/cirpipe v${workflow.manifest.version}"
-======================================================="""
-
-def summary = [:]
-summary['Pipeline Name']  = 'nf-core/cirpipe'
-summary['Pipeline Version'] = workflow.manifest.version
-//summary['Run Name']     = custom_runName ?: workflow.runName
-summary['Reads']        = params.reads
-summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
-summary['Max Memory']   = params.max_memory
-summary['Max CPUs']     = params.max_cpus
-summary['Max Time']     = params.max_time
-summary['Output dir']   = params.outdir
-summary['Working dir']  = workflow.workDir
-summary['Container Engine'] = workflow.containerEngine
-if(workflow.containerEngine) summary['Container'] = workflow.container
-summary['Current home']   = "$HOME"
-summary['Current user']   = "$USER"
-summary['Current path']   = "$PWD"
-summary['Working dir']    = workflow.workDir
-summary['Output dir']     = params.outdir
-summary['Script dir']     = workflow.projectDir
-summary['Config Profile'] = workflow.profile
-
-
-if(workflow.profile == 'awsbatch'){
-    summary['AWS Region'] = params.awsregion
-    summary['AWS Queue'] = params.awsqueue
-}
-if(params.email) summary['E-mail Address'] = params.email
-
-log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
-log.info "========================================="
-
-
-
- *
  * Checking the input files
  * Build up the output files
  * Adding input files error exceptions Here
@@ -233,92 +188,7 @@ log.info "========================================="
 
 outdir = file(params.outdir) //the output directory
 
-/*
-def fastpoutdir = new File( "${params.outdir}/QC/" )
-if( !fastpoutdir.exists() ) {
-    fastpoutdir.mkdirs()
-}
 
-def toolsoutdir = new File( "${params.outdir}/pipeline_tools/" )
-if( !toolsoutdir.exists() ) {
-    toolsoutdir.mkdirs()
-}
-
-def staroutdir = new File( "${params.outdir}/pipeline_tools/pipeline_star/" )
-if( !staroutdir.exists() ) {
-    staroutdir.mkdirs()
-}
-
-def bwaoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_bwa/" )
-if( !bwaoutdir.exists() ) {
-    bwaoutdir.mkdirs()
-}
-
-def bowtie2outdir = new File( "${params.outdir}/pipeline_tools/pipeline_bowtie2/" )
-if( !bowtie2outdir.exists() ) {
-    bowtie2outdir.mkdirs()
-}
-
-def circexplorer2outdir = new File( "${params.outdir}/pipeline_tools/pipeline_circexplorer2/" )
-if( !circexplorer2outdir.exists() ) {
-    circexplorer2outdir.mkdirs()
-}
-
-def cirioutdir = new File( "${params.outdir}/pipeline_tools/pipeline_ciri/" )
-if( !cirioutdir.exists() ) {
-    cirioutdir.mkdirs()
-}
-
-def find_circoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_find_circ/" )
-if( !find_circoutdir.exists() ) {
-    find_circoutdir.mkdirs()
-}
-
-def autocircoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_autocirc/" )
-if( !autocircoutdir.exists() ) {
-    autocircoutdir.mkdirs()
-}
-
-def tophatoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_tophat/" )
-if( !tophatoutdir.exists() ) {
-    tophatoutdir.mkdirs()
-}
-
-def tophatcircexplorer2outdir = new File( "${params.outdir}/pipeline_tools/pipeline_circexplorer2_for_tophat/" )
-if( !tophatcircexplorer2outdir.exists() ) {
-    tophatcircexplorer2outdir.mkdirs()
-}
-
-def mapspliceoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_mapsplice/" )
-if( !mapspliceoutdir.exists() ) {
-    mapspliceoutdir.mkdirs()
-}
-
-def segemehloutdir = new File( "${params.outdir}/pipeline_tools/pipeline_segemehl/" )
-if( !segemehloutdir.exists() ) {
-    segemehloutdir.mkdirs()
-}
-
-def mergeoutdir = new File( "${params.outdir}/pipeline_tools/pipeline_merge/" )
-if( !mergeoutdir.exists() ) {
-    mergeoutdir.mkdirs()
-}
-
-def SEPoutdir = new File( "${params.outdir}/plot_separate/" )
-if( !SEPoutdir.exists() ) {
-    SEPoutdir.mkdirs()
-}
-
-def ALLoutdir = new File( "${params.outdir}/plot_merge/" )
-if( !ALLoutdir.exists() ) {
-    ALLoutdir.mkdirs()
-}
-
-def REPORToutdir = new File( "${params.outdir}/REPORT/" )
-if( !REPORToutdir.exists() ) {
-    REPORToutdir.mkdirs()
-}
-*/
 
 /*
 ========================================================================================
@@ -369,15 +239,6 @@ if(params.mRNA){
 }
 
 
-
-/*
-if(params.knifeindex){
-    knifeindex = Channel
-            .fromPath(params.knifeindex)
-            .ifEmpty { exit 1, "KNIFE index not found: ${params.knifeindex}" }
-}
-*/
-
 /*
 ========================================================================================
                          the reference directory
@@ -406,55 +267,6 @@ bedfile = file(params.bedfile) //the annotationfile-bed-format
 if( !bedfile.exists() ) exit 1, print_red("Missing bed annotation file: ${bedfile}")
 
 
-/*
-========================================================================================
-                         the environment directory
-========================================================================================
-
-condadir = file(params.condadir) //the python3 environment
-if( !condadir.exists() ) exit 1, print_red("Missing python3 environment: ${condadir}")
-
-conda2dir = file(params.conda2dir) //the python2 environment
-if( !conda2dir.exists() ) exit 1, print_red("Missing python2 environment: ${conda2dir}")
-*/
-
-/*
-========================================================================================
-                         the tools directory
-========================================================================================
-*/
-mapsdir = file(params.mapsdir) //the mapsplice directory
-if(params.mapsplice){
-    if( !mapsdir.exists() ) exit 1, print_red("Missing Mapsplice Directory: ${mapsdir}")
-}
-
-segdir = file(params.mapsdir) //the segemehl directory
-if(params.segemehl){
-    if( !segdir.exists() ) exit 1, print_red("Missing Segemehl Directory: ${segdir}")
-}
-
-ciridir = file(params.ciridir)
-if(params.ciri){
-    if( !genomefile.exists() ) exit 1, print_red("Missing CIRI Directory: ${ciridir}")
-}
-
-find_circdir = file(params.find_circdir)
-if(params.find_circ){
-    if( !find_circdir.exists() ) exit 1, print_red("Missing find_circ Directory: ${find_circdir}")
-}
-
-/*
-if(params.knife){
-    knifedir = Channel
-            .fromPath(params.knifedir)
-            .ifEmpty { exit 1, "The KNIFE not found: ${params.knife}" }
-}else{
-    knifedir = Channel
-            .fromPath(params.knifedir)
-}
-*/
-
-
 
 /*
 ========================================================================================
@@ -473,8 +285,6 @@ if(params.comparefile){
 
     if( !comparefile.exists() ) exit 1, print_red("Compare file not found: ${params.comparefile}")
 }
-
-
 
 
 
@@ -526,22 +336,6 @@ log.info print_yellow("==================================Output files directory=
 log.info print_yellow("Output directory :              ") + print_green(params.outdir)
 log.info "\n"
 
-
-
-/*
-ava_cpu = Runtime.getRuntime().availableProcessors()
-// set individual cpu for fork run
-if ( params.cpu != null && ava_cpu > params.cpu ) {
-    idv_cpu = params.cpu
-} else if ( params.cpu != null && ava_cpu < params.cpu ) {
-    idv_cpu = ava_cpu
-    print print_yellow("Exceeding the max available processors, \n use default parameter to run pipe. ")
-}
-int fork_number = ava_cpu / idv_cpu
-if (fork_number < 1) {
-    fork_number = 1
-}
-*/
 
 /*
  * Create the `read_pairs` channel that emits tuples containing three elements:
@@ -734,33 +528,6 @@ if(params.segemehl){
             .fromPath(params.segindex)
 }
 
-
-/*
- * PREPROCESSING - Build KNIFE index
-
-if(!params.knifeindex){
-    process makeKNIFEindex {
-
-        input:
-        file (bowtie_file) from bowtie_build_knife
-        file (bowtie2_file) from bowtie2_build_knife
-        file knifedir
-        file gtffile
-
-        output:
-        file "KNIFE" into knife_use
-
-        script:
-        """
-        mkdir KNIFE/circularRNApipeline_Standalone/denovo_scripts/index
-        cp bowtieindex/* KNIFE/circularRNApipeline_Standalone/denovo_scripts/index
-        mkdir KNIFE/circularRNApipeline_Standalone/index
-        cp bowtie2index/* KNIFE/circularRNApipeline_Standalone/index
-        cp ${gtffile} KNIFE/circularRNApipeline_Standalone/denovo_scripts
-        """
-    }
-}
-*/
 
 
 log.info print_purple("==========Index pass!...==========")
@@ -967,6 +734,8 @@ process Circexplorer2_Matrix{
     file ('name_circexplorer2.txt') into name_circexplorer2
     file ('*annote.txt') into de_circexplorer2
     file ('*.matrix') into plot_circexplorer2
+    file ('*annote.txt') into cor_circexplorer2
+    file ('*.matrix') into plot_circexplorer2_cor
 
     when:
     params.circexplorer2
@@ -1042,6 +811,33 @@ process Circexplorer2_DE{
     '''
 }
 
+/*
+========================================================================================
+                           the first tool : star - circexplorer2
+                                        Correlation
+========================================================================================
+*/
+process Circexplorer2_Cor{
+    publishDir "${params.outdir}/Corrrelation_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (matrix_file) from plot_circexplorer2_cor
+    file (anno_file) from cor_circexplorer2
+    file mRNA
+    file otherTools
+
+    when:
+    params.mRNA && params.circexplorer2
+
+    output:
+    file ('*') into cor_plot_circexplorer2
+
+    shell:
+    '''
+    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    '''
+}
+
 
 /*
 ========================================================================================
@@ -1112,8 +908,8 @@ process Ciri{
     params.ciri
 
     script:
-    """
-        perl ${ciridir}/CIRI2.pl \
+        """
+        CIRI2.pl \
         -T 10 \
         -F ${genomefile} \
         -A ${gtffile} \
@@ -1184,6 +980,8 @@ process Ciri_Matrix{
     file ('name_ciri.txt') into name_ciri
     file ('*annote.txt') into de_ciri
     file ('*.matrix') into plot_ciri
+    file ('*annote.txt') into cor_ciri
+    file ('*.matrix') into plot_ciri_cor
 
     when:
     params.ciri
@@ -1259,6 +1057,33 @@ process Ciri_DE{
     '''
 }
 
+/*
+========================================================================================
+                                the second tool : bwa - ciri
+                                        Correlation
+========================================================================================
+*/
+process Ciri_Cor{
+    publishDir "${params.outdir}/Corrrelation_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (matrix_file) from plot_ciri_cor
+    file (anno_file) from cor_ciri
+    file mRNA
+    file otherTools
+
+    when:
+    params.mRNA && params.ciri
+
+    output:
+    file ('*') into cor_plot_ciri
+
+    shell:
+    '''
+    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    '''
+}
+
 
 /*
 ========================================================================================
@@ -1288,8 +1113,7 @@ process Mapsplice{
     shell:
     if(params.singleEnd){
         """
-        source activate tools_in_python3
-        python ${mapsdir}/mapsplice.py \
+        mapsplice.py \
         -p ${task.cpus} \
         -k 1 \
         --fusion-non-canonical \
@@ -1302,12 +1126,10 @@ process Mapsplice{
         -1 ${query_file} \
         -o output_mapsplice_${pair_id} 2 \
         > ${pair_id}_mapsplice.log
-        source deactivate      
         """
     }else{
         """
-        source activate tools_in_python3
-        python ${mapsdir}/mapsplice.py \
+        mapsplice.py \
         -p ${task.cpus} \
         -k 1 \
         --fusion-non-canonical \
@@ -1320,7 +1142,6 @@ process Mapsplice{
         -2 ${query_file[1]} \
         -o output_mapsplice_${pair_id} 2 \
         > ${pair_id}_mapsplice.log
-        source deactivate
         """
     }
 
@@ -1396,6 +1217,8 @@ process Mapsplice_Matrix{
     file ('name_mapsplice.txt') into name_mapsplice
     file ('*annote.txt') into de_mapsplice
     file ('*.matrix') into plot_mapsplice
+    file ('*annote.txt') into cor_mapsplice
+    file ('*.matrix') into plot_mapsplice_cor
 
     when:
     params.mapsplice
@@ -1471,6 +1294,33 @@ process Mapsplice_DE{
     '''
 }
 
+/*
+========================================================================================
+                                  the third tool : mapsplice
+                                        Correlation
+========================================================================================
+*/
+process Mapsplice_Cor{
+    publishDir "${params.outdir}/Corrrelation_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (matrix_file) from plot_mapsplice_cor
+    file (anno_file) from cor_mapsplice
+    file mRNA
+    file otherTools
+
+    when:
+    params.mRNA && params.mapsplice
+
+    output:
+    file ('*') into cor_plot_mapsplice
+
+    shell:
+    '''
+    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    '''
+}
+
 
 /*
 ========================================================================================
@@ -1498,30 +1348,27 @@ process Segemehl{
     shell:
     if(params.singleEnd){
         """
-        source activate tools_in_python3
-        ${segdir}/segemehl.x \
+        segemehl.x \
         -d ${genomefile} \
         -i ${index} \
         -q ${query_file} \
         -t ${task.cpus} \
         -S \
         | samtools view -bS - \
-        | samtools sort -o - deleteme \
+        | samtools sort -o - \
         | samtools view -h - \
         > segemehl_${pair_id}_mapped.sam
 
-        ${segdir}/testrealign.x \
+        testrealign.x \
         -d ${genomefile} \
         -q segemehl_${pair_id}_mapped.sam \
         -n \
         -U segemehl_${pair_id}_splicesites.bed \
         -T segemehl_${pair_id}_transrealigned.bed
-        source deactivate
         """
     }else{
         """
-        source activate tools_in_python3
-        ${segdir}/segemehl.x \
+        segemehl.x \
         -d ${genomefile} \
         -i ${index} \
         -q ${query_file[0]} \
@@ -1529,17 +1376,16 @@ process Segemehl{
         -t ${task.cpus} \
         -S \
         | samtools view -bS - \
-        | samtools sort -o - deleteme \
+        | samtools sort -o - \
         | samtools view -h - \
         > segemehl_${pair_id}_mapped.sam
 
-        ${segdir}/testrealign.x \
+        testrealign.x \
         -d ${genomefile} \
         -q segemehl_${pair_id}_mapped.sam \
         -n \
         -U segemehl_${pair_id}_splicesites.bed \
         -T segemehl_${pair_id}_transrealigned.bed
-        source deactivate
         """
     }
 
@@ -1611,6 +1457,8 @@ process Segemehl_Matrix{
     file ('*annote.txt') into de_segemehl
     file ('*.matrix') into plot_segemehl
     file ('name_segemehl.txt') into name_segemehl
+    file ('*annote.txt') into cor_segemehl
+    file ('*.matrix') into plot_segemehl_cor
 
     when:
     params.segemehl
@@ -1683,6 +1531,33 @@ process Segemehl_DE{
     shell:
     '''
     Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    '''
+}
+
+/*
+========================================================================================
+                                  the fourth tool : segemehl
+                                        Correlation
+========================================================================================
+*/
+process Segemehl_Cor{
+    publishDir "${params.outdir}/Corrrelation_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (matrix_file) from plot_segemehl_cor
+    file (anno_file) from cor_segemehl
+    file mRNA
+    file otherTools
+
+    when:
+    params.mRNA && params.segemehl
+
+    output:
+    file ('*') into cor_plot_segemehl
+
+    shell:
+    '''
+    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1777,8 +1652,7 @@ process Find_circ{
 
     shell:
     """     
-    source activate tools_in_python2
-    python ${find_circdir}/unmapped2anchors.py ${query_file} \
+    unmapped2anchors.py ${query_file} \
     | gzip \
     > find_circ_${pair_id}_anchors.qfa.gz
 
@@ -1790,15 +1664,13 @@ process Find_circ{
     -q \
     -x ${index}/genome \
     -U find_circ_${pair_id}_anchors.qfa.gz \
-    | python ${find_circdir}/find_circ.py \
+    | find_circ.py \
     -G ${genomefile} \
     -p ${pair_id}_ \
     -s find_circ_${pair_id}_stats.sites.log \
     -n find_circ \
     -R find_circ_${pair_id}_spliced_reads.fa \
     > find_circ_${pair_id}_splice_sites.bed   
-
-    source deactivate
     """
 }
 
@@ -2001,8 +1873,6 @@ process Knife{
         pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 15 hg38_phred33_skipGLM circReads 40 1 2>&1"}' | bash
 
         cp ./testData/circReads/combinedReports/naiveunzip* ./
-
-
         '''
     }else{
         '''
@@ -2011,7 +1881,6 @@ process Knife{
         pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 13 hg38_phred33 circReads 40 1 2>&1"}' | bash
         
         cp ./testData/circReads/combinedReports/naiveunzip* ./
-
         '''
     }
 
@@ -2216,9 +2085,6 @@ process Knife_Cor{
 
 
 
-
-
-
 /*
 ========================================================================================
                                 after running the tools
@@ -2229,15 +2095,16 @@ process Tools_Merge{
     publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
-    file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl ).collect()
-    file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl ).collect()
-    file (matrix_file) from output_find_circ.concat( output_circexplorer2, output_ciri, output_mapsplice, output_segemehl ).collect()
+    file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl, merge_knife ).collect()
+    file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl, name_knife ).collect()
+    file (matrix_file) from output_find_circ.concat( output_circexplorer2, output_ciri, output_mapsplice, output_segemehl, output_knife ).collect()
     file otherTools
 
     output:
     file ('all_tools_merge.matrix') into tools_merge
     file ('for_annotation.bed') into bed_for_annotation
     file ('final.matrix') into matrix_for_circos
+    file ('all_tools_intersect.matrix') into tools_intersect
 
     when:
     params.merge
@@ -2272,6 +2139,8 @@ process Tools_Merge{
     
     cat header.txt id_list.txt > all_tools_merge.matrix
     
+    Rscript !{otherTools}/intersect.R all_tools_merge.matrix
+    
     for file in !{matrix_file}
     do
         cat $file | awk 'NR==1' > sample_id.txt
@@ -2285,6 +2154,8 @@ process Tools_Merge{
     python !{otherTools}/finalmerge.py change_reads.txt newmatrix.txt for_annotation.bed
 
     cat sample_id.txt newmatrix.txt > final.matrix
+    
+    Rscript !{otherTools}/modify_merge.R all_tools_merge.matrix
     '''
 }
 
@@ -2402,8 +2273,9 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
     </tbody>
     </table>
 
-    <p> likelet/circPipe </p>
-    <p><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></p>
+    <h4> likelet/CircPipe </h4>
+    <h4><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></h4>
+    <h4> If you need help, you can send email to 513848731@qq.com </h4>
 </div>
 </body>
 </html>
@@ -2620,8 +2492,9 @@ workflow.onError {
     </tbody>
     </table>
 
-    <p> likelet/circPipe </p>
-    <p><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></p>
+    <h4> likelet/CircPipe </h4>
+    <h4><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></h4>
+    <h4> If you need help, you can send email to 513848731@qq.com </h4>
 </div>
 </body>
 </html>

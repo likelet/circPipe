@@ -9,6 +9,8 @@ dependencies:
   - pysam=0.15.1
   - perl=5.26.2.1
   - numpy=1.15.2
+  - segemehl=0.2.0
+  - mapsplice=2.2.0
   - bwa=0.7.17
   - nextflow=0.32.0
   - graphviz=2.38.0
@@ -35,9 +37,11 @@ dependencies:
   - r-circlize=0.4.5
   - r-rcolorbrewer=1.1_2
   - r-venndiagram=1.6.20
-  - tophat=2.1.1
   - bedtools=2.27.1
   - biopython=1.72
   - bcbiogff=0.6.4
   - perl=5.26.2.1
-  - graphviz=2.38.0
+  - r-markdown=0.9
+  - scipy=1.2.0
+  - hisat2=2.1.0
+  - htseq=0.11.2

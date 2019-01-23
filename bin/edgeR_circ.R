@@ -91,7 +91,7 @@ if( sum(colData$Type==group1)< 3 || sum(colData$Type==group2)< 3 ){
     
     ################plot
     #######Vocano plot
-    png("volcaon.png", width=1800, height=1800, res = 300)
+    png("volcaon.png", width=1200, height=1200, res = 300)
     volcano_plot(sharedCirc_edgeR,c(group1,group2))
     dev.off()
     
@@ -99,18 +99,18 @@ if( sum(colData$Type==group1)< 3 || sum(colData$Type==group2)< 3 ){
     # png("heatmap1.png", width=1800, height=1800, res = 300)
     # heatmap_house(Circ_norm_edgeR[DE_list,],colData,title_hp = "Heatmap of Different expressed all DE circRNA")
     # dev.off()
-    png("heatmap2.png", width=1800, height=1800, res = 300)
+    png("heatmap2.png", width=1200, height=1200, res = 300)
     heatmap_house(Circ_norm_edgeR[DE_list,],colData,
                   title_hp = "Heatmap of Different expressed all DE circRNA",cluster_rule = "row")
     dev.off()
-    png("heatmap3.png", width=1800, height=1800, res = 300)
+    png("heatmap3.png", width=1200, height=1200, res = 300)
     heatmap_house(sharedCirc_DE_edgeR,colData,title_hp = "Heatmap of Different expressed shared_circRNA")
     dev.off()
     ########PCA
     # png("pca1.png", width=1800, height=1800, res = 300)
     # PCA_plot(DE_list,Circ_norm_edgeR,colData,withtext=FALSE)
     # dev.off()
-    png("pca2.png", width=1800, height=1800, res = 300)
+    png("pca2.png", width=1200, height=1200, res = 300)
     PCA_plot(DE_list,Circ_norm_edgeR,colData,withtext=TRUE)
     dev.off()
     

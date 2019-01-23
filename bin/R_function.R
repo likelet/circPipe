@@ -199,7 +199,7 @@ GoKegg=function(gene_list,outdir){
   write.table(as.data.frame(kk@result), file=paste0(outpath,"/kegg.txt"),sep = "\t",quote = F)
   #pdf(paste("GO_KEGG/"kegg.pdf",sep = ""),bg = "transparent")
   pdf(paste0(outpath,"/kegg.pdf"))
-  print(barplot(kk,drop=TRUE,showCategory = 10))
+  print(dotplot(kk,showCategory = 10))
   dev.off()
   cat ("cluster: kegg is ok~\n")
   
@@ -214,7 +214,7 @@ GoKegg=function(gene_list,outdir){
                     qvalueCutoff = 0.1,
                     readable = TRUE)
     write.table(as.data.frame(ego@result), file=paste0(outpath,"/clust_",myont,".txt",sep = ""),sep = "\t",quote = F)
-    print(barplot(ego,drop=TRUE,showCategory = 10)+labs(title=paste("enrichment analysis of GO",myont)))
+    print(dotplot(ego,showCategory = 10)+labs(title=paste("enrichment analysis of GO",myont)))
   }
   
   dev.off()

@@ -1,16 +1,10 @@
 FROM nfcore/base
 LABEL description="Docker image containing all requirements for nf-core/circpipe pipeline"
 
-COPY environment.yml environment1.yml environment2.yml ./
+COPY environment.yml ./
 
 ENV PATH /opt/conda/bin:$PATH
 RUN conda env create -f /environment.yml && conda clean -a
-
-ENV PATH /opt/conda/envs/tools_in_python2/bin:$PATH
-RUN conda env create -f /environment1.yml -n tools_in_python2 python=2.7 && conda clean -a
-
-ENV PATH /opt/conda/envs/tools_in_python3/bin:$PATH
-RUN conda env create -f /environment2.yml -n tools_in_python3 python=3.6 && conda clean -a
 
 ENV PATH /opt/conda/envs/nf-core-cirpipe-1.0dev/bin:$PATH
 
@@ -18,16 +12,22 @@ ENV PATH /opt/conda/envs/nf-core-cirpipe-1.0dev/bin:$PATH
 RUN wget http://sourceforge.net/projects/ciri/files/CIRI-full/CIRI-full_v2.0.zip && \
     unzip CIRI-full_v2.0.zip && \
     rm CIRI-full_v2.0.zip && \
-    mv CIRI-full_v2.0 CIRI
+    mv CIRI-full_v2.0 CIRI && \
+    sed -i "1i\\#\!/usr/bin/perl" ./CIRI/bin/CIRI_v2.0.6/CIRI2.pl && \
+    chmod a+x ./CIRI/bin/CIRI_v2.0.6/* && \
+    echo "export PATH=\"$(pwd)/CIRI/bin/CIRI_v2.0.6:\$PATH\"" >> ~/.bashrc && \
+    source ~/.bashrc
+
+ENV PATH $(pwd)/CIRI/bin/CIRI_v2.0.6:$PATH
 
 #install find_circ
-RUN git clone http://github.com/marvin-jens/find_circ.git
+RUN git clone http://github.com/marvin-jens/find_circ.git && \
+    sed -i '1d' ./find_circ/unmapped2anchors.py && \
+    sed -i "1i\\#\!/usr/bin/python" ./find_circ/unmapped2anchors.py && \
+    sed -i '1d' ./find_circ/find_circ.py && \
+    sed -i "1i\\#\!/usr/bin/python" ./find_circ/find_circ.py && \
+    chmod a+x ./find_circ/* && \
+    echo "export PATH=\"$(pwd)/find_circ:\$PATH\"" >> ~/.bashrc && \
+    source ~/.bashrc
 
-#install KNIFE
-RUN wget https://github.com/lindaszabo/KNIFE/archive/v1.4.tar.gz && \
-    tar zxvf v1.4.tar.gz && \
-    rm v1.4.tar.gz && \
-    mv KNIFE-1.4 KNIFE && \
-    cd KNIFE/circularRNApipeline_Standalone/analysis && \
-    chmod a+x *
-
+ENV PATH $(pwd)/find_circ:$PATH
