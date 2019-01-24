@@ -93,9 +93,10 @@ circ_length.hist
 dev.off()
 
 ################
-m6Astatus<-as.character(circ_feature$m6Astatus)
-distance<-sapply(strsplit(m6Astatus,","),"[",1)
-feature<-sapply(strsplit(m6Astatus,","),"[",2)
+
+test=read.delim(args[3],header = FALSE,sep="\t",fill = T)
+distance <- test$V14
+feature <- test$V13
 
 
 get_density_df <- function(raw_density_df,region_type){

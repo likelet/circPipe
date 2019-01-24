@@ -1829,7 +1829,7 @@ process Knife{
         '''
         ln -s !{knifedir} ./
         
-        pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 15 hg38_phred33_skipGLM circReads 40 1 2>&1"}' | bash
+        pwd | awk '{print "sh completeRun.sh",$0,"complete",$0,"testData 15 hg38_phred33_skipGLM circReads 40 1 2>&1"}' | bash
 
         cp ./testData/circReads/combinedReports/naiveunzip* ./
         '''
@@ -2143,7 +2143,8 @@ process Annotation_Merge{
     '''
     java -jar !{otherTools}/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
     Rscript !{otherTools}/circos.R !{query_file}
-    Rscript !{otherTools}/circRNA_feature.R !{otherTools}/R_function.R merge_for_annotation_annote.txt
+    perl !{otherTools}/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
+    Rscript !{otherTools}/circRNA_feature.R !{otherTools}/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
     '''
 }
 
@@ -2203,6 +2204,7 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
     <div style="text-align:center; color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
         <p>Error report : </p>
         <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${workflow.errorReport}</pre>
+        <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${workflow.errorMessage}</pre>
     </div>
     <p>The command used to launch the workflow was as follows : </p>      
     <pre style="white-space: pre-wrap; overflow: visible; background-color: #ededed; padding: 15px; border-radius: 4px; margin-bottom:0px;">${workflow.commandLine}</pre>
@@ -2223,6 +2225,9 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
     </tr>
     <tr>
     <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Segemehl : ${params.segemehl} </pre></td>
+    </tr>
+    <tr>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Knife : ${params.knife} </pre></td>
     </tr>
     </tbody>
     </table>
@@ -2273,190 +2278,8 @@ email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
 email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
 email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
-// Render the TXT template
-def engine = new groovy.text.GStringTemplateEngine()
-def tf = new File("$baseDir/assets/email_template.txt")
-def txt_template = engine.createTemplate(tf).make(email_fields)
-def email_txt = txt_template.toString()
-
-// Render the HTML template
-def hf = new File("$baseDir/assets/email_template.html")
-def html_template = engine.createTemplate(hf).make(email_fields)
-def email_html = html_template.toString()
-
-// Render the sendmail template
-def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
-def sf = new File("$baseDir/assets/sendmail_template.txt")
-def sendmail_template = engine.createTemplate(sf).make(smail_fields)
-def sendmail_html = sendmail_template.toString()
-
-// Send the HTML e-mail
-if (params.email) {
-    try {
-        if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
-        // Try to send HTML e-mail using sendmail
-        [ 'sendmail', '-t' ].execute() << sendmail_html
-        log.info "[nf-core/cirpipe] Sent summary e-mail to $params.email (sendmail)"
-    } catch (all) {
-        // Catch failures and try with plaintext
-        [ 'mail', '-s', subject, params.email ].execute() << email_txt
-        log.info "[nf-core/cirpipe] Sent summary e-mail to $params.email (mail)"
-    }
-}
-
-// Write summary e-mail HTML to a file
-def output_d = new File( "${params.outdir}/Documentation/" )
-if( !output_d.exists() ) {
-    output_d.mkdirs()
-}
-def output_hf = new File( output_d, "pipeline_report.html" )
-output_hf.withWriter { w -> w << email_html }
-def output_tf = new File( output_d, "pipeline_report.txt" )
-output_tf.withWriter { w -> w << email_txt }
 
 log.info "[nf-core/cirpipe] Pipeline Complete"
 */
 
-
-
-/*
-
-def create_workflow_summary(summary) {
-
-def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
-yaml_file.text  = """
-id: 'nf-core-cirpipe-summary'
-description: " - this information is collected when the pipeline is started."
-section_name: 'nf-core/cirpipe Workflow Summary'
-section_href: 'https://github.com/nf-core/cirpipe'
-plot_type: 'html'
-data: |
-    <dl class=\"dl-horizontal\">
-${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
-    </dl>
-""".stripIndent()
-
-return yaml_file
-
-
-}
-*/
-
-/*
-* Parse software version numbers
-
-process get_software_versions {
-
-output:
-file 'software_versions_mqc.yaml' into software_versions_yaml
-
-script:
-"""
-echo $workflow.manifest.version > v_pipeline.txt
-echo $workflow.nextflow.version > v_nextflow.txt
-//multiqc --version > v_multiqc.txt
-scrape_software_versions.py > software_versions_mqc.yaml
-"""
-}
-*/
-
-
-
-
-
-/*
-* STEP 3 - Output Description HTML
-process output_documentation {
-tag "$prefix"
-publishDir "${params.outdir}/Documentation", mode: 'copy'
-
-input:
-file output_docs
-
-output:
-file "results_description.html"
-
-script:
-"""
-markdown_to_html.r $output_docs results_description.html
-"""
-}
-*/
-
-workflow.onError {
-
-    println print_cyan(workflow.success ? "Done!" : "Oops .. something went wrong")
-
-    def msg = """\
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="circpipe: cirRNA analysis pipe">
-  <title>circpipe Pipeline Report</title>
-</head>
-<body>
-<div style="text-align:center; font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
-    <h1> CircPipe execution summary </h1>
-    <h2> ---------------------------------------------- </h2>
-    <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
-        <h3 style = "margin-top:0; color: inherit;" ><strong>CircPipe</strong></h3>
-        <p>Completed at : <strong>${workflow.complete}</strong></p>
-        <p>Duration : <strong>${workflow.duration}</strong></p>
-        <p>Success : <strong>${workflow.success}</strong></p>
-        <p>Exit status : <strong>${workflow.exitStatus}</strong></p>
-    </div>
-    <div style="text-align:center; color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
-        <p>Error report : </p>
-        <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${workflow.errorMessage}</pre>
-    </div>
-    <p>The command used to launch the workflow was as follows : </p>      
-    <pre style="white-space: pre-wrap; overflow: visible; background-color: #ededed; padding: 15px; border-radius: 4px; margin-bottom:0px;">${
-        workflow.commandLine
-    }</pre>
-    <h3> Tools selected : </h3>
-    <table style="width:100%; max-width:100%; border-spacing: 0; border-collapse: collapse; border:0; margin-bottom: 30px;">
-    <tbody style="border-bottom: 1px solid #ddd;">
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Circexplorer2 : ${
-        params.circexplorer2
-    } </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Find_circ : ${
-        params.find_circ
-    } </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Ciri : ${
-        params.ciri
-    } </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Mapsplice : ${
-        params.mapsplice
-    } </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Segemehl : ${
-        params.segemehl
-    } </pre></td>
-    </tr>
-    </tbody>
-    </table>
-
-    <h4> likelet/CircPipe </h4>
-    <h4><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></h4>
-    <h4> If you need help, you can send email to Wei Qijin (513848731@qq.com) </h4>
-</div>
-</body>
-</html>
-        """
-            .stripIndent()
-
-    sendMail(to: '513848731@qq.com',
-            subject: 'Breaking News in CircPipe Mission!',
-            body: msg)
-}
 
