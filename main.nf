@@ -2,23 +2,14 @@
 
 /*
 ========================================================================================
-                            cirPipe
+                            circPipe
 ========================================================================================
- * cirPipe was implemented by Dr. Qi Zhao and Qijin Wei from Sun Yat-sen University Cancer Center.
+ * circPipe was implemented by Dr. Qi Zhao and Qijin Wei from Sun Yat-sen University Cancer Center.
  * Homepage / Documentation
-  https://github.com/likelet/cirpipe
+  https://github.com/likelet/circpipe
 
  */
 
-/*
-========================================================================================
-                         nf-core/cirpipe
-========================================================================================
- nf-core/cirpipe Analysis Pipeline.
- #### Homepage / Documentation
- https://github.com/nf-core/cirpipe
-----------------------------------------------------------------------------------------
-*/
 
 
 /*
@@ -117,14 +108,6 @@ if (params.help){
 }
 
 /*
-// Configurable variables
-params.name = false
-//params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
-//params.multiqc_config = "$baseDir/conf/multiqc_config.yaml"
-params.email = false
-params.plaintext_email = false
-
-output_docs = file("$baseDir/docs/output.md")
 
 
 // AWSBatch sanity checking
@@ -153,29 +136,7 @@ if( workflow.profile == 'awsbatch') {
     if(!workflow.workDir.startsWith('s3:') || !params.outdir.startsWith('s3:')) exit 1, "Workdir or Outdir not on S3 - specify S3 Buckets for each to run on AWSBatch!"
 }
 
- *
- * Create a channel for input read files
 
-if(params.readPaths){
-    if(params.singleEnd){
-        Channel
-                .from(params.readPaths)
-                .map { row -> [ row[0], [file(row[1][0])]] }
-                .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-                .into { read_files_fastqc; read_files_trimming }
-    } else {
-        Channel
-                .from(params.readPaths)
-                .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-                .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-                .into { read_files_fastqc; read_files_trimming }
-    }
-} else {
-    Channel
-            .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-            .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nIf this is single-end data, please specify --singleEnd on the command line." }
-            .into { read_files_fastqc; read_files_trimming }
-}
 
 */
 
@@ -316,7 +277,7 @@ log.info print_purple("============You are running cirPipe with the following pa
 log.info print_purple("Checking parameters ...")
 log.info "\n"
 log.info print_yellow("=====================================Reads types================================")
-log.info print_yellow("singleEnd :                     ") + print_green(params.singleEnd)
+log.info print_yellow("SingleEnd :                     ") + print_green(params.singleEnd)
 log.info "\n"
 log.info print_yellow("====================================Tools selected==============================")
 log.info print_yellow("Circexplorer2 :                 ") + print_green(params.circexplorer2)
@@ -324,6 +285,7 @@ log.info print_yellow("Find_circ :                     ") + print_green(params.f
 log.info print_yellow("Ciri :                          ") + print_green(params.ciri)
 log.info print_yellow("Mapsplice :                     ") + print_green(params.mapsplice)
 log.info print_yellow("Segemehl :                      ") + print_green(params.segemehl)
+log.info print_yellow("Knife :                         ") + print_green(params.knife)
 log.info "\n"
 log.info print_yellow("==================================Input files selected==========================")
 log.info print_yellow("Reads :                         ") + print_green(params.reads)
@@ -354,7 +316,7 @@ log.info print_yellow("===================check or build the index==============
                              check or build the index
 ========================================================================================
 */
-if(params.circexplorer2){
+if(params.circexplorer2==true){
     if(params.starindex){
         starindex = Channel
                 .fromPath(params.starindex)
@@ -385,11 +347,11 @@ if(params.circexplorer2){
     }
 }else{
     starindex = Channel
-            .fromPath(params.starindex)
+            .fromPath(params.refdir)
 }
 
 
-if(params.find_circ){
+if(params.find_circ==true){
     if(params.bowtie2index){
         bowtie2index = Channel
                 .fromPath(params.bowtie2index)
@@ -423,17 +385,18 @@ if(params.find_circ){
         }
     }
 }else{
+
     bowtie2index = Channel
-            .fromPath(params.bowtie2index)
+            .fromPath(params.refdir)
 
 
     bowtie2index_fc = Channel
-            .fromPath(params.bowtie2index)
+            .fromPath(params.refdir)
 
 
 }
 
-if(params.mapsplice){
+if(params.mapsplice==true){
     if(params.bowtieindex){
         bowtieindex = Channel
                 .fromPath(params.bowtieindex)
@@ -463,11 +426,11 @@ if(params.mapsplice){
     }
 }else{
     bowtieindex = Channel
-            .fromPath(params.bowtieindex)
+            .fromPath(params.refdir)
 
 }
 
-if(params.ciri){
+if(params.ciri==true){
     if(params.bwaindex){
         bwaindex = Channel
                 .fromPath(params.bwaindex)
@@ -496,10 +459,10 @@ if(params.ciri){
     }
 }else{
     bwaindex = Channel
-            .fromPath(params.bwaindex)
+            .fromPath(params.refdir)
 }
 
-if(params.segemehl){
+if(params.segemehl==true){
     if(params.segindex){
         segindex = Channel
                 .fromPath(params.segindex)
@@ -525,7 +488,7 @@ if(params.segemehl){
     }
 }else{
     segindex = Channel
-            .fromPath(params.segindex)
+            .fromPath(params.refdir)
 }
 
 
@@ -899,7 +862,6 @@ process Ciri{
     set pair_id, file (query_file) from bwafiles
     file gtffile
     file genomefile
-    file ciridir
 
     output:
     set pair_id, file ('*.txt') into cirifiles
@@ -1097,7 +1059,6 @@ process Mapsplice{
 
     input:
     set pair_id, file (query_file) from fastpfiles_mapsplice
-    file mapsdir
     file gtffile
     file refmapsplice
     file outdir
@@ -1334,7 +1295,6 @@ process Segemehl{
 
     input:
     set pair_id, file (query_file) from fastpfiles_segemehl
-    file segdir
     file genomefile
     file index from segindex.collect()
 
@@ -1640,7 +1600,6 @@ process Find_circ{
     input:
     set pair_id, file (query_file) from bowtie2files
     file genomefile
-    file find_circdir
     file index from bowtie2index_fc.collect()
 
     output:
@@ -2215,12 +2174,7 @@ process Venn{
 
 emailaddress = params.email
 
-/*
-params.plaintext_email = false
-if(params.email) {
-    summary['E-mail Address'] = params.email
-}
-*/
+
 
 workflow.onComplete {
 
@@ -2275,7 +2229,7 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
 
     <h4> likelet/CircPipe </h4>
     <h4><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></h4>
-    <h4> If you need help, you can send email to 513848731@qq.com </h4>
+    <h4> If you need help, you can send email to Wei Qijin (513848731@qq.com) </h4>
 </div>
 </body>
 </html>
@@ -2494,7 +2448,7 @@ workflow.onError {
 
     <h4> likelet/CircPipe </h4>
     <h4><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></h4>
-    <h4> If you need help, you can send email to 513848731@qq.com </h4>
+    <h4> If you need help, you can send email to Wei Qijin (513848731@qq.com) </h4>
 </div>
 </body>
 </html>
