@@ -1,0 +1,208 @@
+---
+title: "circpipe"
+date: "`r format(Sys.time())`"
+output:
+  html_document:
+    toc : true
+    # toc_float:
+    #   collapsed : false
+    #   smooth_scroll : false
+    theme : cerulean
+---
+<font size = "5px">Introduction</font>
+=====================================
+<table><tr><font size = "4px">
+This is an R Markdown document for data exploration of circRNAs. circPipe begins with the raw sequencing data and then follows a step of quality control.Then to detect circRNAs,we set six softwares in this pipeline,including circexplorer2,CIRI,Find_circ,mapsplice,Segemehl and KNIFE .Users can choose One,several or all appropriate softwares to detect circRNAs.By default,our pipeline will only use CIRI for cirRNAs detection.
+To interpret the data, we design three modules to explore the identified circRNAs as well as protein coding ones, including conventional annotation, differential circRNA expression analysis and correlation analysis with host genes. Plots and tables of analysis module are presented in this HTML file via Rmarkdown.
+
+For any bugs or suggestions, please contact us:</tr></table></font>
+
+<font size = "5px">Detecting circRNAs</font>
+===================================== 
+<br>
+<table><tr><font size = "4px">All results of softwares that users selected are showed in the Venn diagram below.In this plot, we can see the overlapping and the crossing of the results from different softwares clearly.
+<br>
+
+<font size = "5px">Annotation</font>
+===================================== 
+
+<br>
+<table><tr><font size = "4px">The pie plot below displays the genomic loctions of the detected circRNAs,the dark grey part represents Immunoglobulin/T-cell receptor gene segments, orange part shows Long non-coding RNA, blue part presents Protein-coding RNA, red parts is Pseudogenes while cyan part the Small non-coding genes.Numbers in the figure legend represents the proportion of detected circRNAs of each kind of genomic character.
+</tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("genomic_distribution.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'genomic_distribution.png'), dpi = 400)
+}else{
+  print("Your data can't display through this pie plot.")
+}
+```
+
+<br>
+<table><tr><font size = "4px">The circos plot below describes the genomic distributions of circRNAs at the chromosomal level.The black bars and red scatters of the inner layer displays the enrichment degrees of circRNAs on different chromsomes. The outer layer shows the chromosome information,the outermost arabic numerals mean the chromosome number.</tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("circos.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'circos.png'), dpi = 400)
+}else{
+  print("Your data can't display through this circos plot.")
+}
+```
+
+<br>
+<table><tr><font size = "4px">The bar graph presents the frequency of circRNAs with different length. The horizontal axis of the graph represents the length of circRNAs, while the vertical axis displays the frequency of corresponding length circRNAs.The height of each bar represnts the frequency, the taller the bar, the higher the frequency.</tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("frequency.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'frequency.png'), dpi = 400)
+}else{
+  print("Your data can't display through this bar graph to show the frequency of circRNAs with different length.")
+}
+```
+
+<br>
+<table><tr><font size = "4px">The histogram provides the information of circRNA spanning distance.</tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("distance_smooth.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'distance_smooth.png'), dpi = 400)
+}else{
+  print("Your data can't display through this plot to show the sapnning distance of detected circRNAs")
+}
+```
+
+<font size = "5px">Differential Expression Analysis</font>
+===================================== 
+<table><tr><font size = "4px">This section mainly uses the number of reads from RNA-seq to distinguish the differential expressions. Several plots are showed below to display the results. </td></tr></table></font>
+
+###<font size = "4px">Differential Expression Table</font>
+<br>
+<table><tr><font size = "3px">After analysis, a table containing information of all diffientially expressed genes is presented with interactive options. Implication of nouns in header is explained in Table 1.
+Note that in different packages, same noun in header can have different implication. For example, *p*-values in DESeq are obtained by Wald test, but in edgeR *p*-values are obtained by Fisher's exact test.</td></tr></table></font>
+<br>
+```{r, echo=FALSE}
+htmltools::HTML('
+<div align="center">
+<table cellpadding="10" cellspacing="0" border="1" frame=hsides rules=all style="border-color: #000000">
+        <tr>
+            <td style="border-width: medium thin medium 0">&nbsp;Headers</td>
+            <td style="border-width: medium thin medium 0">&nbsp;Implication</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;FeatureID</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Feature identifier</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;baseMean</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Mean over all rows</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;log2FoldChange&nbsp;</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Logarithm (base 2) of the fold change</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;lfcSE</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Standard Error of log2foldchange</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;stat</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Wald statistic</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;pvalue</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Wald test p-value</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin medium 0">&nbsp;padj</td>
+            <td style="border-width: 0 thin medium 0"> <em>&nbsp;p</em>-value adjusted for multiple testing with the Benjamini-Hochberg procedure&nbsp;</td>
+        </tr>
+</table>
+Table 1: Implication of headers of Differential Expression Table in DESeq2
+</div>
+')
+```
+
+###<font size = "4px">Variance Estimation</font>
+<br>
+<table><tr><font size = "3px">The variance estimates plot is for checking the result of dispersion estimates adjustment.Specifically, in DESeq2, variance estimation is plotted by executing ```plotDispEsts()``` which is built-in in the package.
+The gene-wise estimates are in black, the fitted estimates are in red, and the final estimates are in blue. The outliers of gene-wise estimates are marked with blue circles and they are not shrunk towards the fitted value. The points lying on the bottom indicates they have a dispersion of practically zero or exactly zero. </td></tr></table></font>   
+<div align="center">
+<br>
+
+###<font size = "4px">Normalized Size Factors</font>
+<br>
+<table><tr><font size = "3px">Different samples may have different sequencing depth. In order to be comparable, it is necessary to estimate the relative size factors of each sample, and divide the samples by the size factors separately.    
+Table of normalized size factors shows the normalized size factors of each sample. In the header, *Group* represents conditions, *lib.size* represents size of the library, *norm.factors* is the normalized size factors. </td></tr></table></font> 
+<br>
+
+###<font size = "4px">Volcano Plot</font>
+<br>
+<table><tr><font size = "3px">An overview of the number of differential expression genes can be shown in the *volcano plot*. The log2-transformed fold change is on the x-axis, the y-axis represents the–log10-transformed *p*-value.  The threshold of *p*-value is ```INPUT THRESHOLD HERE!```, and fold change threshold is ```INPUT THRESHOLD HERE!```. Highly differential expressed genes are colored blue, while others are in red. </td></tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("volcano.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'volcano.png'), dpi = 400)
+}else{
+  print("Your data can't display through volcano plot.")
+}
+```
+
+###<font size = "4px">Heat map</font>
+<br>
+<table><tr><font size = "3px">The different expression of the genes can be displayed intuitively in the *Heatmap*.The Heatmap can display data through color changes.The color of each grid represent the amout of the gene expression.The darker the color, the higher the expression.</td></tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("heatmap2.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'heatmap2.png'), dpi = 400)
+}
+if(c("heatmap3.png")%in%list.files("./")){
+  knitr::include_graphics(paste0("./", 'heatmap2.png'), dpi = 400)
+}else{
+  print("Your data can't display through heatmap.")
+}
+```
+###<font size = "4px">PCA plot</font>
+<br>
+<table><tr><font size = "3px">PCA（Principal Components Analysis）a method of dimensionality reduction of the data.Using PCA,we can clarify the differences between different samples intuitively. In the PCA plot below, principal component 1 (PC1) and principal component 2 (PC2) are used as the X-axis and Y-axis to draw the scatter plot. Each point in the figure represents one sample.In such a PCA diagram, the further the two samples from each other, the greater the differences in gene expression patterns between the two samples.On the contrary, the scatters with similar expression pattern of corresponding samples are closer.</td></tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("pca2.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'pca2.png'), dpi = 400)
+}else{
+  print("Your data can't display through PCA plot.")
+}
+```
+###<font size = "4px">KEGG Plot</font>
+<br>
+<table><tr><font size = "3px">Using KEGG(Kyoto Encyclopedia of Genes and Genomes) to realize the enrichment of circRNAs to the functional pathways.The graph below displays the results, the ordinate represents the term of GO enrichment, the abscissa represents the number of genes enriched by each GO, and the staining of each pillar represents -log10(PValue). In this way, we can intuitively see which GO is enriched in large number and which enriched in a high degree.</td></tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("KEGG.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'KEGG.png'), dpi = 400)
+}else{
+  print("Your data can't display through KEGG plot.")
+}
+```
+<font size = "5px">Correlation Analysis</font>
+=====================================
+<br>
+<table><tr><font size = "4px">The scatter plot below describes the expression level of circRNAs compared to linear controls to assess the correlation between them.</td></tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("pearson.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'pearson.png'), dpi = 400)
+}else{
+  print("Your data can't display through this plot to show the correlation by pearson .")
+}
+if(c("kendall.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'kendall.png'), dpi = 400)
+}else{
+  print("no such picture")
+}
+if(c("spearman.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'spearman.png'), dpi = 400)
+}else{
+  print("no such picture")
+}
+
+```

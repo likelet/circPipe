@@ -2118,10 +2118,11 @@ process Tools_Merge{
     '''
 }
 
+
 /*
 ========================================================================================
                                 after running the tools
-                                        annoation
+                                        annotation
 ========================================================================================
 */
 process Annotation_Merge{
@@ -2167,6 +2168,34 @@ process Venn{
     '''
 }
 
+
+/*
+========================================================================================
+                                after running the tools
+                                     produce report
+========================================================================================
+*/
+process Report_production{
+    publishDir "${params.outdir}/Report", mode: 'copy', pattern: "*.html", overwrite: true
+
+    input:
+    file (de_file) from end_ciri.collect()
+    file (cor_file) from cor_plot_ciri.collect()
+    file (anno_file) from annotation_plot.collect()
+    file otherTools
+
+    when:
+    params.merge
+
+    output:
+    file ('*.html') into report_html
+
+    shell:
+    '''
+    cp !{otherTools}/CIRC.Rmd ./
+    Rscript -e "require( 'rmarkdown' ); render('CIRC.Rmd', 'html_document')"
+    '''
+}
 
 
 /*
