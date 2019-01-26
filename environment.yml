@@ -7,7 +7,7 @@ dependencies:
   - fastp=0.19.5
   - multiqc=1.6
   - pysam=0.15.1
-  - perl=5.26.2.1
+  - perl=5.26.2
   - numpy=1.15.2
   - segemehl=0.2.0
   - mapsplice=2.2.0
@@ -40,7 +40,6 @@ dependencies:
   - bedtools=2.27.1
   - biopython=1.72
   - bcbiogff=0.6.4
-  - perl=5.26.2.1
   - r-markdown=0.9
   - scipy=1.2.0
   - hisat2=2.1.0
