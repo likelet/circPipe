@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add report.">
-      <change afterPath="$PROJECT_DIR$/install_conda_package.sh" afterDir="false" />
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="change environment.yml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/install_tools_manually.sh" beforeDir="false" afterPath="$PROJECT_DIR$/install_tools_manually.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/CIRC.Rmd" beforeDir="false" afterPath="$PROJECT_DIR$/bin/CIRC.Rmd" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -49,14 +45,14 @@
           <entry key="nf" value="17364" />
           <entry key="py" value="42" />
           <entry key="sh" value="30" />
-          <entry key="txt" value="819" />
+          <entry key="txt" value="841" />
           <entry key="yml" value="213" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Groovy" value="17364" />
-          <entry key="PLAIN_TEXT" value="3305" />
+          <entry key="PLAIN_TEXT" value="3327" />
           <entry key="YAML" value="213" />
         </counts>
       </usages-collector>
@@ -71,7 +67,7 @@
           <entry key="config" value="41" />
           <entry key="html" value="12" />
           <entry key="matrix" value="5" />
-          <entry key="md" value="16" />
+          <entry key="md" value="18" />
           <entry key="nf" value="3" />
           <entry key="out" value="1" />
           <entry key="pl" value="1" />
@@ -87,7 +83,7 @@
         <counts>
           <entry key="Groovy" value="3" />
           <entry key="HTML" value="12" />
-          <entry key="PLAIN_TEXT" value="220" />
+          <entry key="PLAIN_TEXT" value="222" />
           <entry key="Perl" value="1" />
           <entry key="YAML" value="37" />
         </counts>
@@ -96,16 +92,15 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3704">
-              <caret line="768" column="24" lean-forward="true" selection-start-line="768" selection-start-column="24" selection-end-line="768" selection-end-column="24" />
+            <state relative-caret-position="2597">
+              <caret line="1614" column="12" lean-forward="true" selection-start-line="1614" selection-start-column="12" selection-end-line="1614" selection-end-column="12" />
               <folding>
                 <element signature="e#30620#32761#0" />
                 <element signature="e#33079#33543#0" />
                 <element signature="e#33858#34310#0" />
-                <element signature="e#34623#35910#0" />
                 <element signature="e#36229#37550#0" />
                 <element signature="e#37870#40104#0" />
                 <element signature="e#40426#40915#0" />
@@ -116,7 +111,6 @@
                 <element signature="e#47638#48122#0" />
                 <element signature="e#48441#48913#0" />
                 <element signature="e#49229#50631#0" />
-                <element signature="e#50950#51832#0" />
                 <element signature="e#52157#53073#0" />
                 <element signature="e#53398#55634#0" />
                 <element signature="e#55960#56449#0" />
@@ -127,42 +121,6 @@
                 <element signature="e#64591#66834#0" />
                 <element signature="e#67150#67726#0" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/environment.yml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="484">
-              <caret line="43" column="5" lean-forward="true" selection-start-line="43" selection-start-column="4" selection-end-line="43" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/install_conda_package.sh">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
-              <caret line="5" column="31" selection-start-line="5" selection-start-column="31" selection-end-line="5" selection-end-column="31" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Dockerfile">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="133">
-              <caret line="7" column="29" selection-start-line="7" selection-start-column="29" selection-end-line="7" selection-end-column="29" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/nextflow.config">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="304">
-              <caret line="40" column="14" selection-start-line="40" selection-start-column="14" selection-end-line="40" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -209,11 +167,10 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="647" />
-    <option name="y" value="16" />
-    <option name="width" value="979" />
-    <option name="height" value="1040" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="952" />
+    <option name="width" value="977" />
+    <option name="height" value="1038" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -229,6 +186,11 @@
               <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
               <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
+              <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
+              <item name="bin" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -238,7 +200,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1548496525300" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1548836012474" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -614,14 +576,20 @@
       <option name="project" value="LOCAL" />
       <updated>1548394322642</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="change environment.yml">
+      <created>1548496567462</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1548496567462</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
+    <frame x="762" y="0" width="781" height="830" extended-state="0" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16621985" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26417705" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -749,7 +717,8 @@
     <MESSAGE value="select CIRI for default." />
     <MESSAGE value="change annotation process" />
     <MESSAGE value="add report." />
-    <option name="LAST_COMMIT_MESSAGE" value="add report." />
+    <MESSAGE value="change environment.yml" />
+    <option name="LAST_COMMIT_MESSAGE" value="change environment.yml" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/otherTools/quchong.py" />
@@ -916,13 +885,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="413">
-          <caret line="40" column="17" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/conf/base.config">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-432">
@@ -964,15 +926,49 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/install_conda_package.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="114">
+          <caret line="6" column="30" selection-start-line="6" selection-start-column="30" selection-end-line="6" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="527">
+          <caret line="46" column="48" selection-start-line="46" selection-start-column="48" selection-end-line="46" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/nextflow.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="40" column="14" selection-start-line="40" selection-start-column="14" selection-end-line="40" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Dockerfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="76">
+          <caret line="7" column="29" selection-start-line="7" selection-start-column="29" selection-end-line="7" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/environment.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="665">
+          <caret line="35" column="15" lean-forward="true" selection-start-line="35" selection-start-column="15" selection-end-line="35" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3704">
-          <caret line="768" column="24" lean-forward="true" selection-start-line="768" selection-start-column="24" selection-end-line="768" selection-end-column="24" />
+        <state relative-caret-position="2597">
+          <caret line="1614" column="12" lean-forward="true" selection-start-line="1614" selection-start-column="12" selection-end-line="1614" selection-end-column="12" />
           <folding>
             <element signature="e#30620#32761#0" />
             <element signature="e#33079#33543#0" />
             <element signature="e#33858#34310#0" />
-            <element signature="e#34623#35910#0" />
             <element signature="e#36229#37550#0" />
             <element signature="e#37870#40104#0" />
             <element signature="e#40426#40915#0" />
@@ -983,7 +979,6 @@
             <element signature="e#47638#48122#0" />
             <element signature="e#48441#48913#0" />
             <element signature="e#49229#50631#0" />
-            <element signature="e#50950#51832#0" />
             <element signature="e#52157#53073#0" />
             <element signature="e#53398#55634#0" />
             <element signature="e#55960#56449#0" />
@@ -994,34 +989,6 @@
             <element signature="e#64591#66834#0" />
             <element signature="e#67150#67726#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Dockerfile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="7" column="29" selection-start-line="7" selection-start-column="29" selection-end-line="7" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/install_conda_package.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="5" column="31" selection-start-line="5" selection-start-column="31" selection-end-line="5" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/nextflow.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="40" column="14" selection-start-line="40" selection-start-column="14" selection-end-line="40" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/environment.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="484">
-          <caret line="43" column="5" lean-forward="true" selection-start-line="43" selection-start-column="4" selection-end-line="43" selection-end-column="9" />
         </state>
       </provider>
     </entry>
