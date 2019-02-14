@@ -7,6 +7,8 @@
 [![Docker](https://img.shields.io/docker/automated/likelet/cirpipe.svg)](https://hub.docker.com/r/likelet/cirpipe)
 ![Singularity Container available](
 https://img.shields.io/badge/singularity-available-7E4C74.svg)
+[![Documentation Status](https://readthedocs.org/projects/circpipe/badge/?version=latest)](https://circpipe.readthedocs.io/en/latest/?badge=latest)
+
 
 ### Introduction
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
