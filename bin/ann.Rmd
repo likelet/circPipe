@@ -1,0 +1,131 @@
+---
+title: "Differential Expression Analysis"
+date: "`r format(Sys.time())`"
+output: 
+  html_document:
+    toc : true
+    toc_float:   
+       collapsed: TRUE #仅包含H2,其它折叠，滑到标签才打开
+       smooth_scroll: TRUE #平滑滚动
+    number_sections: yes #目录自动编号  
+    # toc_float:
+    #     collapsed : false
+    #     smooth_scroll : false
+  theme : cerulean
+---
+<font size = "5px">Annotation</font>
+===================================== 
+### <font size = "4px">Annotation Table</font>
+<br>
+<table><tr><font size = "4px">After annotation, a table containing annotation information will be presented.We present the first 5 rows below. Implication of nouns in header is explained in Table 1. </td></tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+library(knitr)
+res<- read.delim("hellotest_annote.txt")
+res<- res[,-c(4,5,7,12,14)]
+res<- res[c(1,2,3,4,5),]
+knitr::kable(res,format = "markdown",caption="Annotation Table",col.names=c("Chromosome","Start","End","Strand","Ensemble gene_id","Gene_name","ensemble transcripts_id","gene_feature","gene_type"),full_width = F)
+```
+
+```{r, echo=FALSE}
+htmltools::HTML('
+<div align="center">
+<table cellpadding="10" cellspacing="0" border="1" frame=hsides rules=all style="border-color: #000000">
+        <tr>
+            <td style="border-width: medium thin medium 0">&nbsp;Headers</td>
+            <td style="border-width: medium thin medium 0">&nbsp;Implication</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;Chromosome</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The name of the chromosome</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;Start</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The starting position of the feature in the chromosome</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;End&nbsp;</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The ending position of the feature in the chromosome</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;Strand</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Defines the strand</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;Ensemble gene_id</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Gene indentify in Ensembl database</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;Gene_name</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The name of this gene</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;Ensembl transcript_id</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Transcript identify in ensemble database </td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;Gene_feature</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;Description of gene location </td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin medium 0">&nbsp;Gene_type</td>
+            <td style="border-width: 0 thin medium 0">&nbsp;Gene classification &nbsp;</td>
+        </tr>
+</table>
+Table 1: Implication of headers of Annotation Table 
+</div>
+')
+```
+
+###<font size = "4px">Genomic Distribution</font>
+<br>
+<table><tr><font size = "4px">The pie plot below displays the genomic loctions of the detected circRNAs,the dark grey part represents Immunoglobulin/T-cell receptor gene segments, orange part shows Long non-coding RNA, blue part presents Protein-coding RNA, red parts is Pseudogenes while cyan part the Small non-coding genes.Numbers in the figure legend represents the proportion of detected circRNAs of each kind of genomic character.</tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("genomic_distribution.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'genomic_distribution.png'), dpi = 400)
+}
+# else{
+#   print("Your data can't display through this pie plot.")
+# }
+```
+
+###<font size = "4px">Genomic Distributions at the Chromosomal Level</font>
+<br>
+<table><tr><font size = "4px">The circos plot below describes the genomic distributions of circRNAs at the chromosomal level.The black bars and red scatters of the inner layer displays the enrichment degrees of circRNAs on different chromsomes. The outer layer shows the chromosome information,the outermost arabic numerals mean the chromosome number.</tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("circos.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'circos.png'), dpi = 400)
+}
+# else{
+#   print("Your data can't display through this circos plot.")
+# }
+```
+
+###<font size = "4px">Frequency Of Different Length CircRNAs</font>
+<br>
+<table><tr><font size = "4px">The bar graph presents the frequency of circRNAs with different length. The horizontal axis of the graph represents the length of circRNAs, while the vertical axis displays the frequency of corresponding length circRNAs.The height of each bar represnts the frequency, the taller the bar, the higher the frequency.</tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("frequency.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'frequency.png'), dpi = 400)
+}
+# else{
+#   print("Your data can't display through this bar graph to show the frequency of circRNAs with different length.")
+# }
+```
+
+###<font size = "4px">CircRNA Spanning Distance</font>
+<br>
+<table><tr><font size = "4px">The histogram provides the information of circRNA spanning distance.</tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("distance_smooth.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'distance_smooth.png'), dpi = 400)
+}
+# else{
+#   print("Your data can't display through this plot to show the sapnning distance of detected circRNAs")
+# }
+```
+

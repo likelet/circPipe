@@ -1,0 +1,39 @@
+---
+title: "Correlation Analysis"
+date: "`r format(Sys.time())`"
+output: 
+  html_document:
+    toc : true
+    toc_float:   
+       collapsed: TRUE #仅包含H2,其它折叠，滑到标签才打开
+       smooth_scroll: TRUE #平滑滚动
+    number_sections: yes #目录自动编号  
+    # toc_float:
+    #     collapsed : false
+    #     smooth_scroll : false
+  theme : cerulean
+---
+
+<font size = "5px">Correlation Analysis</font>
+=====================================
+<br>
+<table><tr><font size = "4px">The scatter plot below describes the expression level of circRNAs compared to linear controls to assess the correlation between them.</td></tr></table></font>
+<br>
+```{r echo=FALSE,results='asis'}
+if(c("pearson.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'pearson.png'), dpi = 400)
+# }else{
+#   print("Your data can't display through this plot to show the correlation by pearson .")
+}
+if(c("kendall.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'kendall.png'), dpi = 400)
+ }#else{
+#   print("no such picture")
+# }
+if(c("spearman.png")%in%list.files("./")){
+   knitr::include_graphics(paste0("./", 'spearman.png'), dpi = 400)
+}#else{
+#   print("no such picture")
+# }
+
+```

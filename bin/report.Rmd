@@ -1,0 +1,104 @@
+---
+title: "Reports"
+date: "`r format(Sys.time())`"
+output: 
+  html_document:
+    toc : true
+    toc_float:   
+       collapsed: TRUE #仅包含H2,其它折叠，滑到标签才打开
+       smooth_scroll: TRUE #平滑滚动
+    number_sections: yes #目录自动编号  
+    # toc_float:
+    #     collapsed : false
+    #     smooth_scroll : false
+  theme : cerulean
+---
+
+<font size = "5px">Introduction</font>
+=====================================
+<table><tr><font size = "4px">Thanks for using [CircPipe](https://github.com/likelet/circPipe)! CircPipe is a nextflow-based pipeline which contains several popular tools and in-house scripts so as to identifiy and analyze novel circRNAs from raw RNA sequencing data.As we known, identification and profiling of circRNAs is a fundamental step to advance our knowledge on their function and regulatory mechanisms. We thus present CircPipe to facilitate related researches on circRNA discovery,annotation and analysis.
+This is an R Markdown document for data exploration of circRNAs. This report summarized all output files produced by [CircPipe](https://github.com/likelet/circPipe) and shown them via multiple plots and tables. In a word, CircPipeReporter's output contains modules as follows:
+
+1. Quality control of the raw data. 
+2. CircRNAs detection summary. We set six softwares in this pipeline,including circexplorer2, CIRI, Find_circ, mapsplice, Segemehl and KNIFE. Since the detection step was carried out by one, several or all appropriate softwares which users chose by their own needs, our report summarized the information from various software. By default, our pipeline will only use CIRI for cirRNAs detection. 
+3. CircRNAs annotation information summary. Novel circRNAs basic charateristics such as genomic distribution, length distribution, circRNAs spanning distance and classifications.
+4. Differential expression analysis if design file was feed. Abandunce of each transcript was assessed and compared between conditions. We also provide exploration analysis like PCA and clustering to help check the experimental design.  
+5. Correlation analysis was also performed between circRNAs and linear controls.
+
+For any bugs or suggestions, please contact us:</tr></table></font>
+
+
+<font size = "5px">Quality Control</font>
+=====================================
+<table><tr><font size = "4px"> Quality control of the raw data through MultiQC. Users can browse the report of MultiQC by clicking [MultiQC report](./multiqc_report.html) </tr></table></font>
+
+<font size = "5px">Detecting circRNAs</font>
+=====================================
+<br>
+<table><tr><font size = "4px">All results of softwares that users selected are showed in a table.In this table, we summarized circRNAs detection results of different softwares. The first column shows id of circRNAs, other columns present the detecting results of each software. "0" represents the circRNA is not detected by this software, while "1" is on the contrary.We present the first 5 rows below. Implication of nouns in header is explained in Table 1. </tr></table></font>
+<br>
+```{r echo=FALSE}
+sof<- read.delim("all_tools_merge.matrix")
+sof<- sof[c(1,2,3,4,5),]
+knitr::kable(sof,format = "markdown",caption="CircRNAs Detection Results Table")
+```
+
+```{r, echo=FALSE}
+htmltools::HTML('
+<div align="center">
+<table cellpadding="10" cellspacing="0" border="1" frame=hsides rules=all style="border-color: #000000">
+        <tr>
+            <td style="border-width: medium thin medium 0">&nbsp;Headers</td>
+            <td style="border-width: medium thin medium 0">&nbsp;Implication</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;id</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The name of the detected circRNA</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;find_circ</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The detection results of the software called find_circ </td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;circexplorer2&nbsp;</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The detecting results of the software called circexplorer2</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;ciri</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The detecting results of the software called ciri</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;mapsplice</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The detecting results of the software called mapsplice</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin thin 0">&nbsp;segemehl</td>
+            <td style="border-width: 0 thin thin 0">&nbsp;The detecting results of the software called segemehl</td>
+        </tr>
+        <tr>
+            <td style="border-width: 0 thin medium 0">&nbsp;knife</td>
+            <td style="border-width: 0 thin medium 0">&nbsp;The detecting results of the software called knife</td>
+        </tr>
+</table>
+Table 1: Implication of headers of CircRNAs Detection Results Table 
+</div>
+')
+```
+
+
+
+```{r child = 'ann.Rmd',eval=c("genomic_distribution.png")%in%list.files("./")}
+```
+
+```{r child = 'DE.Rmd',eval=c("volcano.png")%in%list.files("./")}
+```
+
+```{r child = 'cor.Rmd',eval=c("pearson.png")%in%list.files("./")}
+```
+
+
+
+
+
+
+
