@@ -3,6 +3,21 @@
   <component name="ChangeListManager">
     <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="change CIRCreport">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/R_function.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/R_function.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/changematrix.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/changematrix.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/circRNA_feature.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/circRNA_feature.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/circos.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/circos.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/correlation.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/correlation.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/edgeR_circ.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/edgeR_circ.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/intersect.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/intersect.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/modify_merge.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/modify_merge.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/try_annotate_forGTF.pl" beforeDir="false" afterPath="$PROJECT_DIR$/bin/try_annotate_forGTF.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/venn.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/venn.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/base.config" beforeDir="false" afterPath="$PROJECT_DIR$/conf/base.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/install_tools_manually.sh" beforeDir="false" afterPath="$PROJECT_DIR$/install_tools_manually.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -11,115 +26,13 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FUSProjectUsageTrigger">
-    <session id="-62073305">
-      <usages-collector id="statistics.lifecycle.project">
-        <counts>
-          <entry key="project.closed" value="14" />
-          <entry key="project.open.time.2" value="1" />
-          <entry key="project.open.time.21" value="1" />
-          <entry key="project.open.time.25" value="1" />
-          <entry key="project.open.time.26" value="2" />
-          <entry key="project.open.time.27" value="2" />
-          <entry key="project.open.time.28" value="2" />
-          <entry key="project.open.time.29" value="3" />
-          <entry key="project.open.time.31" value="1" />
-          <entry key="project.open.time.39" value="1" />
-          <entry key="project.open.time.42" value="1" />
-          <entry key="project.open.time.43" value="1" />
-          <entry key="project.open.time.7" value="2" />
-          <entry key="project.open.time.8" value="1" />
-          <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="20" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.edit">
-        <counts>
-          <entry key="Dockerfile" value="266" />
-          <entry key="R" value="33" />
-          <entry key="Singularity" value="94" />
-          <entry key="config" value="1502" />
-          <entry key="matrix" value="3" />
-          <entry key="md" value="523" />
-          <entry key="nf" value="17364" />
-          <entry key="py" value="42" />
-          <entry key="sh" value="30" />
-          <entry key="txt" value="861" />
-          <entry key="yml" value="213" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.edit">
-        <counts>
-          <entry key="Groovy" value="17364" />
-          <entry key="PLAIN_TEXT" value="3354" />
-          <entry key="YAML" value="213" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.vcs.git.usages" />
-      <usages-collector id="statistics.file.extensions.open">
-        <counts>
-          <entry key="Dockerfile" value="13" />
-          <entry key="LICENSE" value="1" />
-          <entry key="R" value="37" />
-          <entry key="Singularity" value="5" />
-          <entry key="bed" value="33" />
-          <entry key="config" value="42" />
-          <entry key="html" value="12" />
-          <entry key="matrix" value="5" />
-          <entry key="md" value="18" />
-          <entry key="nf" value="3" />
-          <entry key="out" value="1" />
-          <entry key="pl" value="1" />
-          <entry key="py" value="45" />
-          <entry key="r" value="6" />
-          <entry key="sh" value="5" />
-          <entry key="txt" value="13" />
-          <entry key="yaml" value="5" />
-          <entry key="yml" value="32" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.open">
-        <counts>
-          <entry key="Groovy" value="3" />
-          <entry key="HTML" value="12" />
-          <entry key="PLAIN_TEXT" value="224" />
-          <entry key="Perl" value="1" />
-          <entry key="YAML" value="37" />
-        </counts>
-      </usages-collector>
-    </session>
-  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-821">
-              <caret line="1595" column="17" selection-start-line="1595" selection-start-column="17" selection-end-line="1595" selection-end-column="17" />
-              <folding>
-                <element signature="e#30620#32761#0" />
-                <element signature="e#33079#33543#0" />
-                <element signature="e#33858#34310#0" />
-                <element signature="e#34623#35910#0" />
-                <element signature="e#36229#37550#0" />
-                <element signature="e#37870#40104#0" />
-                <element signature="e#40426#40915#0" />
-                <element signature="e#41235#41712#0" />
-                <element signature="e#42024#43476#0" />
-                <element signature="e#43794#44788#0" />
-                <element signature="e#45107#47319#0" />
-                <element signature="e#47638#48122#0" />
-                <element signature="e#48441#48913#0" />
-                <element signature="e#49229#50631#0" />
-                <element signature="e#50950#51832#0" />
-                <element signature="e#52157#53073#0" />
-                <element signature="e#53398#55634#0" />
-                <element signature="e#60550#62702#0" />
-                <element signature="e#63017#63486#0" />
-                <element signature="e#63798#64255#0" />
-                <element signature="e#64591#66834#0" />
-                <element signature="e#67150#67726#0" />
-              </folding>
+            <state relative-caret-position="30590">
+              <caret line="1610" column="17" selection-start-line="1610" selection-start-column="17" selection-end-line="1610" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -136,7 +49,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="38">
+            <state relative-caret-position="380">
               <caret line="20" column="21" selection-start-line="20" selection-start-column="21" selection-end-line="20" selection-end-column="21" />
             </state>
           </provider>
@@ -194,25 +107,19 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
-              <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="cirPipe" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cirPipe" type="462c0819:PsiDirectoryNode" />
-              <item name="bin" type="462c0819:PsiDirectoryNode" />
+              <item name="circPipe" type="b2602c69:ProjectViewProjectNode" />
+              <item name="circPipe" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="AndroidView" />
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -330,7 +237,7 @@
       <setting name="rowsRange" value="" />
       <method />
     </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
+    <configuration default="true" type="Applet">
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -343,6 +250,7 @@
       </method>
     </configuration>
     <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -382,7 +290,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="TestNG" factoryName="TestNG">
+    <configuration default="true" type="TestNG">
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
       <properties />
       <listeners />
@@ -390,11 +298,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
       <module name="" />
       <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
       <option name="PROGRAM_PARAMETERS" />
-      <predefined_log_file id="idea.log" enabled="true" />
+      <predefined_log_file enabled="true" id="idea.log" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -611,10 +519,9 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.12801608" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2249467" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -634,6 +541,7 @@
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50067025" side_tool="true" weight="0.32907802" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.19007093" />
       <window_info anchor="bottom" id="Messages" order="10" sideWeight="0.49932975" weight="0.32907802" />
+      <window_info anchor="right" id="Maven" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -715,9 +623,20 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list />
+          </value>
+        </entry>
+        <entry key="User">
+          <value>
+            <list />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="change something." />
@@ -747,33 +666,14 @@
     <option name="LAST_COMMIT_MESSAGE" value="change CIRCreport" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/otherTools/quchong.py" />
     <entry file="file://$PROJECT_DIR$/otherTools/hebingtoolsid.py" />
     <entry file="file://$USER_HOME$/Desktop/cirpipe_trace.txt" />
-    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/total_matrix.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="16" column="19" selection-start-line="16" selection-start-column="19" selection-end-line="16" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/total_matrix.txt" />
     <entry file="file://$PROJECT_DIR$/otherTools/changematrix.R" />
-    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/final.matrix">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
-          <caret line="831" column="21" selection-start-line="831" selection-start-column="21" selection-end-line="831" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/final.matrix" />
     <entry file="file://$PROJECT_DIR$/otherTools/edgeR_circ.R" />
-    <entry file="file://$PROJECT_DIR$/docs/README.md">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docs/installation.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-798" />
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/docs/README.md" />
+    <entry file="file://$PROJECT_DIR$/docs/installation.md" />
     <entry file="file://$PROJECT_DIR$/assets/sendmail_template.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -794,13 +694,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/F1_plot.R">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2655">
-          <caret line="373" selection-start-line="373" selection-end-line="373" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/F1_plot.R" />
     <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/m6A_feature_stats.R" />
     <entry file="file://$PROJECT_DIR$/conf/test.config">
       <provider selected="true" editor-type-id="text-editor">
@@ -869,13 +763,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Desktop/all_tools_intersect.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="64" selection-start-column="2" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/Desktop/all_tools_intersect.txt" />
     <entry file="file://$PROJECT_DIR$/bin/R_function.R">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4218">
@@ -923,21 +811,13 @@
         <state relative-caret-position="-570" />
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Desktop/test.anno.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-171816">
-          <caret line="22" column="8" lean-forward="true" selection-start-line="22" selection-start-column="8" selection-end-line="22" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$USER_HOME$/Desktop/test.anno.txt" />
     <entry file="file://$PROJECT_DIR$/bin/finalmerge.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1092" />
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Desktop/all_tools_intersect.matrix">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$USER_HOME$/Desktop/all_tools_intersect.matrix" />
     <entry file="file://$PROJECT_DIR$/install_tools_manually.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="499">
@@ -973,42 +853,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/main.nf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30590">
+          <caret line="1610" column="17" selection-start-line="1610" selection-start-column="17" selection-end-line="1610" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/nextflow.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
+        <state relative-caret-position="380">
           <caret line="20" column="21" selection-start-line="20" selection-start-column="21" selection-end-line="20" selection-end-column="21" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.nf">
+    <entry file="file://$PROJECT_DIR$/docs/index.rst">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-821">
-          <caret line="1595" column="17" selection-start-line="1595" selection-start-column="17" selection-end-line="1595" selection-end-column="17" />
-          <folding>
-            <element signature="e#30620#32761#0" />
-            <element signature="e#33079#33543#0" />
-            <element signature="e#33858#34310#0" />
-            <element signature="e#34623#35910#0" />
-            <element signature="e#36229#37550#0" />
-            <element signature="e#37870#40104#0" />
-            <element signature="e#40426#40915#0" />
-            <element signature="e#41235#41712#0" />
-            <element signature="e#42024#43476#0" />
-            <element signature="e#43794#44788#0" />
-            <element signature="e#45107#47319#0" />
-            <element signature="e#47638#48122#0" />
-            <element signature="e#48441#48913#0" />
-            <element signature="e#49229#50631#0" />
-            <element signature="e#50950#51832#0" />
-            <element signature="e#52157#53073#0" />
-            <element signature="e#53398#55634#0" />
-            <element signature="e#60550#62702#0" />
-            <element signature="e#63017#63486#0" />
-            <element signature="e#63798#64255#0" />
-            <element signature="e#64591#66834#0" />
-            <element signature="e#67150#67726#0" />
-          </folding>
-        </state>
+        <state relative-caret-position="-741" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/bin/circRNA_feature.R">

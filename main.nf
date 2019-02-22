@@ -193,6 +193,9 @@ if( params.selectTools ==~ /.*6.*/ ){
 otherTools = file(params.otherTools) //the other tools directory
 if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
 
+Rscriptpath = file(params.Rscriptpath) //the other tools directory
+if( !Rscriptpath.exists() ) exit 1, print_red("Missing Rscript path: ${Rscriptpath}")
+
 if(params.mRNA){
     mRNA = file(params.mRNA) //the mRNA file
     if( !mRNA.exists() ) exit 1, print_red("Missing mRNA expression file: ${mRNA}")
@@ -220,6 +223,9 @@ if(params.circexplorer2){
 
 genomefile = file(params.genomefile) //the genomefile
 if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
+
+faifile = file(params.faifile) //the genomefile
+if( !faifile.exists() ) exit 1, print_red("Missing genome file index: ${faifile}")
 
 gtffile = file(params.gtffile) //the annotationfile-gtf-format
 if( !gtffile.exists() ) exit 1, print_red("Missing gtf annotation file: ${gtffile}")
@@ -508,7 +514,7 @@ process Fastp{
     set pair_id, file(query_file) from read_pairs_fastp
 
     output:
-    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,fastpfiles_bowtie2
+    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,fastpfiles_bowtie2,fastpfiles_recount
     file ('*.html') into fastp_for_waiting
     file ('*_fastp.json') into fastp_for_multiqc
 
@@ -761,16 +767,17 @@ process Circexplorer2_DE{
     file designfile
     file comparefile
     file (matrix_file) from plot_circexplorer2
+    file Rscriptpath
 
     output:
     file ('*') into end_circexplorer2
 
     when:
-    params.circexplorer2
+    params.circexplorer2 && params.separate
 
     shell:
     '''
-    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -788,16 +795,17 @@ process Circexplorer2_Cor{
     file (anno_file) from cor_circexplorer2
     file mRNA
     file otherTools
+    file Rscriptpath
 
     when:
-    params.mRNA && params.circexplorer2
+    params.mRNA && params.circexplorer2 && params.separate
 
     output:
     file ('*') into cor_plot_circexplorer2
 
     shell:
     '''
-    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -936,6 +944,7 @@ process Ciri_Matrix{
     file designfile
     file gtffile
 
+
     output:
     file ('ciri.txt') into merge_ciri
     file ('*.matrix') into output_ciri
@@ -1006,16 +1015,17 @@ process Ciri_DE{
     file designfile
     file comparefile
     file (matrix_file) from plot_ciri
+    file Rscriptpath
 
     output:
     file ('*') into end_ciri
 
     when:
-    params.ciri
+    params.ciri && params.separate
 
     shell:
     '''
-    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1033,16 +1043,17 @@ process Ciri_Cor{
     file (anno_file) from cor_ciri
     file mRNA
     file otherTools
+    file Rscriptpath
 
     when:
-    params.mRNA && params.ciri
+    params.mRNA && params.ciri && params.separate
 
     output:
     file ('*') into cor_plot_ciri
 
     shell:
     '''
-    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1242,16 +1253,17 @@ process Mapsplice_DE{
     file designfile
     file comparefile
     file (matrix_file) from plot_mapsplice
+    file Rscriptpath
 
     output:
     file ('*') into end_mapsplice
 
     when:
-    params.mapsplice
+    params.mapsplice && params.separate
 
     shell:
     '''
-    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1269,16 +1281,17 @@ process Mapsplice_Cor{
     file (anno_file) from cor_mapsplice
     file mRNA
     file otherTools
+    file Rscriptpath
 
     when:
-    params.mRNA && params.mapsplice
+    params.mRNA && params.mapsplice && params.separate
 
     output:
     file ('*') into cor_plot_mapsplice
 
     shell:
     '''
-    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1481,16 +1494,17 @@ process Segemehl_DE{
     file designfile
     file comparefile
     file (matrix_file) from plot_segemehl
+    file Rscriptpath
 
     output:
     file ('*') into end_segemehl
 
     when:
-    params.segemehl
+    params.segemehl && params.separate
 
     shell:
     '''
-    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1508,16 +1522,17 @@ process Segemehl_Cor{
     file (anno_file) from cor_segemehl
     file mRNA
     file otherTools
+    file Rscriptpath
 
     when:
-    params.mRNA && params.segemehl
+    params.mRNA && params.segemehl && params.separate
 
     output:
     file ('*') into cor_plot_segemehl
 
     shell:
     '''
-    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1760,16 +1775,17 @@ process Find_circ_DE{
     file designfile
     file comparefile
     file (matrix_file) from plot_find_circ
+    file Rscriptpath
 
     output:
     file ('*') into end_find_circ
 
     when:
-    params.find_circ
+    params.find_circ && params.separate
 
     shell:
     '''
-    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1787,16 +1803,17 @@ process Find_circ_Cor{
     file (anno_file) from cor_find_circ
     file mRNA
     file otherTools
+    file Rscriptpath
 
     when:
-    params.mRNA && params.find_circ
+    params.mRNA && params.find_circ && params.separate
 
     output:
     file ('*') into cor_plot_find_circ
 
     shell:
     '''
-    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -2002,16 +2019,17 @@ process Knife_DE{
     file designfile
     file comparefile
     file (matrix_file) from plot_knife
+    file Rscriptpath
 
     output:
     file ('*') into end_knife
 
     when:
-    params.knife
+    params.knife && params.separate
 
     shell:
     '''
-    Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -2029,16 +2047,17 @@ process Knife_Cor{
     file (anno_file) from cor_knife
     file mRNA
     file otherTools
+    file Rscriptpath
 
     when:
-    params.mRNA && params.knife
+    params.mRNA && params.knife && params.separate
 
     output:
     file ('*') into cor_plot_knife
 
     shell:
     '''
-    Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -2047,7 +2066,7 @@ process Knife_Cor{
 /*
 ========================================================================================
                                 after running the tools
-                calculate the results by different tools, combine matrix
+                       calculate the results by different tools
 ========================================================================================
 */
 process Tools_Merge{
@@ -2056,13 +2075,17 @@ process Tools_Merge{
     input:
     file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl, merge_knife ).collect()
     file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl, name_knife ).collect()
-    file (matrix_file) from output_find_circ.concat( output_circexplorer2, output_ciri, output_mapsplice, output_segemehl, output_knife ).collect()
     file otherTools
+    file Rscriptpath
 
     output:
     file ('all_tools_merge.matrix') into tools_merge
+    file ('all_tools_merge.matrix') into tools_merge_html
     file ('for_annotation.bed') into bed_for_annotation
-    file ('final.matrix') into matrix_for_circos
+    file ('for_annotation.bed') into bed_for_recount
+    file ('for_annotation.bed') into bed_for_merge
+    file ('*annote.txt') into de_merge
+    file ('*annote.txt') into cor_merge
     file ('all_tools_intersect.matrix') into tools_intersect
 
     when:
@@ -2072,11 +2095,16 @@ process Tools_Merge{
     '''
     for file in !{query_file}
     do
-        cat $file >> concatenate.txt
-    done
+        cat $file >> temp_concatenate.txt
+    done 
+        
+    awk '$3-$2>=100' temp_concatenate.txt > concatenate.txt
     
     python !{otherTools}/hebingtoolsid.py concatenate.txt id_unsort.txt
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 id_unsort.txt > id_sort.txt
+    
+    cat id_sort.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > for_annotation.bed
+    java -jar !{otherTools}/bed1114.jar -i for_annotation.bed -o merge_ -gtf !{gtffile} -uniq 
     
     echo -e "total\\c" > total.txt
     cat id_sort.txt | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id_merge.txt
@@ -2098,23 +2126,165 @@ process Tools_Merge{
     
     cat header.txt id_list.txt > all_tools_merge.matrix
     
-    Rscript !{otherTools}/intersect.R all_tools_merge.matrix
-    
-    for file in !{matrix_file}
-    do
-        cat $file | awk 'NR==1' > sample_id.txt
-        cat $file > temp.txt
-        sed -i '1d' temp.txt
-        cat temp.txt >> total_matrix.txt
-    done
-    
-    Rscript !{otherTools}/changematrix.R total_matrix.txt change_reads.txt
-    
-    python !{otherTools}/finalmerge.py change_reads.txt newmatrix.txt for_annotation.bed
+    !{Rscriptpath}/Rscript !{otherTools}/intersect.R all_tools_merge.matrix
+    '''
+}
 
-    cat sample_id.txt newmatrix.txt > final.matrix
+
+/*
+========================================================================================
+                                after running the tools
+                                   Recount for merge
+========================================================================================
+*/
+process Recount_fisrt_step{
+    input:
+    file (bed_file) from bed_for_recount
+    file genomefile
+    file otherTools
+    file faifile
+
+    output:
+    file "candidate_circRNA_index" into candidate_circRNA_index
+    file ('tmp_candidate_circRNA.gff3') into gff3_file
+
+    when:
+    params.merge
+
+    shell:
+    '''
+    sh !{otherTools}/final_recount.sh !{bed_file} !{task.cpus} !{genomefile}
+    '''
+}
+
+process Recount_second_step{
+    tag "$pair_id"
+
+    input:
+    file index from candidate_circRNA_index.collect()
+    file (gff_file) from gff3_file
+    set pair_id, file(query_file) from fastpfiles_recount
+    file otherTools
+
+    output:
+    file('*circRNA_requantity.count') into single_sample_recount
+
+    when:
+    params.merge
+
+    shell:
+    if(params.singleEnd){
+        '''
+        sh !{otherTools}/final_recount2.sh !{pair_id} single_end !{task.cpus} !{query_file}
+        '''
+    }else{
+        '''
+        sh !{otherTools}/final_recount2.sh !{pair_id} pair_end !{task.cpus} !{query_file[0]} !{query_file[1]}
+        '''
+    }
+}
+
+process Recount_results_combine{
+    publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+    input:
+    file (query_file) from single_sample_recount.collect()
+    file designfile
+    file otherTools
+    file (bed_file) from bed_for_merge
+
+    output:
+    file ('final.matrix') into matrix_for_circos
+    file ('final.matrix') into plot_merge
+    file ('final.matrix') into plot_merge_cor
+
+    when:
+    params.merge
+
+    shell:
+    '''
+    cat !{designfile} > designfile.txt
+    sed -i '1d' designfile.txt
+    cat designfile.txt | awk '{print $1}' > samplename.txt
     
-    Rscript !{otherTools}/modify_merge.R all_tools_merge.matrix
+    echo -e "id\\c" > merge_header.txt
+    
+    cat for_annotation.bed | awk '{print $1 "_" $2 "_" $3 "_" $6 }' > id.txt
+    
+    cat samplename.txt | while read line
+    do
+        sed '$d' ${line}_circRNA_requantity.count > temp1.bed
+        sed '$d' temp1.bed > temp2.bed
+        sed '$d' temp2.bed > temp3.bed
+        sed '$d' temp3.bed > temp4.bed
+        sed '$d' temp4.bed > ${line}_modify_circRNA_requantity.count
+        python !{otherTools}/final_countnumbers.py id.txt ${line}_modify_circRNA_requantity.count ${line}_counts.txt
+        paste -d"\t" id.txt ${line}_counts.txt > temp.txt
+        cat temp.txt > id.txt
+        echo -e "\\t${line}\\c" >> merge_header.txt
+    done   
+    
+    echo -e "\\n\\c" >> merge_header.txt
+    
+    cat merge_header.txt id.txt > final.matrix
+    '''
+}
+
+
+/*
+========================================================================================
+                                      after recount
+                                 Differential Expression
+========================================================================================
+*/
+process Merge_DE{
+    publishDir "${params.outdir}/DE_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (anno_file) from de_merge
+    file otherTools
+    file designfile
+    file comparefile
+    file (matrix_file) from plot_merge
+    file Rscriptpath
+
+    output:
+    file ('*') into end_merge
+
+    when:
+    params.merge
+
+    shell:
+    '''
+    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    '''
+}
+
+/*
+========================================================================================
+                                       after recount
+                                        Correlation
+========================================================================================
+*/
+process Merge_Cor{
+    publishDir "${params.outdir}/Corrrelation_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
+
+    input:
+    file (matrix_file) from plot_merge_cor
+    file (anno_file) from cor_merge
+    file mRNA
+    file otherTools
+    file Rscriptpath
+
+    when:
+    params.mRNA && params.merge
+
+    output:
+    file ('*') into cor_plot_merge
+
+    shell:
+    '''
+    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -2125,7 +2295,7 @@ process Tools_Merge{
                                         annotation
 ========================================================================================
 */
-process Annotation_Merge{
+process Merge_Annotation{
     publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
 
     input:
@@ -2133,6 +2303,7 @@ process Annotation_Merge{
     file (query_file) from matrix_for_circos
     file otherTools
     file gtffile
+    file Rscriptpath
 
     when:
     params.merge
@@ -2143,9 +2314,9 @@ process Annotation_Merge{
     shell:
     '''
     java -jar !{otherTools}/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
-    Rscript !{otherTools}/circos.R !{query_file}
+    !{Rscriptpath}/Rscript !{otherTools}/circos.R !{query_file}
     perl !{otherTools}/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
-    Rscript !{otherTools}/circRNA_feature.R !{otherTools}/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
+    !{Rscriptpath}/Rscript !{otherTools}/circRNA_feature.R !{otherTools}/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
     '''
 }
 
@@ -2154,6 +2325,7 @@ process Venn{
 
     input:
     file (matrix_file) from tools_merge
+    file Rscriptpath
 
 
     when:
@@ -2164,7 +2336,7 @@ process Venn{
 
     shell:
     '''
-    Rscript !{otherTools}/venn.R !{matrix_file} venn.png
+    !{Rscriptpath}/Rscript !{otherTools}/venn.R !{matrix_file} venn.png
     '''
 }
 
@@ -2179,10 +2351,13 @@ process Report_production{
     publishDir "${params.outdir}/Report", mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
-    file (de_file) from end_ciri.collect()
-    file (cor_file) from cor_plot_ciri.collect()
+    file (de_file) from end_merge.collect()
+    file (cor_file) from cor_plot_merge.collect()
     file (anno_file) from annotation_plot.collect()
+    file (calculate_file) from tools_merge_html
+    file (multiqc_file) from multiqc_results
     file otherTools
+    file Rscriptpath
 
     when:
     params.merge
@@ -2192,8 +2367,8 @@ process Report_production{
 
     shell:
     '''
-    cp !{otherTools}/CIRC.Rmd ./
-    Rscript -e "require( 'rmarkdown' ); render('CIRC.Rmd', 'html_document')"
+    cp !{otherTools}/*.Rmd ./
+    !{Rscriptpath}/Rscript -e "require( 'rmarkdown' ); render('report.Rmd', 'html_document')"
     '''
 }
 

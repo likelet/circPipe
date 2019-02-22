@@ -50,6 +50,7 @@ temp<-read.table(args[4])
 type_level <- rev(strsplit((temp[1,1]),split = "_vs_")[[1]])
 #type_level <- levels(as.factor(colData$Type))
 comb <- combn(type_level,2)
+
 Circ_norm_edgeR=cpm(countData)
 #########filter low-abandance circRNA ; the step has been done in node1:filter_circ
  countData <- countData[which(rowSums(countData > 0) >= 2),] #a Count>0 in at least 2 samples
