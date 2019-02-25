@@ -777,7 +777,7 @@ process Circexplorer2_DE{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -805,7 +805,7 @@ process Circexplorer2_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1025,7 +1025,7 @@ process Ciri_DE{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1053,7 +1053,7 @@ process Ciri_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1263,7 +1263,7 @@ process Mapsplice_DE{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1291,7 +1291,7 @@ process Mapsplice_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1504,7 +1504,7 @@ process Segemehl_DE{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1532,7 +1532,7 @@ process Segemehl_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1785,7 +1785,7 @@ process Find_circ_DE{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1813,7 +1813,7 @@ process Find_circ_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -2029,7 +2029,7 @@ process Knife_DE{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -2057,7 +2057,7 @@ process Knife_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -2124,7 +2124,7 @@ process Tools_Merge{
     
     cat header.txt id_list.txt > all_tools_merge.matrix
     
-    !{Rscriptpath}/Rscript !{otherTools}/intersect.R all_tools_merge.matrix
+    !{Rscriptpath}/bin/Rscript !{otherTools}/intersect.R all_tools_merge.matrix
     '''
 }
 
@@ -2254,7 +2254,7 @@ process Merge_DE{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -2282,7 +2282,7 @@ process Merge_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -2312,9 +2312,9 @@ process Merge_Annotation{
     shell:
     '''
     java -jar !{otherTools}/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
-    !{Rscriptpath}/Rscript !{otherTools}/circos.R !{query_file}
+    !{Rscriptpath}/bin/Rscript !{otherTools}/circos.R !{query_file}
     perl !{otherTools}/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
-    !{Rscriptpath}/Rscript !{otherTools}/circRNA_feature.R !{otherTools}/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
+    !{Rscriptpath}/bin/Rscript !{otherTools}/circRNA_feature.R !{otherTools}/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
     '''
 }
 
@@ -2334,7 +2334,7 @@ process Venn{
 
     shell:
     '''
-    !{Rscriptpath}/Rscript !{otherTools}/venn.R !{matrix_file} venn.png
+    !{Rscriptpath}/bin/Rscript !{otherTools}/venn.R !{matrix_file} venn.png
     '''
 }
 
@@ -2366,7 +2366,7 @@ process Report_production{
     shell:
     '''
     cp !{otherTools}/*.Rmd ./
-    !{Rscriptpath}/Rscript -e "require( 'rmarkdown' ); render('report.Rmd', 'html_document')"
+    !{Rscriptpath}/bin/Rscript -e "require( 'rmarkdown' ); render('report.Rmd', 'html_document')"
     '''
 }
 

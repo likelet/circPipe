@@ -4,6 +4,7 @@
     <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add recount">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,8 +18,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2301">
-              <caret line="2089" lean-forward="true" selection-start-line="2089" selection-end-line="2089" />
+            <state relative-caret-position="318">
+              <caret line="2368" column="23" selection-start-line="2368" selection-start-column="23" selection-end-line="2368" selection-end-column="23" />
             </state>
           </provider>
         </entry>
@@ -26,8 +27,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="20" column="21" selection-start-line="20" selection-start-column="21" selection-end-line="20" selection-end-column="21" />
+            <state relative-caret-position="817">
+              <caret line="49" column="65" selection-start-line="49" selection-start-column="65" selection-end-line="49" selection-end-column="65" />
             </state>
           </provider>
         </entry>
@@ -101,7 +102,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551079852908" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551092011754" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -506,7 +507,14 @@
       <option name="project" value="LOCAL" />
       <updated>1550839985009</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="add recount">
+      <created>1551079871022</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1551079871022</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -846,13 +854,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/nextflow.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="20" column="21" selection-start-line="20" selection-start-column="21" selection-end-line="20" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/docs/index.rst">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-741" />
@@ -865,10 +866,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/nextflow.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="817">
+          <caret line="49" column="65" selection-start-line="49" selection-start-column="65" selection-end-line="49" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2301">
-          <caret line="2089" lean-forward="true" selection-start-line="2089" selection-end-line="2089" />
+        <state relative-caret-position="318">
+          <caret line="2368" column="23" selection-start-line="2368" selection-start-column="23" selection-end-line="2368" selection-end-column="23" />
         </state>
       </provider>
     </entry>
