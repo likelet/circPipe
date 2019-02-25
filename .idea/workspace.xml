@@ -1,23 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="change CIRCreport">
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add recount">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/R_function.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/R_function.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/changematrix.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/changematrix.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/circRNA_feature.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/circRNA_feature.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/circos.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/circos.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/correlation.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/correlation.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/edgeR_circ.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/edgeR_circ.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/intersect.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/intersect.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/modify_merge.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/modify_merge.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/try_annotate_forGTF.pl" beforeDir="false" afterPath="$PROJECT_DIR$/bin/try_annotate_forGTF.pl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/venn.R" beforeDir="false" afterPath="$PROJECT_DIR$/bin/venn.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/base.config" beforeDir="false" afterPath="$PROJECT_DIR$/conf/base.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/install_tools_manually.sh" beforeDir="false" afterPath="$PROJECT_DIR$/install_tools_manually.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nextflow.config" beforeDir="false" afterPath="$PROJECT_DIR$/nextflow.config" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -28,20 +14,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30590">
-              <caret line="1610" column="17" selection-start-line="1610" selection-start-column="17" selection-end-line="1610" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/bin/circRNA_feature.R">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="675">
-              <caret line="98" column="19" selection-start-line="98" selection-start-column="19" selection-end-line="98" selection-end-column="19" />
+            <state relative-caret-position="-2301">
+              <caret line="2089" lean-forward="true" selection-start-line="2089" selection-end-line="2089" />
             </state>
           </provider>
         </entry>
@@ -88,12 +65,12 @@
         <option value="$PROJECT_DIR$/bin/edgeR_circ.R" />
         <option value="$PROJECT_DIR$/bin/R_function.R" />
         <option value="$PROJECT_DIR$/bin/circRNA_feature.R" />
-        <option value="$PROJECT_DIR$/main.nf" />
         <option value="$PROJECT_DIR$/install_tools_manually.sh" />
         <option value="$PROJECT_DIR$/Dockerfile" />
         <option value="$PROJECT_DIR$/install_conda_package.sh" />
         <option value="$PROJECT_DIR$/environment.yml" />
         <option value="$PROJECT_DIR$/nextflow.config" />
+        <option value="$PROJECT_DIR$/main.nf" />
       </list>
     </option>
   </component>
@@ -124,7 +101,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1548845729173" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1551079852908" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -515,11 +492,26 @@
       <option name="project" value="LOCAL" />
       <updated>1548836114895</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="add recount">
+      <created>1550839903578</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1550839903578</updated>
+    </task>
+    <task id="LOCAL-00030" summary="add recount">
+      <created>1550839985009</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1550839985009</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2249467" />
       <window_info id="Structure" order="1" weight="0.25" />
@@ -663,7 +655,8 @@
     <MESSAGE value="add report." />
     <MESSAGE value="change environment.yml" />
     <MESSAGE value="change CIRCreport" />
-    <option name="LAST_COMMIT_MESSAGE" value="change CIRCreport" />
+    <MESSAGE value="add recount" />
+    <option name="LAST_COMMIT_MESSAGE" value="add recount" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/otherTools/hebingtoolsid.py" />
@@ -853,13 +846,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.nf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30590">
-          <caret line="1610" column="17" selection-start-line="1610" selection-start-column="17" selection-end-line="1610" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/nextflow.config">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="380">
@@ -876,6 +862,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="675">
           <caret line="98" column="19" selection-start-line="98" selection-start-column="19" selection-end-line="98" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.nf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2301">
+          <caret line="2089" lean-forward="true" selection-start-line="2089" selection-end-line="2089" />
         </state>
       </provider>
     </entry>

@@ -2088,8 +2088,6 @@ process Tools_Merge{
     file ('*annote.txt') into cor_merge
     file ('all_tools_intersect.matrix') into tools_intersect
 
-    when:
-    params.merge
 
     shell :
     '''
