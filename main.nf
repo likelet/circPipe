@@ -544,25 +544,7 @@ process Fastp{
 
 fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process first
 
-/*
-========================================================================================
-                    run the multiqc (merge the results of fastp)
-========================================================================================
-*/
-process Multiqc{
-    publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*.html", overwrite: true
 
-    input:
-    file (query_file) from fastp_for_multiqc.collect()
-
-    output:
-    file ('*.html') into multiqc_results
-
-    script:
-    """
-    multiqc .
-    """
-}
 
 
 /*
@@ -581,6 +563,7 @@ process Star{
 
     output:
     set pair_id, file ('*.junction') into starfiles
+    file ('*.out') into star_multiqc
 
     when:
     params.circexplorer2
@@ -2059,6 +2042,28 @@ process Knife_Cor{
     '''
     !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
+}
+
+
+
+/*
+========================================================================================
+                    run the multiqc (merge the results of fastp and star)
+========================================================================================
+*/
+process Multiqc{
+    publishDir "${params.outdir}/MultiQC", mode: 'copy', pattern: "*.html", overwrite: true
+
+    input:
+    file (query_file) from fastp_for_multiqc.concat( star_multiqc ).collect()
+
+    output:
+    file ('*.html') into multiqc_results
+
+    script:
+    """
+    multiqc .
+    """
 }
 
 
