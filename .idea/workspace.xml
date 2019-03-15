@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="build index manually">
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add multiqc">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
     </list>
@@ -17,8 +17,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="9940">
-              <caret line="2058" column="82" selection-start-line="2058" selection-start-column="82" selection-end-line="2058" selection-end-column="82" />
+            <state relative-caret-position="145">
+              <caret line="1547" column="8" selection-start-line="1547" selection-start-column="8" selection-end-line="1547" selection-end-column="8" />
             </state>
           </provider>
         </entry>
@@ -36,7 +36,7 @@
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="342">
-              <caret line="25" column="43" lean-forward="true" selection-start-line="25" selection-start-column="40" selection-end-line="25" selection-end-column="47" />
+              <caret line="49" column="66" selection-start-line="49" selection-start-column="2" selection-end-line="49" selection-end-column="66" />
             </state>
           </provider>
         </entry>
@@ -87,9 +87,11 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="width" value="960" />
-    <option name="height" value="1040" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="1013" />
+    <option name="y" value="31" />
+    <option name="width" value="977" />
+    <option name="height" value="1038" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -113,7 +115,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552626663243" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552628804150" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -546,14 +548,21 @@
       <option name="project" value="LOCAL" />
       <updated>1552621170004</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="add multiqc">
+      <created>1552627089661</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1552627089661</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="1013" y="31" width="977" height="1038" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.11247335" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23009814" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -671,7 +680,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="solved the merging problem." />
     <MESSAGE value="add the environment.(except CIRI and find_circ)" />
     <MESSAGE value="add multiqc and change the params." />
     <MESSAGE value="add singleEnd mode." />
@@ -696,7 +704,8 @@
     <MESSAGE value="add recount" />
     <MESSAGE value="add star-multiqc" />
     <MESSAGE value="build index manually" />
-    <option name="LAST_COMMIT_MESSAGE" value="build index manually" />
+    <MESSAGE value="add multiqc" />
+    <option name="LAST_COMMIT_MESSAGE" value="add multiqc" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/total_matrix.txt" />
@@ -896,13 +905,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/nextflow.config">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="25" column="43" lean-forward="true" selection-start-line="25" selection-start-column="40" selection-end-line="25" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/utils/Make_Bowtie2_Index.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="38">
@@ -917,10 +919,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/nextflow.config">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="49" column="66" selection-start-line="49" selection-start-column="2" selection-end-line="49" selection-end-column="66" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9940">
-          <caret line="2058" column="82" selection-start-line="2058" selection-start-column="82" selection-end-line="2058" selection-end-column="82" />
+        <state relative-caret-position="145">
+          <caret line="1547" column="8" selection-start-line="1547" selection-start-column="8" selection-end-line="1547" selection-end-column="8" />
         </state>
       </provider>
     </entry>

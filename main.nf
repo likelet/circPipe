@@ -1545,17 +1545,16 @@ process Bowtie2{
     shell:
     if(params.singleEnd){
         """
-        nohup bowtie2 \
+        bowtie2 \
         -p ${task.cpus} \
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
         -x ${index}/genome \
         -q \
-        -U ${query_file} \
+        -U ${query_file} 2> bowtie2_${pair_id}.log \
         | samtools view -hbuS - \
-        | samtools sort \
-        -o bowtie2_output_${pair_id}.bam 2>bowtie2_${pair_id}.log &
+        | samtools sort - bowtie2_output_${pair_id}
 
         samtools \
         view -hf 4 bowtie2_output_${pair_id}.bam \
@@ -1564,7 +1563,7 @@ process Bowtie2{
         """
     }else{
         """
-        nohup bowtie2 \
+        bowtie2 \
         -p ${task.cpus} \
         --very-sensitive \
         --score-min=C,-15,0 \
@@ -1572,10 +1571,9 @@ process Bowtie2{
         -x ${index}/genome \
         -q \
         -1 ${query_file[0]} \
-        -2 ${query_file[1]} \
+        -2 ${query_file[1]} 2> bowtie2_${pair_id}.log \
         | samtools view -hbuS - \
-        | samtools sort \
-        -o bowtie2_output_${pair_id}.bam 2>bowtie2_${pair_id}.log &
+        | samtools sort - bowtie2_output_${pair_id}
 
         samtools \
         view -hf 4 bowtie2_output_${pair_id}.bam \
