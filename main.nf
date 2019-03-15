@@ -1537,6 +1537,7 @@ process Bowtie2{
     output:
     set pair_id, file ('bowtie2_unmapped_*') into bowtie2files
     set pair_id, file ('bowtie2_unmapped_*') into bowtie2files_for_autocirc
+    file ('*.log') into bowtie2_multiqc
 
     when:
     params.find_circ
@@ -1544,7 +1545,7 @@ process Bowtie2{
     shell:
     if(params.singleEnd){
         """
-        bowtie2 \
+        nohup bowtie2 \
         -p ${task.cpus} \
         --very-sensitive \
         --score-min=C,-15,0 \
@@ -1554,7 +1555,7 @@ process Bowtie2{
         -U ${query_file} \
         | samtools view -hbuS - \
         | samtools sort \
-        -o bowtie2_output_${pair_id}.bam
+        -o bowtie2_output_${pair_id}.bam 2>bowtie2_${pair_id}.log &
 
         samtools \
         view -hf 4 bowtie2_output_${pair_id}.bam \
@@ -1563,7 +1564,7 @@ process Bowtie2{
         """
     }else{
         """
-        bowtie2 \
+        nohup bowtie2 \
         -p ${task.cpus} \
         --very-sensitive \
         --score-min=C,-15,0 \
@@ -1574,7 +1575,7 @@ process Bowtie2{
         -2 ${query_file[1]} \
         | samtools view -hbuS - \
         | samtools sort \
-        -o bowtie2_output_${pair_id}.bam
+        -o bowtie2_output_${pair_id}.bam 2>bowtie2_${pair_id}.log &
 
         samtools \
         view -hf 4 bowtie2_output_${pair_id}.bam \
@@ -2055,7 +2056,7 @@ process Multiqc{
     publishDir "${params.outdir}/MultiQC", mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
-    file (query_file) from fastp_for_multiqc.concat( star_multiqc ).collect()
+    file (query_file) from fastp_for_multiqc.concat( star_multiqc, bowtie2_multiqc ).collect()
 
     output:
     file ('*.html') into multiqc_results

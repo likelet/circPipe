@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add star-multiqc">
-      <change afterPath="$PROJECT_DIR$/utils/Build_Index_Manually.sh" afterDir="false" />
+    <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="build index manually">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,16 +14,16 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="475">
-              <caret line="490" column="25" lean-forward="true" selection-start-line="488" selection-start-column="18" selection-end-line="490" selection-end-column="25" />
+            <state relative-caret-position="9940">
+              <caret line="2058" column="82" selection-start-line="2058" selection-start-column="82" selection-end-line="2058" selection-end-column="82" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/utils/Build_Index_Manually.sh">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="475">
@@ -48,6 +48,8 @@
       <find>output_docs</find>
       <find>=====</find>
       <find>conda</find>
+      <find>bwa</find>
+      <find>bowtie2</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -79,9 +81,9 @@
         <option value="$PROJECT_DIR$/install_conda_package.sh" />
         <option value="$PROJECT_DIR$/environment.yml" />
         <option value="$PROJECT_DIR$/nextflow.config" />
-        <option value="$PROJECT_DIR$/main.nf" />
         <option value="$PROJECT_DIR$/utils/Make_Bowtie2_Index.sh" />
         <option value="$PROJECT_DIR$/utils/Make_STAR_Index.sh" />
+        <option value="$PROJECT_DIR$/main.nf" />
       </list>
     </option>
   </component>
@@ -101,11 +103,6 @@
               <item name="circPipe" type="b2602c69:ProjectViewProjectNode" />
               <item name="circPipe" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="circPipe" type="b2602c69:ProjectViewProjectNode" />
-              <item name="circPipe" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -116,7 +113,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552621141397" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552626663243" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -542,7 +539,14 @@
       <option name="project" value="LOCAL" />
       <updated>1552555386481</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="build index manually">
+      <created>1552621170004</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1552621170004</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -667,7 +671,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="update.the problem of merging any tools still exsists. now it can only merge all the tools results." />
     <MESSAGE value="solved the merging problem." />
     <MESSAGE value="add the environment.(except CIRI and find_circ)" />
     <MESSAGE value="add multiqc and change the params." />
@@ -692,7 +695,8 @@
     <MESSAGE value="change CIRCreport" />
     <MESSAGE value="add recount" />
     <MESSAGE value="add star-multiqc" />
-    <option name="LAST_COMMIT_MESSAGE" value="add star-multiqc" />
+    <MESSAGE value="build index manually" />
+    <option name="LAST_COMMIT_MESSAGE" value="build index manually" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/Desktop/脚本/RNAseq-master/total_matrix.txt" />
@@ -906,17 +910,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.nf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="490" column="25" lean-forward="true" selection-start-line="488" selection-start-column="18" selection-end-line="490" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/utils/Build_Index_Manually.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="475">
           <caret line="25" column="42" lean-forward="true" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.nf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9940">
+          <caret line="2058" column="82" selection-start-line="2058" selection-start-column="82" selection-end-line="2058" selection-end-column="82" />
         </state>
       </provider>
     </entry>
