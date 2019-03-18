@@ -1824,11 +1824,12 @@ process Knife{
 
     shell:
     knifedir = params.knifedir
+    knfieprefix = params.knifeprefix
     if(params.singleEnd){
         '''
         ln -s !{knifedir} ./
         
-        pwd | awk '{print "sh completeRun.sh",$0,"complete",$0,"testData 15 hg38_phred33_skipGLM circReads 40 1 2>&1"}' | bash
+        pwd | awk '{print "sh completeRun.sh",$0,"complete",$0,"testData 15", !{knfieprefix}, "circReads 40 1 2>&1"}' | bash
 
         cp ./testData/circReads/combinedReports/naiveunzip* ./
         '''
@@ -1836,7 +1837,7 @@ process Knife{
         '''
         ln -s !{knifedir} ./
        
-        pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 13 hg38_phred33 circReads 40 1 2>&1"}' | bash
+        pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 13", !{knfieprefix}, "circReads 40 1 2>&1"}' | bash
         
         cp ./testData/circReads/combinedReports/naiveunzip* ./
         '''
