@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="97f622c0-e92b-41f3-b6b3-593fa16aaaba" name="Default" comment="add multiqc">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.nf" beforeDir="false" afterPath="$PROJECT_DIR$/main.nf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/Build_Index_Manually.sh" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Build_Index_Manually.sh" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,20 +14,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.nf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="145">
-              <caret line="1547" column="8" selection-start-line="1547" selection-start-column="8" selection-end-line="1547" selection-end-column="8" />
+            <state relative-caret-position="311">
+              <caret line="470" column="18" selection-start-line="470" selection-start-column="10" selection-end-line="470" selection-end-column="18" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/utils/Build_Index_Manually.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="475">
-              <caret line="25" column="42" lean-forward="true" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
+            <state relative-caret-position="-2076">
+              <caret line="24" column="12" selection-start-line="24" selection-start-column="12" selection-end-line="24" selection-end-column="12" />
             </state>
           </provider>
         </entry>
@@ -35,7 +35,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/nextflow.config">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
+            <state relative-caret-position="931">
               <caret line="49" column="66" selection-start-line="49" selection-start-column="2" selection-end-line="49" selection-end-column="66" />
             </state>
           </provider>
@@ -50,6 +50,8 @@
       <find>conda</find>
       <find>bwa</find>
       <find>bowtie2</find>
+      <find>segemehl</find>
+      <find>INDEX_MODE_ID</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -84,12 +86,13 @@
         <option value="$PROJECT_DIR$/utils/Make_Bowtie2_Index.sh" />
         <option value="$PROJECT_DIR$/utils/Make_STAR_Index.sh" />
         <option value="$PROJECT_DIR$/main.nf" />
+        <option value="$PROJECT_DIR$/utils/Build_Index_Manually.sh" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="1013" />
-    <option name="y" value="31" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="612" />
+    <option name="y" value="-11" />
     <option name="width" value="977" />
     <option name="height" value="1038" />
   </component>
@@ -98,6 +101,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -105,17 +110,20 @@
               <item name="circPipe" type="b2602c69:ProjectViewProjectNode" />
               <item name="circPipe" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="circPipe" type="b2602c69:ProjectViewProjectNode" />
+              <item name="circPipe" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/cirPipe/environment.yml&#10;genome&#9;FILE&#9;file://D:/cirPipe/docs/configuration/reference_genomes.md" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552628804150" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552630070688" />
     <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
@@ -555,14 +563,21 @@
       <option name="project" value="LOCAL" />
       <updated>1552627089661</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="add multiqc">
+      <created>1552628815559</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1552628815559</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1013" y="31" width="977" height="1038" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23009814" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.11353944" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -572,7 +587,7 @@
       <window_info id="Capture Tool" order="7" />
       <window_info id="Learn" order="8" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32907802" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32827735" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -580,7 +595,7 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Event Log" order="8" sideWeight="0.50067025" side_tool="true" weight="0.32907802" />
-      <window_info anchor="bottom" id="Version Control" order="9" weight="0.19007093" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.18959913" />
       <window_info anchor="bottom" id="Messages" order="10" sideWeight="0.49932975" weight="0.32907802" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -905,31 +920,25 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils/Make_Bowtie2_Index.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="2" selection-start-line="2" selection-end-line="4" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils/Build_Index_Manually.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="25" column="42" lean-forward="true" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/Make_Bowtie2_Index.sh" />
     <entry file="file://$PROJECT_DIR$/nextflow.config">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
+        <state relative-caret-position="931">
           <caret line="49" column="66" selection-start-line="49" selection-start-column="2" selection-end-line="49" selection-end-column="66" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.nf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="145">
-          <caret line="1547" column="8" selection-start-line="1547" selection-start-column="8" selection-end-line="1547" selection-end-column="8" />
+        <state relative-caret-position="311">
+          <caret line="470" column="18" selection-start-line="470" selection-start-column="10" selection-end-line="470" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils/Build_Index_Manually.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2076">
+          <caret line="24" column="12" selection-start-line="24" selection-start-column="12" selection-end-line="24" selection-end-column="12" />
         </state>
       </provider>
     </entry>
