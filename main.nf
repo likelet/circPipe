@@ -168,8 +168,26 @@ genomefile = file(params.genomefile) //the genomefile
 if( !genomefile.exists() ) exit 1, LikeletUtils.print_red("Missing genome file: ${genomefile}")
 
 if(params.mapsplice){
-    refmapsplice = file(params.refmapsplice) //the mapsplice reference genome directory
-    if( !refmapsplice.exists() ) exit 1, LikeletUtils.print_red("Missing Mapsplice Reference Genome Directory: ${refmapsplice}")
+    if(params.refmapsplice){
+        Refmapsplice = Channal.fromPath(params.refmapsplice) //the mapsplice reference genome directory
+        if( !Refmapsplice.exists() ) exit 1, LikeletUtils.print_red("Missing Mapsplice Reference Genome Directory: ${Refmapsplice}")
+    }else{
+        process built_refmapsplice_reference_by_split {
+                storeDir "${params.outdir}/reference_genome/split"
+                input:
+                file genomefile
+                output: 
+                file "split" into Refmapsplice
+                shell:
+                """
+                mkdir split 
+                perl ${baseDir}/bin/split_fasta_by_chromsome.pl ${genomefile} split
+                """
+            }
+    }
+    
+}else{
+     Refmapsplice = Channal.fromPath(params.inputdir)
 }
 
 
@@ -978,7 +996,7 @@ process Mapsplice{
     input:
     set pair_id, file (query_file) from fastpfiles_mapsplice
     file gtffile
-    file refmapsplice
+    file refmapsplice_dir from Refmapsplice
     file outdir
     file index from Bowtieindex.collect()
 
@@ -1001,7 +1019,7 @@ process Mapsplice{
         --min-fusion-distance 200 \
         -x ${index}/genome \
         --gene-gtf ${gtffile} \
-        -c ${refmapsplice} \
+        -c ${refmapsplice_dir} \
         -1 ${query_file} \
         -o output_mapsplice_${pair_id} 2 \
         > ${pair_id}_mapsplice.log
@@ -1016,7 +1034,7 @@ process Mapsplice{
         --min-fusion-distance 200 \
         -x ${index}/genome \
         --gene-gtf ${gtffile} \
-        -c ${refmapsplice} \
+        -c ${refmapsplice_dir} \
         -1 ${query_file[0]} \
         -2 ${query_file[1]} \
         -o output_mapsplice_${pair_id} 2 \
