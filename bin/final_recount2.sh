@@ -5,7 +5,7 @@ seq_type=$2 ###single_end , paired_end
 thread=$3
 
 gff="tmp_candidate_circRNA.gff3"
-index="candidate_circRNA_index/candidate_circRNA_doulbed"
+index="candidate_circRNA_doulbed"
 
 
 if [[ "${seq_type}" = "single_end" ]] ; then

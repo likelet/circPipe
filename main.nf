@@ -22,28 +22,6 @@
 
 println(PATH)
 
-//pre-defined functions for render command
-//=======================================================================================
-ANSI_RESET = "\u001B[0m";
-ANSI_BLACK = "\u001B[30m";
-ANSI_RED = "\u001B[31m";
-ANSI_GREEN = "\u001B[32m";
-ANSI_YELLOW = "\u001B[33m";
-ANSI_BLUE = "\u001B[34m";
-ANSI_PURPLE = "\u001B[35m";
-ANSI_CYAN = "\u001B[36m";
-ANSI_WHITE = "\u001B[37m";
-def print_red = {  str -> ANSI_RED + str + ANSI_RESET }
-def print_black = {  str -> ANSI_BLACK + str + ANSI_RESET }
-def print_green = {  str -> ANSI_GREEN + str + ANSI_RESET }
-def print_yellow = {  str -> ANSI_YELLOW + str + ANSI_RESET }
-def print_blue = {  str -> ANSI_BLUE + str + ANSI_RESET }
-def print_cyan = {  str -> ANSI_CYAN + str + ANSI_RESET }
-def print_purple = {  str -> ANSI_PURPLE + str + ANSI_RESET }
-def print_white = {  str -> ANSI_WHITE + str + ANSI_RESET }
-
-
-
 
 def helpMessage() {
     log.info"""
@@ -64,7 +42,7 @@ def helpMessage() {
     Configuration:
       --redir                       The folder containing all reference files and index
       --genomefile                  Path to Fasta reference (required if not set in config file)
-      --gtffile/--bedfile/
+      --gtffile/
       --annotationfile              Different annotation files from GENCODE database for annotating circRNAs. 
                                     e.g. [gencode.v25.annotation.gtf]/[gencode.v25.annotation.bed]/[hg38_gencode.txt]
       --ciridir/--find_circdir/
@@ -73,7 +51,7 @@ def helpMessage() {
     Options:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: standard, conda, docker, singularity, awsbatch, test
-      --starindex/--bowtie2index/
+      --starindex/--Bowtie2index/
       --bwaindex/--segindex/
       --bowtieindex/--refmapsplice  Path to STAR/bowtie2/segemehl/bowtie/bwa/mapsplice index. 
                                     If not set, the pipeline will create the index itself.
@@ -190,15 +168,12 @@ if( params.selectTools ==~ /.*6.*/ ){
 
 
 
-otherTools = file(params.otherTools) //the other tools directory
-if( !otherTools.exists() ) exit 1, print_red("Missing other tools directory: ${otherTools}")
 
-Rscriptpath = file(params.Rscriptpath) //the other tools directory
-if( !Rscriptpath.exists() ) exit 1, print_red("Missing Rscript path: ${Rscriptpath}")
+
 
 if(params.mRNA){
     mRNA = file(params.mRNA) //the mRNA file
-    if( !mRNA.exists() ) exit 1, print_red("Missing mRNA expression file: ${mRNA}")
+    if( !mRNA.exists() ) exit 1, LikeletUtils.print_red("Missing mRNA expression file: ${mRNA}")
 
 }
 
@@ -208,30 +183,30 @@ if(params.mRNA){
                          the reference directory
 ========================================================================================
 */
-refdir = file(params.refdir) //the reference genome directory
-if( !refdir.exists() ) exit 1, print_red("Missing Reference Genome Directory: ${refdir}")
 
-refmapsplice = file(params.refmapsplice) //the mapsplice reference genome directory
-if(params.mapsplice){
-    if( !refmapsplice.exists() ) exit 1, print_red("Missing Mapsplice Reference Genome Directory: ${refmapsplice}")
-}
 
-annotationfile = file(params.annotationfile) //the annotationfile
+
+
 if(params.circexplorer2){
-    if( !annotationfile.exists() ) exit 1, print_red("Missing annotation file: ${annotationfile}")
+    annotationfile = file(params.annotationfile) //the annotationfile
+    if( !annotationfile.exists() ) exit 1, LikeletUtils.print_red("Missing annotation file: ${annotationfile}")
 }
 
 genomefile = file(params.genomefile) //the genomefile
-if( !genomefile.exists() ) exit 1, print_red("Missing genome file: ${genomefile}")
+if( !genomefile.exists() ) exit 1, LikeletUtils.print_red("Missing genome file: ${genomefile}")
+
+if(params.mapsplice){
+    refmapsplice = file(params.refmapsplice) //the mapsplice reference genome directory
+    if( !refmapsplice.exists() ) exit 1, LikeletUtils.print_red("Missing Mapsplice Reference Genome Directory: ${refmapsplice}")
+}
+
 
 faifile = file(params.faifile) //the genomefile
-if( !faifile.exists() ) exit 1, print_red("Missing genome file index: ${faifile}")
+if( !faifile.exists() ) exit 1, LikeletUtils.print_red("Missing genome file index: ${faifile}")
 
 gtffile = file(params.gtffile) //the annotationfile-gtf-format
-if( !gtffile.exists() ) exit 1, print_red("Missing gtf annotation file: ${gtffile}")
+if( !gtffile.exists() ) exit 1, LikeletUtils.print_red("Missing gtf annotation file: ${gtffile}")
 
-bedfile = file(params.bedfile) //the annotationfile-bed-format
-if( !bedfile.exists() ) exit 1, print_red("Missing bed annotation file: ${bedfile}")
 
 
 
@@ -244,13 +219,13 @@ if( !bedfile.exists() ) exit 1, print_red("Missing bed annotation file: ${bedfil
 designfile = file(params.designfile)
 if(params.designfile) {
 
-    if( !designfile.exists() ) exit 1, print_red("Design file not found: ${params.designfile}")
+    if( !designfile.exists() ) exit 1, LikeletUtils.print_red("Design file not found: ${params.designfile}")
 }
 //compare file
 comparefile = file(params.comparefile)
 if(params.comparefile){
 
-    if( !comparefile.exists() ) exit 1, print_red("Compare file not found: ${params.comparefile}")
+    if( !comparefile.exists() ) exit 1, LikeletUtils.print_red("Compare file not found: ${params.comparefile}")
 }
 
 
@@ -260,7 +235,7 @@ if(params.comparefile){
                          showing the process and files
 ========================================================================================
 */
-log.info print_cyan("""
+log.info LikeletUtils.print_cyan("""
 ========================================================================
     ________                          _______
    |  ____  |                        |  ___  |
@@ -279,29 +254,28 @@ log.info print_cyan("""
  =======================================================================
          """)
         .stripIndent()
-log.info print_purple("============You are running cirPipe with the following parameters===============")
-log.info print_purple("Checking parameters ...")
+log.info LikeletUtils.print_purple("============You are running cirPipe with the following parameters===============")
+log.info LikeletUtils.print_purple("Checking parameters ...")
 log.info "\n"
-log.info print_yellow("=====================================Reads types================================")
-log.info print_yellow("SingleEnd :                     ") + print_green(params.singleEnd)
+log.info LikeletUtils.print_yellow("=====================================Reads types================================")
+log.info LikeletUtils.print_yellow("SingleEnd :                     ") + LikeletUtils.print_green(params.singleEnd)
 log.info "\n"
-log.info print_yellow("====================================Tools selected==============================")
-log.info print_yellow("Circexplorer2 :                 ") + print_green(params.circexplorer2)
-log.info print_yellow("Find_circ :                     ") + print_green(params.find_circ)
-log.info print_yellow("Ciri :                          ") + print_green(params.ciri)
-log.info print_yellow("Mapsplice :                     ") + print_green(params.mapsplice)
-log.info print_yellow("Segemehl :                      ") + print_green(params.segemehl)
-log.info print_yellow("Knife :                         ") + print_green(params.knife)
+log.info LikeletUtils.print_yellow("====================================Tools selected==============================")
+log.info LikeletUtils.print_yellow("Circexplorer2 :                 ") + LikeletUtils.print_green(params.circexplorer2)
+log.info LikeletUtils.print_yellow("Find_circ :                     ") + LikeletUtils.print_green(params.find_circ)
+log.info LikeletUtils.print_yellow("Ciri :                          ") + LikeletUtils.print_green(params.ciri)
+log.info LikeletUtils.print_yellow("Mapsplice :                     ") + LikeletUtils.print_green(params.mapsplice)
+log.info LikeletUtils.print_yellow("Segemehl :                      ") + LikeletUtils.print_green(params.segemehl)
+log.info LikeletUtils.print_yellow("Knife :                         ") + LikeletUtils.print_green(params.knife)
 log.info "\n"
-log.info print_yellow("==================================Input files selected==========================")
-log.info print_yellow("Reads :                         ") + print_green(params.reads)
-log.info print_yellow("Annotation file :               ") + print_green(params.annotationfile)
-log.info print_yellow("Genome file :                   ") + print_green(params.genomefile)
-log.info print_yellow("Gtf file :                      ") + print_green(params.gtffile)
-log.info print_yellow("Bed file :                      ") + print_green(params.bedfile)
+log.info LikeletUtils.print_yellow("==================================Input files selected==========================")
+log.info LikeletUtils.print_yellow("Reads :                         ") + LikeletUtils.print_green(params.reads)
+log.info LikeletUtils.print_yellow("Annotation file :               ") + LikeletUtils.print_green(params.annotationfile)
+log.info LikeletUtils.print_yellow("Genome file :                   ") + LikeletUtils.print_green(params.genomefile)
+log.info LikeletUtils.print_yellow("Gtf file :                      ") + LikeletUtils.print_green(params.gtffile)
 log.info "\n"
-log.info print_yellow("==================================Output files directory========================")
-log.info print_yellow("Output directory :              ") + print_green(params.outdir)
+log.info LikeletUtils.print_yellow("==================================Output files directory========================")
+log.info LikeletUtils.print_yellow("Output directory :              ") + LikeletUtils.print_green(params.outdir)
 log.info "\n"
 
 
@@ -316,7 +290,7 @@ Channel
 
 
 
-log.info print_yellow("===================check or build the index===============================")
+log.info LikeletUtils.print_yellow("===================check or build the index===============================")
 /*
 ========================================================================================
                              check or build the index
@@ -328,8 +302,9 @@ if(params.circexplorer2==true){
                 .fromPath(params.starindex)
                 .ifEmpty { exit 1, "STAR index not found: ${params.starindex}" }
     }else{
+        LikeletUtils.print_yellow("Seems that you did not provide a STAR index for circexplorer2, circPipe will built it automaticaly. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeSTARindex {
-            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+            storeDir "${params.outdir}/reference_genome"
 
             input:
             file genomefile
@@ -340,142 +315,104 @@ if(params.circexplorer2==true){
 
             script:
             """
-        mkdir starindex
-        STAR \
-            --runMode genomeGenerate \
-            --runThreadN ${task.cpus} \
-            --sjdbGTFfile ${gtffile} \
-            --genomeDir starindex/ \
-            --genomeFastaFiles ${genomefile} \
-            --sjdbOverhang 149
-        """
+            mkdir starindex
+            STAR \
+                --runMode genomeGenerate \
+                --runThreadN ${task.cpus} \
+                --sjdbGTFfile ${gtffile} \
+                --genomeDir starindex/ \
+                --genomeFastaFiles ${genomefile} \
+                --sjdbOverhang 149
+            """
         }
     }
-}else{
-    starindex = Channel
-            .fromPath(params.refdir)
 }
 
 
 if(params.find_circ==true){
-    if(params.bowtie2index){
-        bowtie2index = Channel
-                .fromPath(params.bowtie2index)
-                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}" }
+    if(params.Bowtie2index){
+        (Bowtie2index,Bowtie2index_fc)= Channel
+                .fromPath(params.bowtie2index+"/*.bt2")
+                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.Bowtie2index}, and it required by find_circ " }.into(2)
 
-        bowtie2index_fc = Channel
-                .fromPath(params.bowtie2index)
-                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}" }
     }else{
+        LikeletUtils.print_yellow("Seems that you did not provide a Bowtie2 index for find_circ, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBowtie2index {
-            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+             storeDir "${params.outdir}/reference_genome"
 
             input:
             file genomefile
 
 
             output:
-            file "bowtie2index" into bowtie2index
-            file "bowtie2index" into bowtie2index_fc
-            file "bowtie2index" into bowtie2_build_knife
+            file "*.bt2" into Bowtie2index, Bowtie2index_fc,Bowtie2_build_knife
 
             script:
             """
-        mkdir bowtie2index
-        cd ./bowtie2index
-        bowtie2-build -f \
-            ../${genomefile} \
-            genome
-        cd ../
-        """
+            bowtie2-build -f ${genomefile} genome
+            """
+            
         }
     }
-}else{
-
-    bowtie2index = Channel
-            .fromPath(params.refdir)
-
-
-    bowtie2index_fc = Channel
-            .fromPath(params.refdir)
-
-
 }
-
 if(params.mapsplice==true){
     if(params.bowtieindex){
-        bowtieindex = Channel
-                .fromPath(params.bowtieindex)
+        Bowtieindex = Channel
+                .fromPath(params.bowtieindex+"/*.ebwt")
                 .ifEmpty { exit 1, "Bowtie index not found: ${params.bowtieindex}" }
     }else{
+         LikeletUtils.print_yellow("Seems that you did not provide a Bowtie index for mapsplice, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBowtieindex {
-            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+            storeDir "${params.outdir}/reference_genome"
 
             input:
             file genomefile
 
-
             output:
-            file "bowtieindex" into bowtieindex
-            file "bowtieindex" into bowtie_build_knife
+            file "*.ebwt" into Bowtieindex,Bowtie_build_knife
 
             script:
             """
-        mkdir bowtieindex
-        cd ./bowtieindex
-        bowtie-build \
-            ../${genomefile} \
-            genome
-        cd ../
-        """
+            bowtie-build ${genomefile} genome
+            """
         }
     }
-}else{
-    bowtieindex = Channel
-            .fromPath(params.refdir)
-
 }
 
 if(params.ciri==true){
     if(params.bwaindex){
         bwaindex = Channel
-                .fromPath(params.bwaindex)
+                .fromPath(params.bwaindex+"*.{ann,amb,pac,bwt,sa}")
                 .ifEmpty { exit 1, "BWA index not found: ${params.bwaindex}" }
     }else{
+        LikeletUtils.print_yellow("Seems that you did not provide a BWA index for ciri, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBWAindex {
-            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+            storeDir "${params.outdir}/reference_genome"
 
             input:
             file genomefile
 
 
             output:
-            file "bwaindex" into bwaindex
+            file "*.{ann,amb,pac,bwt,sa}" into bwaindex
 
             script:
             """
-        mkdir bwaindex
-        cd ./bwaindex
-        bwa \
-            index ../${genomefile} \
-            -p genome
-        cd ../
-        """
+             bwa index ${genomefile} -p genome
+            """
         }
     }
-}else{
-    bwaindex = Channel
-            .fromPath(params.refdir)
 }
 
 if(params.segemehl==true){
     if(params.segindex){
         segindex = Channel
-                .fromPath(params.segindex)
+                .fromPath(params.segindex+"/*.idx")
                 .ifEmpty { exit 1, "Segemehl index not found: ${params.segindex}" }
     }else{
+        LikeletUtils.print_yellow("Seems that you did not provide a segemehl index for runing segemehl, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeSegemehlindex {
-            publishDir "${params.outdir}/reference_genome", mode: 'copy', overwrite: true
+            storeDir "${params.outdir}/reference_genome"
 
             input:
             file genomefile
@@ -486,21 +423,16 @@ if(params.segemehl==true){
 
             script:
             """
-        ${segdir}/segemehl.x \
-            -d ${genomefile} \
-            -x genome.idx
+        segemehl.x -d ${genomefile} -x genome.idx
         """
         }
     }
-}else{
-    segindex = Channel
-            .fromPath(params.refdir)
 }
 
 
 
-log.info print_purple("==========Index pass!...==========")
-log.info print_purple("==========Start running CircPipe...==========")
+log.info LikeletUtils.print_green("==========Index pass!...==========")
+log.info LikeletUtils.print_green("==========Start running CircPipe...==========")
 /*
 ========================================================================================
                        first step : run the fastp (QC tool)
@@ -514,7 +446,7 @@ process Fastp{
     set pair_id, file(query_file) from read_pairs_fastp
 
     output:
-    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,fastpfiles_bowtie2,fastpfiles_recount
+    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount
     file ('*.html') into fastp_for_waiting
     file ('*_fastp.json') into fastp_for_multiqc
 
@@ -639,7 +571,7 @@ process Circexplorer2_Bed{
 
     input:
     set pair_id, file (query_file) from circexplorer2files
-    file otherTools
+    
 
     output:
     file ('*candidates.bed') into modify_circexplorer2
@@ -658,7 +590,7 @@ process Circexplorer2_Bed{
     | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
     > !{pair_id}_modify_circexplorer2.temp.bed
     
-    python !{otherTools}/quchong.py !{pair_id}_modify_circexplorer2.temp.bed !{pair_id}_modify_circexplorer2.candidates.bed
+    python !{baseDir}/bin/quchong.py !{pair_id}_modify_circexplorer2.temp.bed !{pair_id}_modify_circexplorer2.candidates.bed
     fi
     '''
 }
@@ -676,7 +608,7 @@ process Circexplorer2_Matrix{
     input:
     file (query_file) from modify_circexplorer2.collect()
     val (pair_id) from modify_circexplorer2_id.collect()
-    file otherTools
+    
     file designfile
     file gtffile
 
@@ -699,13 +631,13 @@ process Circexplorer2_Matrix{
         cat $file >> concatenate.bed
     done
     
-    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
     cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
     cat mergeconcatenate.bed > circexplorer2.txt
         
     cat circexplorer2.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o circexplorer2_ -gtf !{gtffile} -uniq
+    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o circexplorer2_ -gtf !{gtffile} -uniq
 
     cat !{designfile} > designfile.txt
     sed -i '1d' designfile.txt
@@ -716,9 +648,9 @@ process Circexplorer2_Matrix{
     cat samplename.txt | while read line
     do
         if [ $((`cat ${line}_modify_circexplorer2.candidates.bed | wc -l`)) == 0 ];then
-        python !{otherTools}/createzero.py mergeconcatenate.bed counts.txt
+        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
         else
-        python !{otherTools}/quchongsamples.py mergeconcatenate.bed ${line}_modify_circexplorer2.candidates.bed counts.txt
+        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_circexplorer2.candidates.bed counts.txt
         fi
         paste -d"\t" id.txt counts.txt > temp.txt
         cat temp.txt > id.txt
@@ -746,11 +678,11 @@ process Circexplorer2_DE{
 
     input:
     file (anno_file) from de_circexplorer2
-    file otherTools
+    
     file designfile
     file comparefile
     file (matrix_file) from plot_circexplorer2
-    file Rscriptpath
+    
 
     output:
     file ('*') into end_circexplorer2
@@ -760,7 +692,7 @@ process Circexplorer2_DE{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -777,8 +709,8 @@ process Circexplorer2_Cor{
     file (matrix_file) from plot_circexplorer2_cor
     file (anno_file) from cor_circexplorer2
     file mRNA
-    file otherTools
-    file Rscriptpath
+    
+    
 
     when:
     params.mRNA && params.circexplorer2 && params.separate
@@ -788,7 +720,7 @@ process Circexplorer2_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -885,7 +817,7 @@ process Ciri_Bed{
 
     input:
     set pair_id, file (query_file) from cirifiles
-    file otherTools
+    
 
     output:
     file ('*candidates.bed') into modify_ciri_file
@@ -905,7 +837,7 @@ process Ciri_Bed{
         | awk '{print $2 "\t" $3 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
         > !{pair_id}_modify_ciri.temp.bed
         
-        python !{otherTools}/quchong.py !{pair_id}_modify_ciri.temp.bed !{pair_id}_modify_ciri.candidates.bed
+        python !{baseDir}/bin/quchong.py !{pair_id}_modify_ciri.temp.bed !{pair_id}_modify_ciri.candidates.bed
         fi
         '''
 }
@@ -923,7 +855,7 @@ process Ciri_Matrix{
     input:
     file (query_file) from modify_ciri_file.collect()
     val (pair_id) from modify_ciri_id.collect()
-    file otherTools
+    
     file designfile
     file gtffile
 
@@ -947,13 +879,13 @@ process Ciri_Matrix{
         cat $file >> concatenate.bed
     done
     
-    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
     cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
     cat mergeconcatenate.bed > ciri.txt    
         
     cat ciri.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o ciri_ -gtf !{gtffile} -uniq
+    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o ciri_ -gtf !{gtffile} -uniq
 
     cat !{designfile} > designfile.txt
     sed -i '1d' designfile.txt
@@ -964,9 +896,9 @@ process Ciri_Matrix{
     cat samplename.txt | while read line
     do
         if [ $((`cat ${line}_modify_ciri.candidates.bed | wc -l`)) == 0 ];then
-        python !{otherTools}/createzero.py mergeconcatenate.bed counts.txt
+        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
         else
-        python !{otherTools}/quchongsamples.py mergeconcatenate.bed ${line}_modify_ciri.candidates.bed counts.txt
+        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_ciri.candidates.bed counts.txt
         fi
         paste -d"\t" id.txt counts.txt > temp.txt
         cat temp.txt > id.txt
@@ -994,11 +926,11 @@ process Ciri_DE{
 
     input:
     file (anno_file) from de_ciri
-    file otherTools
+    
     file designfile
     file comparefile
     file (matrix_file) from plot_ciri
-    file Rscriptpath
+    
 
     output:
     file ('*') into end_ciri
@@ -1008,7 +940,7 @@ process Ciri_DE{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1025,8 +957,8 @@ process Ciri_Cor{
     file (matrix_file) from plot_ciri_cor
     file (anno_file) from cor_ciri
     file mRNA
-    file otherTools
-    file Rscriptpath
+    
+    
 
     when:
     params.mRNA && params.ciri && params.separate
@@ -1036,7 +968,7 @@ process Ciri_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1115,7 +1047,7 @@ process Mapsplice_Bed{
     input:
     set pair_id, file (query_file) from mapsplicefiles
     file outdir
-    file otherTools
+    
 
     output:
     file ('*candidates.bed') into modify_mapsplice
@@ -1144,7 +1076,7 @@ process Mapsplice_Bed{
     | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
     > !{pair_id}_modify_mapsplice.temp.bed
     
-    python !{otherTools}/quchong.py !{pair_id}_modify_mapsplice.temp.bed !{pair_id}_modify_mapsplice.candidates.bed
+    python !{baseDir}/bin/quchong.py !{pair_id}_modify_mapsplice.temp.bed !{pair_id}_modify_mapsplice.candidates.bed
     fi
     '''
 }
@@ -1162,7 +1094,7 @@ process Mapsplice_Matrix{
     input:
     file (query_file) from modify_mapsplice.collect()
     val (pair_id) from modify_mapsplice_id.collect()
-    file otherTools
+    
     file designfile
     file gtffile
 
@@ -1185,13 +1117,13 @@ process Mapsplice_Matrix{
         cat $file >> concatenate.bed
     done
     
-    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
     cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
     cat mergeconcatenate.bed > mapsplice.txt
         
     cat mapsplice.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o mapsplice_ -gtf !{gtffile} -uniq
+    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o mapsplice_ -gtf !{gtffile} -uniq
     
     cat !{designfile} > designfile.txt
     sed -i '1d' designfile.txt
@@ -1202,9 +1134,9 @@ process Mapsplice_Matrix{
     cat samplename.txt | while read line
     do
         if [ $((`cat ${line}_modify_mapsplice.candidates.bed | wc -l`)) == 0 ];then
-        python !{otherTools}/createzero.py mergeconcatenate.bed counts.txt
+        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
         else
-        python !{otherTools}/quchongsamples.py mergeconcatenate.bed ${line}_modify_mapsplice.candidates.bed counts.txt
+        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_mapsplice.candidates.bed counts.txt
         fi
         paste -d"\t" id.txt counts.txt > temp.txt
         cat temp.txt > id.txt
@@ -1232,11 +1164,11 @@ process Mapsplice_DE{
 
     input:
     file (anno_file) from de_mapsplice
-    file otherTools
+    
     file designfile
     file comparefile
     file (matrix_file) from plot_mapsplice
-    file Rscriptpath
+    
 
     output:
     file ('*') into end_mapsplice
@@ -1246,7 +1178,7 @@ process Mapsplice_DE{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1263,8 +1195,8 @@ process Mapsplice_Cor{
     file (matrix_file) from plot_mapsplice_cor
     file (anno_file) from cor_mapsplice
     file mRNA
-    file otherTools
-    file Rscriptpath
+    
+    
 
     when:
     params.mRNA && params.mapsplice && params.separate
@@ -1274,7 +1206,7 @@ process Mapsplice_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1359,7 +1291,7 @@ process Segemehl_Bed{
 
     input:
     set pair_id , file ( query_file ) from segemehlfiles
-    file otherTools
+    
 
     output:
     file ('*candidates.bed') into modify_segemehl
@@ -1385,7 +1317,7 @@ process Segemehl_Bed{
     | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
     > !{pair_id}_modify_segemehl.temp.bed
     
-    python !{otherTools}/quchong.py !{pair_id}_modify_segemehl.temp.bed !{pair_id}_modify_segemehl.candidates.bed
+    python !{baseDir}/bin/quchong.py !{pair_id}_modify_segemehl.temp.bed !{pair_id}_modify_segemehl.candidates.bed
     fi
     '''
 }
@@ -1403,7 +1335,7 @@ process Segemehl_Matrix{
     input:
     file (query_file) from modify_segemehl.collect()
     val (pair_id) from modify_segemehl_id.collect()
-    file otherTools
+    
     file designfile
     file gtffile
 
@@ -1426,13 +1358,13 @@ process Segemehl_Matrix{
         cat $file >> concatenate.bed
     done
     
-    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
     cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
     cat mergeconcatenate.bed > segemehl.txt
     
     cat segemehl.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o segemehl_ -gtf !{gtffile} -uniq
+    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o segemehl_ -gtf !{gtffile} -uniq
 
     cat !{designfile} > designfile.txt
     sed -i '1d' designfile.txt
@@ -1443,9 +1375,9 @@ process Segemehl_Matrix{
     cat samplename.txt | while read line
     do
         if [ $((`cat ${line}_modify_segemehl.candidates.bed | wc -l`)) == 0 ];then
-        python !{otherTools}/createzero.py mergeconcatenate.bed counts.txt
+        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
         else
-        python !{otherTools}/quchongsamples.py mergeconcatenate.bed ${line}_modify_segemehl.candidates.bed counts.txt
+        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_segemehl.candidates.bed counts.txt
         fi
         paste -d"\t" id.txt counts.txt > temp.txt
         cat temp.txt > id.txt
@@ -1473,11 +1405,11 @@ process Segemehl_DE{
 
     input:
     file (anno_file) from de_segemehl
-    file otherTools
+    
     file designfile
     file comparefile
     file (matrix_file) from plot_segemehl
-    file Rscriptpath
+    
 
     output:
     file ('*') into end_segemehl
@@ -1487,7 +1419,7 @@ process Segemehl_DE{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1504,8 +1436,8 @@ process Segemehl_Cor{
     file (matrix_file) from plot_segemehl_cor
     file (anno_file) from cor_segemehl
     file mRNA
-    file otherTools
-    file Rscriptpath
+    
+    
 
     when:
     params.mRNA && params.segemehl && params.separate
@@ -1515,7 +1447,7 @@ process Segemehl_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1531,12 +1463,12 @@ process Bowtie2{
     publishDir "${params.outdir}/Alignment/Bowtie2", mode: 'link', overwrite: true
 
     input:
-    set pair_id, file (query_file) from fastpfiles_bowtie2
-    file index from bowtie2index.collect()
+    set pair_id, file (query_file) from Fastpfiles_bowtie2
+    file index from Bowtie2index.collect()
 
     output:
-    set pair_id, file ('bowtie2_unmapped_*') into bowtie2files
-    set pair_id, file ('bowtie2_unmapped_*') into bowtie2files_for_autocirc
+    set pair_id, file ('bowtie2_unmapped_*') into Bowtie2files
+    set pair_id, file ('bowtie2_unmapped_*') into Bowtie2files_for_autocirc
     file ('*.log') into bowtie2_multiqc
 
     when:
@@ -1595,9 +1527,9 @@ process Find_circ{
     publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', overwrite: true
 
     input:
-    set pair_id, file (query_file) from bowtie2files
+    set pair_id, file (query_file) from Bowtie2files
     file genomefile
-    file index from bowtie2index_fc.collect()
+    file index from Bowtie2index_fc.collect()
 
     output:
     set pair_id, file ('*splice_sites.bed') into find_circfiles
@@ -1642,7 +1574,7 @@ process Find_circ_Bed{
 
     input:
     set pair_id, file (query_file) from find_circfiles
-    file otherTools
+    
 
     output:
     file ('*candidates.bed') into modify_find_circfiles
@@ -1664,7 +1596,7 @@ process Find_circ_Bed{
     | sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 \
     > !{pair_id}_modify_find_circ.temp.bed
     
-    python !{otherTools}/quchong.py !{pair_id}_modify_find_circ.temp.bed !{pair_id}_modify_find_circ.candidates.bed
+    python !{baseDir}/bin/quchong.py !{pair_id}_modify_find_circ.temp.bed !{pair_id}_modify_find_circ.candidates.bed
     fi
     '''
 }
@@ -1682,7 +1614,7 @@ process Find_circ_Matrix{
     input:
     file (query_file) from modify_find_circfiles.collect()
     val (pair_id) from modify_find_circ_id.collect()
-    file otherTools
+    
     file designfile
     file gtffile
 
@@ -1706,13 +1638,13 @@ process Find_circ_Matrix{
         cat $file >> concatenate.bed
     done
     
-    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
     cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
     cat mergeconcatenate.bed > find_circ.txt
     
     cat find_circ.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o find_circ_ -gtf !{gtffile} -uniq
+    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o find_circ_ -gtf !{gtffile} -uniq
 
     cat !{designfile} > designfile.txt
     sed -i '1d' designfile.txt
@@ -1723,9 +1655,9 @@ process Find_circ_Matrix{
     cat samplename.txt | while read line
     do
         if [ $((`cat ${line}_modify_find_circ.candidates.bed | wc -l`)) == 0 ];then
-        python !{otherTools}/createzero.py mergeconcatenate.bed counts.txt
+        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
         else
-        python !{otherTools}/quchongsamples.py mergeconcatenate.bed ${line}_modify_find_circ.candidates.bed counts.txt
+        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_find_circ.candidates.bed counts.txt
         fi
         paste -d"\t" id.txt counts.txt > temp.txt
         cat temp.txt > id.txt
@@ -1753,11 +1685,11 @@ process Find_circ_DE{
 
     input:
     file (anno_file) from de_find_circ
-    file otherTools
+    
     file designfile
     file comparefile
     file (matrix_file) from plot_find_circ
-    file Rscriptpath
+    
 
     output:
     file ('*') into end_find_circ
@@ -1767,7 +1699,7 @@ process Find_circ_DE{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -1784,8 +1716,8 @@ process Find_circ_Cor{
     file (matrix_file) from plot_find_circ_cor
     file (anno_file) from cor_find_circ
     file mRNA
-    file otherTools
-    file Rscriptpath
+    
+    
 
     when:
     params.mRNA && params.find_circ && params.separate
@@ -1795,7 +1727,7 @@ process Find_circ_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -1857,7 +1789,7 @@ process Knife_Bed{
 
     input:
     set pair_id , file ( query_file ) from knifefiles
-    file otherTools
+    
 
     output:
     file ('*candidates.bed') into modify_knifefiles
@@ -1908,7 +1840,7 @@ process Knife_Bed{
     | awk '{if($5=="-") print $1 "\t" $2 "\t" $3 "\t" "knife" "\t" $4 "\t" $5 ; else print $1 "\t" $3 "\t" $2 "\t" "knife" "\t" $4 "\t" $5 }' \
     > temp.bed
 
-    python !{otherTools}/quchong.py temp.bed !{pair_id}_modify_knife.candidates.bed
+    python !{baseDir}/bin/quchong.py temp.bed !{pair_id}_modify_knife.candidates.bed
     fi
     '''
 
@@ -1927,7 +1859,7 @@ process Knife_Matrix{
     input:
     file (query_file) from modify_knifefiles.collect()
     val (pair_id) from modify_knife_id.collect()
-    file otherTools
+    
     file designfile
     file gtffile
 
@@ -1951,13 +1883,13 @@ process Knife_Matrix{
         cat $file >> concatenate.bed
     done
     
-    python !{otherTools}/hebinglist.py concatenate.bed merge_concatenate.bed
+    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
     cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
     cat mergeconcatenate.bed > knife.txt
     
     cat knife.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{otherTools}/bed1114.jar -i annotation.bed -o knife_ -gtf !{gtffile} -uniq
+    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o knife_ -gtf !{gtffile} -uniq
 
     cat !{designfile} > designfile.txt
     sed -i '1d' designfile.txt
@@ -1968,9 +1900,9 @@ process Knife_Matrix{
     cat samplename.txt | while read line
     do
         if [ $((`cat ${line}_modify_knife.candidates.bed | wc -l`)) == 0 ];then
-        python !{otherTools}/createzero.py mergeconcatenate.bed counts.txt
+        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
         else
-        python !{otherTools}/quchongsamples.py mergeconcatenate.bed ${line}_modify_knife.candidates.bed counts.txt
+        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_knife.candidates.bed counts.txt
         fi
         paste -d"\t" id.txt counts.txt > temp.txt
         cat temp.txt > id.txt
@@ -1998,11 +1930,11 @@ process Knife_DE{
 
     input:
     file (anno_file) from de_knife
-    file otherTools
+    
     file designfile
     file comparefile
     file (matrix_file) from plot_knife
-    file Rscriptpath
+    
 
     output:
     file ('*') into end_knife
@@ -2012,7 +1944,7 @@ process Knife_DE{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -2029,8 +1961,8 @@ process Knife_Cor{
     file (matrix_file) from plot_knife_cor
     file (anno_file) from cor_knife
     file mRNA
-    file otherTools
-    file Rscriptpath
+    
+    
 
     when:
     params.mRNA && params.knife && params.separate
@@ -2040,7 +1972,7 @@ process Knife_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -2080,14 +2012,14 @@ process Tools_Merge{
     input:
     file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl, merge_knife ).collect()
     file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl, name_knife ).collect()
-    file otherTools
-    file Rscriptpath
+    
+    
 
     output:
     file ('all_tools_merge.matrix') into tools_merge
     file ('all_tools_merge.matrix') into tools_merge_html
-    file ('for_annotation.bed') into bed_for_annotation
-    file ('for_annotation.bed') into bed_for_recount
+    file ('for_annotation.bed') into Med_for_annotation
+    file ('for_annotation.bed') into Bed_for_recount
     file ('for_annotation.bed') into bed_for_merge
     file ('*annote.txt') into de_merge
     file ('*annote.txt') into cor_merge
@@ -2103,11 +2035,11 @@ process Tools_Merge{
         
     awk '$3-$2>=100' temp_concatenate.txt > concatenate.txt
     
-    python !{otherTools}/hebingtoolsid.py concatenate.txt id_unsort.txt
+    python !{baseDir}/bin/hebingtoolsid.py concatenate.txt id_unsort.txt
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 id_unsort.txt > id_sort.txt
     
     cat id_sort.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > for_annotation.bed
-    java -jar !{otherTools}/bed1114.jar -i for_annotation.bed -o merge_ -gtf !{gtffile} -uniq 
+    java -jar !{baseDir}/bin/bed1114.jar -i for_annotation.bed -o merge_ -gtf !{gtffile} -uniq 
     
     echo -e "total\\c" > total.txt
     cat id_sort.txt | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id_merge.txt
@@ -2115,7 +2047,7 @@ process Tools_Merge{
     
     for file in !{query_file}
     do
-        python !{otherTools}/countnumbers.py id_sort.txt $file counts.txt
+        python !{baseDir}/bin/countnumbers.py id_sort.txt $file counts.txt
         paste -d"\t" id_list.txt counts.txt > temp.txt
         cat temp.txt > id_list.txt
     done
@@ -2129,7 +2061,7 @@ process Tools_Merge{
     
     cat header.txt id_list.txt > all_tools_merge.matrix
     
-    !{Rscriptpath}/bin/Rscript !{otherTools}/intersect.R all_tools_merge.matrix
+    Rscript !{baseDir}/bin/intersect.R all_tools_merge.matrix
     '''
 }
 
@@ -2140,34 +2072,52 @@ process Tools_Merge{
                                    Recount for merge
 ========================================================================================
 */
-process Recount_fisrt_step{
+process Recount_index_step{
     input:
-    file (bed_file) from bed_for_recount
+    file (bed_file) from Bed_for_recount
     file genomefile
-    file otherTools
+    
     file faifile
 
     output:
-    file "candidate_circRNA_index" into candidate_circRNA_index
-    file ('tmp_candidate_circRNA.gff3') into gff3_file
+    file "*.ht2" into Candidate_circRNA_index
+    file ('tmp_candidate_circRNA.gff3') into Gff3_file
 
     when:
     params.merge
 
     shell:
     '''
-    sh !{otherTools}/final_recount.sh !{bed_file} !{task.cpus} !{genomefile}
+    # sort bed (in some result bed file , start > end ) and length filtering( >= 100nt)
+    awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' !{bed_file} | awk '$3 - $2 >= 100 ' >  tmp_candidate_circRNA.bed
+
+    # bed to gff3 for htseq-count; sites around junction sites(+/-3bp)
+    awk  '{OFS="\t"}{split($4,a,"_");len=$3-$2; print $4"("a[4]")",".","exon",len-3,len+3,".","+",".","gene_id="$4 }' tmp_candidate_circRNA.bed > tmp_candidate_circRNA.gff3
+
+    # bed to fasta
+    bedtools getfasta -fi  !{genomefile} -s -bed tmp_candidate_circRNA.bed -name > tmp_candidate.circular.fa
+
+    # candidate circRNA sequnces (doulbed).
+    awk 'NR%2==1{print $0}NR%2==0{print $1$1}'  tmp_candidate.circular.fa > tmp_candidate.circular_doulbed.fa
+
+    #build index for candidate circRNA sequnce
+    mkdir $tmp_candidate_hisat_index
+
+    hisat2-build -p !{task.cpus} tmp_candidate.circular_doulbed.fa candidate_circRNA_doulbed 
+
+
+
     '''
 }
 
-process Recount_second_step{
+process Recount_estimate_step{
     tag "$pair_id"
 
     input:
-    file index from candidate_circRNA_index.collect()
-    file (gff_file) from gff3_file
-    set pair_id, file(query_file) from fastpfiles_recount
-    file otherTools
+    file index from Candidate_circRNA_index.collect()
+    file (gff_file) from Gff3_file
+    set pair_id, file(query_file) from Fastpfiles_recount
+    
 
     output:
     file('*circRNA_requantity.count') into single_sample_recount
@@ -2178,11 +2128,11 @@ process Recount_second_step{
     shell:
     if(params.singleEnd){
         '''
-        sh !{otherTools}/final_recount2.sh !{pair_id} single_end !{task.cpus} !{query_file}
+        sh !{baseDir}/bin/final_recount2.sh !{pair_id} single_end !{task.cpus} !{query_file}
         '''
     }else{
         '''
-        sh !{otherTools}/final_recount2.sh !{pair_id} pair_end !{task.cpus} !{query_file[0]} !{query_file[1]}
+        sh !{baseDir}/bin/final_recount2.sh !{pair_id} pair_end !{task.cpus} !{query_file[0]} !{query_file[1]}
         '''
     }
 }
@@ -2193,13 +2143,11 @@ process Recount_results_combine{
     input:
     file (query_file) from single_sample_recount.collect()
     file designfile
-    file otherTools
+    
     file (bed_file) from bed_for_merge
 
     output:
-    file ('final.matrix') into matrix_for_circos
-    file ('final.matrix') into plot_merge
-    file ('final.matrix') into plot_merge_cor
+    file ('final.matrix') into Matrix_for_circos,plot_merge,plot_merge_cor
 
     when:
     params.merge
@@ -2221,7 +2169,7 @@ process Recount_results_combine{
         sed '$d' temp2.bed > temp3.bed
         sed '$d' temp3.bed > temp4.bed
         sed '$d' temp4.bed > ${line}_modify_circRNA_requantity.count
-        python !{otherTools}/final_countnumbers.py id.txt ${line}_modify_circRNA_requantity.count ${line}_counts.txt
+        python !{baseDir}/bin/final_countnumbers.py id.txt ${line}_modify_circRNA_requantity.count ${line}_counts.txt
         paste -d"\t" id.txt ${line}_counts.txt > temp.txt
         cat temp.txt > id.txt
         echo -e "\\t${line}\\c" >> merge_header.txt
@@ -2245,11 +2193,11 @@ process Merge_DE{
 
     input:
     file (anno_file) from de_merge
-    file otherTools
+    
     file designfile
     file comparefile
     file (matrix_file) from plot_merge
-    file Rscriptpath
+    
 
     output:
     file ('*') into end_merge
@@ -2259,7 +2207,7 @@ process Merge_DE{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/edgeR_circ.R !{otherTools}/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
     '''
 }
 
@@ -2276,8 +2224,8 @@ process Merge_Cor{
     file (matrix_file) from plot_merge_cor
     file (anno_file) from cor_merge
     file mRNA
-    file otherTools
-    file Rscriptpath
+    
+    
 
     when:
     params.mRNA && params.merge
@@ -2287,7 +2235,7 @@ process Merge_Cor{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/correlation.R !{otherTools}/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
     '''
 }
 
@@ -2302,11 +2250,9 @@ process Merge_Annotation{
     publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (bed_file) from bed_for_annotation
-    file (query_file) from matrix_for_circos
-    file otherTools
-    file gtffile
-    file Rscriptpath
+    file (bed_file) from Med_for_annotation
+    file (query_file) from Matrix_for_circos
+    file gtffile 
 
     when:
     params.merge
@@ -2316,10 +2262,10 @@ process Merge_Annotation{
 
     shell:
     '''
-    java -jar !{otherTools}/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
-    !{Rscriptpath}/bin/Rscript !{otherTools}/circos.R !{query_file}
-    perl !{otherTools}/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
-    !{Rscriptpath}/bin/Rscript !{otherTools}/circRNA_feature.R !{otherTools}/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
+    java -jar !{baseDir}/bin/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
+    Rscript !{baseDir}/bin/circos.R !{query_file}
+    perl !{baseDir}/bin/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
+    Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
     '''
 }
 
@@ -2328,7 +2274,7 @@ process Venn{
 
     input:
     file (matrix_file) from tools_merge
-    file Rscriptpath
+    
 
 
     when:
@@ -2339,7 +2285,7 @@ process Venn{
 
     shell:
     '''
-    !{Rscriptpath}/bin/Rscript !{otherTools}/venn.R !{matrix_file} venn.png
+    Rscript !{baseDir}/bin/venn.R !{matrix_file} venn.png
     '''
 }
 
@@ -2359,8 +2305,8 @@ process Report_production{
     file (anno_file) from annotation_plot.collect()
     file (calculate_file) from tools_merge_html
     file (multiqc_file) from multiqc_results
-    file otherTools
-    file Rscriptpath
+    
+    
 
     when:
     params.merge
@@ -2370,8 +2316,8 @@ process Report_production{
 
     shell:
     '''
-    cp !{otherTools}/*.Rmd ./
-    !{Rscriptpath}/bin/Rscript -e "require( 'rmarkdown' ); render('report.Rmd', 'html_document')"
+    cp !{baseDir}/bin/*.Rmd ./
+    Rscript -e "require( 'rmarkdown' ); render('report.Rmd', 'html_document')"
     '''
 }
 
@@ -2386,7 +2332,7 @@ emailaddress = params.email
 
 workflow.onComplete {
 
-println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" )
+println LikeletUtils.print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" )
 
     def msg = """\
 <html>
@@ -2440,8 +2386,8 @@ println print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" 
     </table>
 
     <h4> likelet/CircPipe </h4>
-    <h4><a href="https://github.com/likelet/cirPipe">https://github.com/likelet/circPipe</a></h4>
-    <h4> If you need help, you can send email to Wei Qijin (513848731@qq.com) </h4>
+    <h4><a href="https://github.com/likelet/circPipe">https://github.com/likelet/circPipe</a></h4>
+    <h4> If you need help, you can send email to Qi Zhao(zhaoqi@sysucc.org.cn) or Wei Qijin (513848731@qq.com) </h4>
 </div>
 </body>
 </html>
