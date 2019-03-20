@@ -40,7 +40,6 @@ def helpMessage() {
       --comparefile                 A txt file that stored experimental compare information
 
     Configuration:
-      --redir                       The folder containing all reference files and index
       --genomefile                  Path to Fasta reference (required if not set in config file)
       --gtffile/
       --annotationfile              Different annotation files from GENCODE database for annotating circRNAs. 
@@ -51,9 +50,7 @@ def helpMessage() {
     Options:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: standard, conda, docker, singularity, awsbatch, test
-      --starindex/--Bowtie2index/
-      --bwaindex/--segindex/
-      --bowtieindex/--refmapsplice  Path to STAR/bowtie2/segemehl/bowtie/bwa/mapsplice index. 
+
                                     If not set, the pipeline will create the index itself.
       --singleEnd                   Specify that the reads are single ended
       --merge                       Merge the different matrixes produce by different tools and draw the venn graph
@@ -88,34 +85,6 @@ if (params.help){
 /*
 
 
-// AWSBatch sanity checking
-if(workflow.profile == 'awsbatch'){
-    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-    if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
-}
-//
-// NOTE - THIS IS NOT USED IN THIS PIPELINE, EXAMPLE ONLY
-// If you want to use the above in a process, define the following:
-//   input:
-//   file fasta from fasta
-//
-
-
-// Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
-custom_runName = params.name
-if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
-    custom_runName = workflow.runName
-}
-
-// Check workDir/outdir paths to be S3 buckets if running on AWSBatch
-// related: https://github.com/nextflow-io/nextflow/issues/813
-if( workflow.profile == 'awsbatch') {
-    if(!workflow.workDir.startsWith('s3:') || !params.outdir.startsWith('s3:')) exit 1, "Workdir or Outdir not on S3 - specify S3 Buckets for each to run on AWSBatch!"
-}
-
-
-
 */
 
 /*
@@ -127,6 +96,9 @@ if( workflow.profile == 'awsbatch') {
 
 outdir = file(params.outdir) //the output directory
 
+
+// check variables 
+assert params.library == 'rnase' || params.aligner == 'total' : "Invalid library option: ${params.library}. Valid options: 'rnase', 'total'"
 
 
 /*
@@ -172,8 +144,8 @@ if( params.selectTools ==~ /.*6.*/ ){
 
 
 if(params.mRNA){
-    mRNA = file(params.mRNA) //the mRNA file
-    if( !mRNA.exists() ) exit 1, LikeletUtils.print_red("Missing mRNA expression file: ${mRNA}")
+    mRNAfile = file(params.mRNA) //the mRNA file
+    if( !mRNAfile.exists() ) exit 1, LikeletUtils.print_red("Missing mRNA expression file: ${mRNAfile}")
 
 }
 
@@ -218,7 +190,6 @@ if( !gtffile.exists() ) exit 1, LikeletUtils.print_red("Missing gtf annotation f
 //design file
 designfile = file(params.designfile)
 if(params.designfile) {
-
     if( !designfile.exists() ) exit 1, LikeletUtils.print_red("Design file not found: ${params.designfile}")
 }
 //compare file
@@ -272,7 +243,7 @@ log.info LikeletUtils.print_yellow("==================================Input file
 log.info LikeletUtils.print_yellow("Reads :                         ") + LikeletUtils.print_green(params.reads)
 log.info LikeletUtils.print_yellow("Annotation file :               ") + LikeletUtils.print_green(params.annotationfile)
 log.info LikeletUtils.print_yellow("Genome file :                   ") + LikeletUtils.print_green(params.genomefile)
-log.info LikeletUtils.print_yellow("Gtf file :                      ") + LikeletUtils.print_green(params.gtffile)
+log.info LikeletUtils.print_yellow("GTF file :                      ") + LikeletUtils.print_green(params.gtffile)
 log.info "\n"
 log.info LikeletUtils.print_yellow("==================================Output files directory========================")
 log.info LikeletUtils.print_yellow("Output directory :              ") + LikeletUtils.print_green(params.outdir)
@@ -296,7 +267,7 @@ log.info LikeletUtils.print_yellow("===================check or build the index=
                              check or build the index
 ========================================================================================
 */
-if(params.circexplorer2==true){
+if(params.circexplorer2){
     if(params.starindex){
         starindex = Channel
                 .fromPath(params.starindex)
@@ -326,11 +297,14 @@ if(params.circexplorer2==true){
             """
         }
     }
+}else{
+    // avoiding throw errors  by nextflow
+    starindex=Channel.fromPath(params.inputdir)
 }
 
 
-if(params.find_circ==true){
-    if(params.Bowtie2index){
+if(params.find_circ){
+    if(params.bowtie2index){
         (Bowtie2index,Bowtie2index_fc)= Channel
                 .fromPath(params.bowtie2index+"/*.bt2")
                 .ifEmpty { exit 1, "Bowtie2 index not found: ${params.Bowtie2index}, and it required by find_circ " }.into(2)
@@ -354,8 +328,13 @@ if(params.find_circ==true){
             
         }
     }
+}else{
+    // avoiding throw errors  by nextflow
+     (Bowtie2index,Bowtie2index_fc)=Channel.fromPath(params.inputdir).into(2)
+
 }
-if(params.mapsplice==true){
+
+if(params.mapsplice){
     if(params.bowtieindex){
         Bowtieindex = Channel
                 .fromPath(params.bowtieindex+"/*.ebwt")
@@ -377,12 +356,16 @@ if(params.mapsplice==true){
             """
         }
     }
+}else{
+    // avoiding throw errors  by nextflow
+    (Bowtieindex,Bowtie_build_knife)=Channel.fromPath(params.inputdir).into(2)
 }
 
-if(params.ciri==true){
+
+if(params.ciri){
     if(params.bwaindex){
         bwaindex = Channel
-                .fromPath(params.bwaindex+"*.{ann,amb,pac,bwt,sa}")
+                .fromPath(params.bwaindex+"/*.{ann,amb,pac,bwt,sa}")
                 .ifEmpty { exit 1, "BWA index not found: ${params.bwaindex}" }
     }else{
         LikeletUtils.print_yellow("Seems that you did not provide a BWA index for ciri, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
@@ -402,11 +385,14 @@ if(params.ciri==true){
             """
         }
     }
+}else{
+    // avoiding throw errors  by nextflow
+    bwaindex=Channel.fromPath(params.inputdir)
 }
 
-if(params.segemehl==true){
+if(params.segemehl){
     if(params.segindex){
-        segindex = Channel
+       Segindex = Channel
                 .fromPath(params.segindex+"/*.idx")
                 .ifEmpty { exit 1, "Segemehl index not found: ${params.segindex}" }
     }else{
@@ -419,7 +405,7 @@ if(params.segemehl==true){
             file segdir
 
             output:
-            file "genome.idx" into segindex
+            file "genome.idx" into Segindex
 
             script:
             """
@@ -427,7 +413,11 @@ if(params.segemehl==true){
         """
         }
     }
+}else{
+    // avoiding throw errors  by nextflow
+    Segindex=Channel.fromPath(params.inputdir)
 }
+
 
 
 
@@ -702,28 +692,29 @@ process Circexplorer2_DE{
                                         Correlation
 ========================================================================================
 */
-process Circexplorer2_Cor{
-    publishDir "${params.outdir}/Corrrelation_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
+if(params.mRNA){
+    process Circexplorer2_Cor{
+        publishDir "${params.outdir}/Corrrelation_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
 
-    input:
-    file (matrix_file) from plot_circexplorer2_cor
-    file (anno_file) from cor_circexplorer2
-    file mRNA
-    
-    
+        input:
+        file (matrix_file) from plot_circexplorer2_cor
+        file (anno_file) from cor_circexplorer2
+        file mRNAfile
+        
+        
 
-    when:
-    params.mRNA && params.circexplorer2 && params.separate
+        when:
+        params.mRNA && params.circexplorer2 && params.separate
 
-    output:
-    file ('*') into cor_plot_circexplorer2
+        output:
+        file ('*') into cor_plot_circexplorer2
 
-    shell:
-    '''
-    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
-    '''
+        shell:
+        '''
+        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+        '''
+    }
 }
-
 
 /*
 ========================================================================================
@@ -950,28 +941,29 @@ process Ciri_DE{
                                         Correlation
 ========================================================================================
 */
-process Ciri_Cor{
-    publishDir "${params.outdir}/Corrrelation_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
+if(params.mRNA){
+    process Ciri_Cor{
+        publishDir "${params.outdir}/Corrrelation_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
 
-    input:
-    file (matrix_file) from plot_ciri_cor
-    file (anno_file) from cor_ciri
-    file mRNA
-    
-    
+        input:
+        file (matrix_file) from plot_ciri_cor
+        file (anno_file) from cor_ciri
+        file mRNA
+        
+        
 
-    when:
-    params.mRNA && params.ciri && params.separate
+        when:
+        params.mRNA && params.ciri && params.separate
 
-    output:
-    file ('*') into cor_plot_ciri
+        output:
+        file ('*') into cor_plot_ciri
 
-    shell:
-    '''
-    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
-    '''
+        shell:
+        '''
+        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+        '''
+    }
 }
-
 
 /*
 ========================================================================================
@@ -988,7 +980,7 @@ process Mapsplice{
     file gtffile
     file refmapsplice
     file outdir
-    file index from bowtieindex.collect()
+    file index from Bowtieindex.collect()
 
     output:
     set pair_id, file('*') into mapsplicefiles
@@ -1188,26 +1180,28 @@ process Mapsplice_DE{
                                         Correlation
 ========================================================================================
 */
-process Mapsplice_Cor{
-    publishDir "${params.outdir}/Corrrelation_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
+if(params.mRNA){
+    process Mapsplice_Cor{
+        publishDir "${params.outdir}/Corrrelation_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
 
-    input:
-    file (matrix_file) from plot_mapsplice_cor
-    file (anno_file) from cor_mapsplice
-    file mRNA
-    
-    
+        input:
+        file (matrix_file) from plot_mapsplice_cor
+        file (anno_file) from cor_mapsplice
+        file mRNAfile
+        
+        
 
-    when:
-    params.mRNA && params.mapsplice && params.separate
+        when:
+        params.mapsplice && params.separate
 
-    output:
-    file ('*') into cor_plot_mapsplice
+        output:
+        file ('*') into cor_plot_mapsplice
 
-    shell:
-    '''
-    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
-    '''
+        shell:
+        '''
+        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+        '''
+    }
 }
 
 
@@ -1217,239 +1211,243 @@ process Mapsplice_Cor{
                                    run the segemehl
 ========================================================================================
 */
-process Segemehl{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
 
-    input:
-    set pair_id, file (query_file) from fastpfiles_segemehl
-    file genomefile
-    file index from segindex.collect()
+        process Segemehl{
+            tag "$pair_id"
+            publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
 
-    output:
-    set pair_id, file ('*splicesites.bed') into segemehlfiles
+            input:
+            set pair_id, file (query_file) from fastpfiles_segemehl
+            file genomefile
+            file index from Segindex.collect()
+
+            output:
+            set pair_id, file ('*splicesites.bed') into segemehlfiles
+
+            when:
+            params.segemehl 
+
+            shell:
+            if(params.singleEnd){
+                """
+                segemehl.x \
+                -d ${genomefile} \
+                -i ${index} \
+                -q ${query_file} \
+                -t ${task.cpus} \
+                -S \
+                | samtools view -bS - \
+                | samtools sort -o - \
+                | samtools view -h - \
+                > segemehl_${pair_id}_mapped.sam
+
+                testrealign.x \
+                -d ${genomefile} \
+                -q segemehl_${pair_id}_mapped.sam \
+                -n \
+                -U segemehl_${pair_id}_splicesites.bed \
+                -T segemehl_${pair_id}_transrealigned.bed
+                """
+            }else{
+                """
+                segemehl.x \
+                -d ${genomefile} \
+                -i ${index} \
+                -q ${query_file[0]} \
+                -p ${query_file[1]} \
+                -t ${task.cpus} \
+                -S \
+                | samtools view -bS - \
+                | samtools sort -o - \
+                | samtools view -h - \
+                > segemehl_${pair_id}_mapped.sam
+
+                testrealign.x \
+                -d ${genomefile} \
+                -q segemehl_${pair_id}_mapped.sam \
+                -n \
+                -U segemehl_${pair_id}_splicesites.bed \
+                -T segemehl_${pair_id}_transrealigned.bed
+                """
+            }
+
+        }
 
 
-    when:
-    params.segemehl
+    /*
+    ========================================================================================
+                                the fourth tool : segemehl
+                                    produce the bed6 file
+    ========================================================================================
+    */
+    process Segemehl_Bed{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
 
-    shell:
-    if(params.singleEnd){
-        """
-        segemehl.x \
-        -d ${genomefile} \
-        -i ${index} \
-        -q ${query_file} \
-        -t ${task.cpus} \
-        -S \
-        | samtools view -bS - \
-        | samtools sort -o - \
-        | samtools view -h - \
-        > segemehl_${pair_id}_mapped.sam
+        input:
+        set pair_id , file ( query_file ) from segemehlfiles
+        
 
-        testrealign.x \
-        -d ${genomefile} \
-        -q segemehl_${pair_id}_mapped.sam \
-        -n \
-        -U segemehl_${pair_id}_splicesites.bed \
-        -T segemehl_${pair_id}_transrealigned.bed
-        """
-    }else{
-        """
-        segemehl.x \
-        -d ${genomefile} \
-        -i ${index} \
-        -q ${query_file[0]} \
-        -p ${query_file[1]} \
-        -t ${task.cpus} \
-        -S \
-        | samtools view -bS - \
-        | samtools sort -o - \
-        | samtools view -h - \
-        > segemehl_${pair_id}_mapped.sam
+        output:
+        file ('*candidates.bed') into modify_segemehl
+        val (pair_id) into modify_segemehl_id
 
-        testrealign.x \
-        -d ${genomefile} \
-        -q segemehl_${pair_id}_mapped.sam \
-        -n \
-        -U segemehl_${pair_id}_splicesites.bed \
-        -T segemehl_${pair_id}_transrealigned.bed
-        """
+        when:
+        params.segemehl 
+
+        shell :
+        '''
+        if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
+        touch !{pair_id}_modify_segemehl.candidates.bed
+        else
+        cat !{query_file} \
+        | awk '{print $4}' \
+        | awk -F":" '{print $2 "\t" $5 "\t" $6}' \
+        > !{pair_id}_segemehl.temp.bed
+
+        paste !{query_file} !{pair_id}_segemehl.temp.bed \
+        | grep C \
+        | grep P \
+        | grep -v chrM \
+        | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
+        > !{pair_id}_modify_segemehl.temp.bed
+        
+        python !{baseDir}/bin/quchong.py !{pair_id}_modify_segemehl.temp.bed !{pair_id}_modify_segemehl.candidates.bed
+        fi
+        '''
     }
 
-}
+    /*
+    ========================================================================================
+                                the fourth tool : segemehl
+                                    produce the matrix
+    ========================================================================================
+    */
+    process Segemehl_Matrix{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern: "*.matrix", overwrite: true
 
-/*
-========================================================================================
-                              the fourth tool : segemehl
-                                 produce the bed6 file
-========================================================================================
-*/
-process Segemehl_Bed{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
+        input:
+        file (query_file) from modify_segemehl.collect()
+        val (pair_id) from modify_segemehl_id.collect()
+        
+        file designfile
+        file gtffile
 
-    input:
-    set pair_id , file ( query_file ) from segemehlfiles
-    
+        output:
+        file ('segemehl.txt') into merge_segemehl
+        file ('*.matrix') into output_segemehl
+        file ('*annote.txt') into de_segemehl
+        file ('*.matrix') into plot_segemehl
+        file ('name_segemehl.txt') into name_segemehl
+        file ('*annote.txt') into cor_segemehl
+        file ('*.matrix') into plot_segemehl_cor
 
-    output:
-    file ('*candidates.bed') into modify_segemehl
-    val (pair_id) into modify_segemehl_id
 
-    when:
-    params.segemehl
+        when:
+        params.segemehl 
 
-    shell :
-    '''
-    if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
-    touch !{pair_id}_modify_segemehl.candidates.bed
-    else
-    cat !{query_file} \
-    | awk '{print $4}' \
-    | awk -F":" '{print $2 "\t" $5 "\t" $6}' \
-    > !{pair_id}_segemehl.temp.bed
+        shell :
+        '''
+        for file in !{query_file}
+        do
+            cat $file >> concatenate.bed
+        done
+        
+        python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
+        sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
+        cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
+        cat mergeconcatenate.bed > segemehl.txt
+        
+        cat segemehl.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
+        java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o segemehl_ -gtf !{gtffile} -uniq
 
-    paste !{query_file} !{pair_id}_segemehl.temp.bed \
-    | grep C \
-    | grep P \
-    | grep -v chrM \
-    | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
-    > !{pair_id}_modify_segemehl.temp.bed
-    
-    python !{baseDir}/bin/quchong.py !{pair_id}_modify_segemehl.temp.bed !{pair_id}_modify_segemehl.candidates.bed
-    fi
-    '''
-}
+        cat !{designfile} > designfile.txt
+        sed -i '1d' designfile.txt
+        cat designfile.txt | awk '{print $1}' > samplename.txt
+        
+        echo -e "id\\c" > merge_header.txt
+        
+        cat samplename.txt | while read line
+        do
+            if [ $((`cat ${line}_modify_segemehl.candidates.bed | wc -l`)) == 0 ];then
+            python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
+            else
+            python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_segemehl.candidates.bed counts.txt
+            fi
+            paste -d"\t" id.txt counts.txt > temp.txt
+            cat temp.txt > id.txt
+            echo -e "\\t${line}\\c" >> merge_header.txt
+        done   
+        
+        sed -i 's/\\[//g' merge_header.txt
+        sed -i 's/\\,//g' merge_header.txt
+        sed -i 's/\\]//g' merge_header.txt
+        echo -e "\\n\\c" >> merge_header.txt
+        
+        cat merge_header.txt id.txt > segemehl_merge.matrix
+        echo -e "segemehl" > name_segemehl.txt
+        '''
+    }
 
-/*
-========================================================================================
-                              the fourth tool : segemehl
-                                  produce the matrix
-========================================================================================
-*/
-process Segemehl_Matrix{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern: "*.matrix", overwrite: true
+    /*
+    ========================================================================================
+                                the fourth tool : segemehl
+                                    Differential Expression
+    ========================================================================================
+    */
+    process Segemehl_DE{
+        publishDir "${params.outdir}/DE_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
 
-    input:
-    file (query_file) from modify_segemehl.collect()
-    val (pair_id) from modify_segemehl_id.collect()
-    
-    file designfile
-    file gtffile
+        input:
+        file (anno_file) from de_segemehl
+        
+        file designfile
+        file comparefile
+        file (matrix_file) from plot_segemehl
+        
 
-    output:
-    file ('segemehl.txt') into merge_segemehl
-    file ('*.matrix') into output_segemehl
-    file ('*annote.txt') into de_segemehl
-    file ('*.matrix') into plot_segemehl
-    file ('name_segemehl.txt') into name_segemehl
-    file ('*annote.txt') into cor_segemehl
-    file ('*.matrix') into plot_segemehl_cor
+        output:
+        file ('*') into end_segemehl
 
-    when:
-    params.segemehl
+        when:
+        params.separate && params.segemehl 
 
-    shell :
-    '''
-    for file in !{query_file}
-    do
-        cat $file >> concatenate.bed
-    done
-    
-    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-    cat mergeconcatenate.bed > segemehl.txt
-    
-    cat segemehl.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o segemehl_ -gtf !{gtffile} -uniq
+        shell:
+        '''
+        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+        '''
+    }
 
-    cat !{designfile} > designfile.txt
-    sed -i '1d' designfile.txt
-    cat designfile.txt | awk '{print $1}' > samplename.txt
-    
-    echo -e "id\\c" > merge_header.txt
-    
-    cat samplename.txt | while read line
-    do
-        if [ $((`cat ${line}_modify_segemehl.candidates.bed | wc -l`)) == 0 ];then
-        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
-        else
-        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_segemehl.candidates.bed counts.txt
-        fi
-        paste -d"\t" id.txt counts.txt > temp.txt
-        cat temp.txt > id.txt
-        echo -e "\\t${line}\\c" >> merge_header.txt
-    done   
-       
-    sed -i 's/\\[//g' merge_header.txt
-    sed -i 's/\\,//g' merge_header.txt
-    sed -i 's/\\]//g' merge_header.txt
-    echo -e "\\n\\c" >> merge_header.txt
-     
-    cat merge_header.txt id.txt > segemehl_merge.matrix
-    echo -e "segemehl" > name_segemehl.txt
-    '''
-}
+    /*
+    ========================================================================================
+                                    the fourth tool : segemehl
+                                            Correlation
+    ========================================================================================
+    */
+    if(params.mRNA){
+        process Segemehl_Cor{
+            publishDir "${params.outdir}/Corrrelation_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
 
-/*
-========================================================================================
-                               the fourth tool : segemehl
-                                Differential Expression
-========================================================================================
-*/
-process Segemehl_DE{
-    publishDir "${params.outdir}/DE_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
+            input:
+            file (matrix_file) from plot_segemehl_cor
+            file (anno_file) from cor_segemehl
+            file mRNAfile
+            
+            
 
-    input:
-    file (anno_file) from de_segemehl
-    
-    file designfile
-    file comparefile
-    file (matrix_file) from plot_segemehl
-    
+            when:
+            params.segemehl && params.separate
 
-    output:
-    file ('*') into end_segemehl
+            output:
+            file ('*') into cor_plot_segemehl
 
-    when:
-    params.segemehl && params.separate
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-    '''
-}
-
-/*
-========================================================================================
-                                  the fourth tool : segemehl
-                                        Correlation
-========================================================================================
-*/
-process Segemehl_Cor{
-    publishDir "${params.outdir}/Corrrelation_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (matrix_file) from plot_segemehl_cor
-    file (anno_file) from cor_segemehl
-    file mRNA
-    
-    
-
-    when:
-    params.mRNA && params.segemehl && params.separate
-
-    output:
-    file ('*') into cor_plot_segemehl
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
-    '''
-}
+            shell:
+            '''
+            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+            '''
+        }
+    }
 
 
 /*
@@ -1709,26 +1707,28 @@ process Find_circ_DE{
                                         Correlation
 ========================================================================================
 */
-process Find_circ_Cor{
-    publishDir "${params.outdir}/Corrrelation_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
+if(params.mRNA){
+    process Find_circ_Cor{
+        publishDir "${params.outdir}/Corrrelation_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
 
-    input:
-    file (matrix_file) from plot_find_circ_cor
-    file (anno_file) from cor_find_circ
-    file mRNA
-    
-    
+        input:
+        file (matrix_file) from plot_find_circ_cor
+        file (anno_file) from cor_find_circ
+        file mRNAfile
+        
+        
 
-    when:
-    params.mRNA && params.find_circ && params.separate
+        when:
+        params.find_circ && params.separate
 
-    output:
-    file ('*') into cor_plot_find_circ
+        output:
+        file ('*') into cor_plot_find_circ
 
-    shell:
-    '''
-    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
-    '''
+        shell:
+        '''
+        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+        '''
+    }
 }
 
 
@@ -1954,28 +1954,29 @@ process Knife_DE{
                                         Correlation
 ========================================================================================
 */
-process Knife_Cor{
-    publishDir "${params.outdir}/Corrrelation_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
+if(params.mRNA){
+    process Knife_Cor{
+        publishDir "${params.outdir}/Corrrelation_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
 
-    input:
-    file (matrix_file) from plot_knife_cor
-    file (anno_file) from cor_knife
-    file mRNA
-    
-    
+        input:
+        file (matrix_file) from plot_knife_cor
+        file (anno_file) from cor_knife
+        file mRNAfile
+        
+        
 
-    when:
-    params.mRNA && params.knife && params.separate
+        when:
+         params.knife && params.separate
 
-    output:
-    file ('*') into cor_plot_knife
+        output:
+        file ('*') into cor_plot_knife
 
-    shell:
-    '''
-    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
-    '''
+        shell:
+        '''
+        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+        '''
+    }
 }
-
 
 
 /*
@@ -2217,26 +2218,29 @@ process Merge_DE{
                                         Correlation
 ========================================================================================
 */
-process Merge_Cor{
-    publishDir "${params.outdir}/Corrrelation_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
 
-    input:
-    file (matrix_file) from plot_merge_cor
-    file (anno_file) from cor_merge
-    file mRNA
-    
-    
+if(params.mRNA){
+    process Merge_Cor{
+        publishDir "${params.outdir}/Corrrelation_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
 
-    when:
-    params.mRNA && params.merge
+        input:
+        file (matrix_file) from plot_merge_cor
+        file (anno_file) from cor_merge
+        file mRNAfile
+        
+        
 
-    output:
-    file ('*') into cor_plot_merge
+        when:
+        params.merge
 
-    shell:
-    '''
-    Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
-    '''
+        output:
+        file ('*') into cor_plot_merge
+
+        shell:
+        '''
+        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+        '''
+    }
 }
 
 
