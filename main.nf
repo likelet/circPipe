@@ -376,8 +376,10 @@ if(params.mapsplice){
 if(params.ciri){
     if(params.bwaindex){
         bwaindex = Channel
-                .fromPath(params.bwaindex+"/*.{ann,amb,pac,bwt,sa}")
+                .fromPath(params.bwaindex+"*.{ann,amb,pac,bwt,sa}")
                 .ifEmpty { exit 1, "BWA index not found: ${params.bwaindex}" }
+        String [] tempstr=params.bwaindex.split("/")
+        String bwastr=tempstr[tempstr.length-1]
     }else{
         LikeletUtils.print_yellow("Seems that you did not provide a BWA index for ciri, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBWAindex {
@@ -749,7 +751,7 @@ process Bwa{
 
     shell:
     if(params.bwaindex){
-        bwastr=params.bwaindex
+        bwastr=bwastr
     }else{
         bwastr="genome"
     }
