@@ -20,8 +20,6 @@
  * Wei qijin
  */
 
-println(PATH)
-
 
 def helpMessage() {
     log.info"""
@@ -82,10 +80,6 @@ if (params.help){
     exit 0
 }
 
-/*
-
-
-*/
 
 /*
  * Checking the input files
@@ -169,8 +163,7 @@ if( !genomefile.exists() ) exit 1, LikeletUtils.print_red("Missing genome file: 
 
 if(params.mapsplice){
     if(params.refmapsplice){
-        Refmapsplice = Channal.fromPath(params.refmapsplice) //the mapsplice reference genome directory
-        if( !Refmapsplice.exists() ) exit 1, LikeletUtils.print_red("Missing Mapsplice Reference Genome Directory: ${Refmapsplice}")
+        Refmapsplice = Channel.fromPath(params.refmapsplice) //the mapsplice reference genome directory
     }else{
         process built_refmapsplice_reference_by_split {
                 storeDir "${params.outdir}/reference_genome/split"
@@ -187,7 +180,7 @@ if(params.mapsplice){
     }
     
 }else{
-     Refmapsplice = Channal.fromPath(params.inputdir)
+     Refmapsplice = Channel.fromPath(params.inputdir)
 }
 
 
@@ -317,7 +310,7 @@ if(params.circexplorer2){
     }
 }else{
     // avoiding throw errors  by nextflow
-    starindex=Channel.fromPath(params.inputdir)
+    starindex=Channel.create()
 }
 
 
@@ -348,7 +341,7 @@ if(params.find_circ){
     }
 }else{
     // avoiding throw errors  by nextflow
-     (Bowtie2index,Bowtie2index_fc)=Channel.fromPath(params.inputdir).into(2)
+     (Bowtie2index,Bowtie2index_fc)=Channel.create().into(2)
 
 }
 
@@ -376,7 +369,7 @@ if(params.mapsplice){
     }
 }else{
     // avoiding throw errors  by nextflow
-    (Bowtieindex,Bowtie_build_knife)=Channel.fromPath(params.inputdir).into(2)
+    (Bowtieindex,Bowtie_build_knife)=Channel.create().into(2)
 }
 
 
@@ -405,7 +398,7 @@ if(params.ciri){
     }
 }else{
     // avoiding throw errors  by nextflow
-    bwaindex=Channel.fromPath(params.inputdir)
+    bwaindex=Channel.create()
 }
 
 if(params.segemehl){
@@ -433,7 +426,7 @@ if(params.segemehl){
     }
 }else{
     // avoiding throw errors  by nextflow
-    Segindex=Channel.fromPath(params.inputdir)
+    Segindex=Channel.create()
 }
 
 
@@ -755,6 +748,12 @@ process Bwa{
     params.ciri
 
     shell:
+    if(params.bwaindex){
+        bwastr=params.bwaindex
+    }else{
+        bwastr="genome"
+    }
+
     if(params.singleEnd){
         """
         bwa \
@@ -762,7 +761,7 @@ process Bwa{
         -k 15 \
         -T 19  -M -R \
         "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        ${index}/genome \
+        ${bwastr} \
         ${query_file} \
         > bwa_${pair_id}.mem.sam
         """
@@ -772,7 +771,7 @@ process Bwa{
         mem -t ${task.cpus} \
         -T 19 -M -R \
         "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        ${index}/genome \
+        ${bwastr} \
         ${query_file[0]} ${query_file[1]} \
         > bwa_${pair_id}.mem.sam
         """
@@ -2093,56 +2092,54 @@ process Tools_Merge{
 */
 process Recount_index_step{
     input:
-    file (bed_file) from Bed_for_recount
-    file genomefile
-    
-    file faifile
+        file (bed_file) from Bed_for_recount
+        file genomefile
+        file faifile
 
     output:
-    file "*.ht2" into Candidate_circRNA_index
-    file ('tmp_candidate_circRNA.gff3') into Gff3_file
+        file "*.ht2" into Candidate_circRNA_index
+        file ('tmp_candidate_circRNA.gff3') into Gff3_file
 
     when:
-    params.merge
+        params.merge
 
     shell:
-    '''
-    # sort bed (in some result bed file , start > end ) and length filtering( >= 100nt)
-    awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' !{bed_file} | awk '$3 - $2 >= 100 ' >  tmp_candidate_circRNA.bed
+        '''
+        # sort bed (in some result bed file , start > end ) and length filtering( >= 100nt)
+        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' !{bed_file} | awk '$3 - $2 >= 100 ' >  tmp_candidate_circRNA.bed
 
-    # bed to gff3 for htseq-count; sites around junction sites(+/-3bp)
-    awk  '{OFS="\t"}{split($4,a,"_");len=$3-$2; print $4"("a[4]")",".","exon",len-3,len+3,".","+",".","gene_id="$4 }' tmp_candidate_circRNA.bed > tmp_candidate_circRNA.gff3
+        # bed to gff3 for htseq-count; sites around junction sites(+/-3bp)
+        awk  '{OFS="\t"}{split($4,a,"_");len=$3-$2; print $4"("a[4]")",".","exon",len-3,len+3,".","+",".","gene_id="$4 }' tmp_candidate_circRNA.bed > tmp_candidate_circRNA.gff3
 
-    # bed to fasta
-    bedtools getfasta -fi  !{genomefile} -s -bed tmp_candidate_circRNA.bed -name > tmp_candidate.circular.fa
+        # bed to fasta
+        bedtools getfasta -fi  !{genomefile} -s -bed tmp_candidate_circRNA.bed -name > tmp_candidate.circular.fa
 
-    # candidate circRNA sequnces (doulbed).
-    awk 'NR%2==1{print $0}NR%2==0{print $1$1}'  tmp_candidate.circular.fa > tmp_candidate.circular_doulbed.fa
+        # candidate circRNA sequnces (doulbed).
+        awk 'NR%2==1{print $0}NR%2==0{print $1$1}'  tmp_candidate.circular.fa > tmp_candidate.circular_doulbed.fa
 
-    #build index for candidate circRNA sequnce
-    mkdir $tmp_candidate_hisat_index
+        #build index for candidate circRNA sequnce
+        mkdir $tmp_candidate_hisat_index
 
-    hisat2-build -p !{task.cpus} tmp_candidate.circular_doulbed.fa candidate_circRNA_doulbed 
+        hisat2-build -p !{task.cpus} tmp_candidate.circular_doulbed.fa candidate_circRNA_doulbed 
 
 
 
-    '''
+        '''
 }
 
 process Recount_estimate_step{
-    tag "$pair_id"
 
     input:
-    file index from Candidate_circRNA_index.collect()
-    file (gff_file) from Gff3_file
-    set pair_id, file(query_file) from Fastpfiles_recount
-    
+        file index from Candidate_circRNA_index.collect()
+        file (gff_file) from Gff3_file
+        set pair_id, file(query_file) from Fastpfiles_recount
+        
 
     output:
-    file('*circRNA_requantity.count') into single_sample_recount
+        file('*circRNA_requantity.count') into single_sample_recount
 
     when:
-    params.merge
+        params.merge
 
     shell:
     if(params.singleEnd){
@@ -2156,48 +2153,50 @@ process Recount_estimate_step{
     }
 }
 
+
+// test
 process Recount_results_combine{
+
     publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
-    file (query_file) from single_sample_recount.collect()
-    file designfile
-    
-    file (bed_file) from bed_for_merge
+        file (query_file) from single_sample_recount.collect()
+        file designfile
+        file (bed_file) from bed_for_merge
 
     output:
-    file ('final.matrix') into Matrix_for_circos,plot_merge,plot_merge_cor
-
+        file ("final.matrix") into (Matrix_for_circos, Plot_merge, PlotMergeCor)
+    
     when:
-    params.merge
+        params.merge
 
     shell:
-    '''
-    cat !{designfile} > designfile.txt
-    sed -i '1d' designfile.txt
-    cat designfile.txt | awk '{print $1}' > samplename.txt
-    
-    echo -e "id\\c" > merge_header.txt
-    
-    cat for_annotation.bed | awk '{print $1 "_" $2 "_" $3 "_" $6 }' > id.txt
-    
-    cat samplename.txt | while read line
-    do
-        sed '$d' ${line}_circRNA_requantity.count > temp1.bed
-        sed '$d' temp1.bed > temp2.bed
-        sed '$d' temp2.bed > temp3.bed
-        sed '$d' temp3.bed > temp4.bed
-        sed '$d' temp4.bed > ${line}_modify_circRNA_requantity.count
-        python !{baseDir}/bin/final_countnumbers.py id.txt ${line}_modify_circRNA_requantity.count ${line}_counts.txt
-        paste -d"\t" id.txt ${line}_counts.txt > temp.txt
-        cat temp.txt > id.txt
-        echo -e "\\t${line}\\c" >> merge_header.txt
-    done   
-    
-    echo -e "\\n\\c" >> merge_header.txt
-    
-    cat merge_header.txt id.txt > final.matrix
-    '''
+        '''
+        cat !{designfile} > designfile.txt
+        sed -i '1d' designfile.txt
+        cat designfile.txt | awk '{print $1}' > samplename.txt
+        
+        echo -e "id\\c" > merge_header.txt
+        
+        cat for_annotation.bed | awk '{print $1 "_" $2 "_" $3 "_" $6 }' > id.txt
+        
+        cat samplename.txt | while read line
+        do
+            sed '$d' ${line}_circRNA_requantity.count > temp1.bed
+            sed '$d' temp1.bed > temp2.bed
+            sed '$d' temp2.bed > temp3.bed
+            sed '$d' temp3.bed > temp4.bed
+            sed '$d' temp4.bed > ${line}_modify_circRNA_requantity.count
+            python !{baseDir}/bin/final_countnumbers.py id.txt ${line}_modify_circRNA_requantity.count ${line}_counts.txt
+            paste -d"\t" id.txt ${line}_counts.txt > temp.txt
+            cat temp.txt > id.txt
+            echo -e "\\t${line}\\c" >> merge_header.txt
+        done   
+        
+        echo -e "\\n\\c" >> merge_header.txt
+        
+        cat merge_header.txt id.txt > final.matrix
+        '''
 }
 
 
@@ -2215,7 +2214,7 @@ process Merge_DE{
     
     file designfile
     file comparefile
-    file (matrix_file) from plot_merge
+    file (matrix_file) from Plot_merge
     
 
     output:
@@ -2242,7 +2241,7 @@ if(params.mRNA){
         publishDir "${params.outdir}/Corrrelation_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (matrix_file) from plot_merge_cor
+        file (matrix_file) from PlotMergeCor
         file (anno_file) from cor_merge
         file mRNAfile
         
@@ -2252,13 +2251,15 @@ if(params.mRNA){
         params.merge
 
         output:
-        file ('*') into cor_plot_merge
+        file("*") into CorPlotMerge
 
         shell:
         '''
         Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
         '''
     }
+}else{
+    CorPlotMerge=Channel.create()
 }
 
 
@@ -2323,7 +2324,7 @@ process Report_production{
 
     input:
     file (de_file) from end_merge.collect()
-    file (cor_file) from cor_plot_merge.collect()
+    file (cor_file) from CorPlotMerge.collect()
     file (anno_file) from annotation_plot.collect()
     file (calculate_file) from tools_merge_html
     file (multiqc_file) from multiqc_results
