@@ -378,8 +378,6 @@ if(params.ciri){
         bwaindex = Channel
                 .fromPath(params.bwaindex+"*.{ann,amb,pac,bwt,sa}")
                 .ifEmpty { exit 1, "BWA index not found: ${params.bwaindex}" }
-        String [] tempstr=params.bwaindex.split("/")
-        String bwastr=tempstr[tempstr.length-1]
     }else{
         LikeletUtils.print_yellow("Seems that you did not provide a BWA index for ciri, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBWAindex {
@@ -394,7 +392,7 @@ if(params.ciri){
 
             script:
             """
-             bwa index ${genomefile} -p genome
+             bwa index ${genomefile} 
             """
         }
     }
@@ -742,6 +740,8 @@ process Bwa{
     input:
     set pair_id, file (query_file) from fastpfiles_bwa
     file index from bwaindex.collect()
+    file genomefile
+
 
     output:
     set pair_id, file ('*.sam') into bwafiles
@@ -750,12 +750,7 @@ process Bwa{
     params.ciri
 
     shell:
-    if(params.bwaindex){
-        bwastr=bwastr
-    }else{
-        bwastr="genome"
-    }
-
+    
     if(params.singleEnd){
         """
         bwa \
@@ -763,7 +758,7 @@ process Bwa{
         -k 15 \
         -T 19  -M -R \
         "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        ${bwastr} \
+        ${genomefile} \
         ${query_file} \
         > bwa_${pair_id}.mem.sam
         """
@@ -773,7 +768,7 @@ process Bwa{
         mem -t ${task.cpus} \
         -T 19 -M -R \
         "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        ${bwastr} \
+        ${genomefile} \
         ${query_file[0]} ${query_file[1]} \
         > bwa_${pair_id}.mem.sam
         """
@@ -1018,7 +1013,7 @@ process Mapsplice{
         --qual-scale phred33 \
         --non-canonical-double-anchor \
         --min-fusion-distance 200 \
-        -x ${index}/genome \
+        -x genome \
         --gene-gtf ${gtffile} \
         -c ${refmapsplice_dir} \
         -1 ${query_file} \
@@ -1033,7 +1028,7 @@ process Mapsplice{
         --fusion-non-canonical \
         --non-canonical-double-anchor \
         --min-fusion-distance 200 \
-        -x ${index}/genome \
+        -x genome \
         --gene-gtf ${gtffile} \
         -c ${refmapsplice_dir} \
         -1 ${query_file[0]} \
@@ -1499,11 +1494,11 @@ process Bowtie2{
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
-        -x ${index}/genome \
+        -x genome \
         -q \
         -U ${query_file} 2> bowtie2_${pair_id}.log \
         | samtools view -hbuS - \
-        | samtools sort - bowtie2_output_${pair_id}
+        | samtools sort - > bowtie2_output_${pair_id}.bam
 
         samtools \
         view -hf 4 bowtie2_output_${pair_id}.bam \
@@ -1517,12 +1512,12 @@ process Bowtie2{
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
-        -x ${index}/genome \
+        -x genome \
         -q \
         -1 ${query_file[0]} \
         -2 ${query_file[1]} 2> bowtie2_${pair_id}.log \
         | samtools view -hbuS - \
-        | samtools sort - bowtie2_output_${pair_id}
+        | samtools sort - > bowtie2_output_${pair_id}.bam
 
         samtools \
         view -hf 4 bowtie2_output_${pair_id}.bam \
@@ -1567,7 +1562,7 @@ process Find_circ{
     --mm \
     --score-min=C,-15,0 \
     -q \
-    -x ${index}/genome \
+    -x genome \
     -U find_circ_${pair_id}_anchors.qfa.gz \
     | find_circ.py \
     -G ${genomefile} \
@@ -2459,5 +2454,6 @@ email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timest
 
 log.info "[nf-core/cirpipe] Pipeline Complete"
 */
+
 
 
