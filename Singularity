@@ -2,7 +2,7 @@ From:nfcore/base
 Bootstrap:docker
 
 %labels
-    DESCRIPTION Singularity image containing all requirements for the nf-core/cirpipe pipeline
+    DESCRIPTION Singularity image containing all requirements for the cirpipe pipeline
     VERSION 1.0dev
 
 %environment
