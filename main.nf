@@ -236,7 +236,7 @@ log.info LikeletUtils.print_cyan("""
  =======================================================================
          """)
         .stripIndent()
-log.info LikeletUtils.print_purple("============You are running cirPipe with the following parameters===============")
+log.info LikeletUtils.print_purple("============You are running circpipe with the following parameters===============")
 log.info LikeletUtils.print_purple("Checking parameters ...")
 log.info "\n"
 log.info LikeletUtils.print_yellow("=====================================Reads types================================")
@@ -258,6 +258,8 @@ log.info LikeletUtils.print_yellow("GTF file :                      ") + Likelet
 log.info "\n"
 log.info LikeletUtils.print_yellow("==================================Output files directory========================")
 log.info LikeletUtils.print_yellow("Output directory :              ") + LikeletUtils.print_green(params.outdir)
+log.info LikeletUtils.print_yellow("==================================          Others      ========================")
+log.info LikeletUtils.print_yellow("Skip Fastqc :                   ") + LikeletUtils.print_green(params.skip_fastp)
 log.info "\n"
 
 
@@ -283,6 +285,7 @@ if(params.circexplorer2){
         starindex = Channel
                 .fromPath(params.starindex)
                 .ifEmpty { exit 1, "STAR index not found: ${params.starindex}" }
+        star_run_index = params.starindex
     }else{
         LikeletUtils.print_yellow("Seems that you did not provide a STAR index for circexplorer2, circPipe will built it automaticaly. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeSTARindex {
@@ -307,19 +310,22 @@ if(params.circexplorer2){
                 --sjdbOverhang 149
             """
         }
+        star_run_index = 'starindex'
     }
 }else{
     // avoiding throw errors  by nextflow
     starindex=Channel.create()
+    
 }
 
 
 if(params.find_circ){
     if(params.bowtie2index){
         (Bowtie2index,Bowtie2index_fc)= Channel
-                .fromPath(params.bowtie2index+"/*.bt2")
-                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.Bowtie2index}, and it required by find_circ " }.into(2)
+                .fromPath(params.bowtie2index+"*.bt2")
+                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}, and it required by find_circ " }.into(2)
 
+        bowtie2_run_index = params.bowtie2index
     }else{
         LikeletUtils.print_yellow("Seems that you did not provide a Bowtie2 index for find_circ, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBowtie2index {
@@ -338,18 +344,20 @@ if(params.find_circ){
             """
             
         }
+         bowtie2_run_index = 'genome'
     }
 }else{
     // avoiding throw errors  by nextflow
      (Bowtie2index,Bowtie2index_fc)=Channel.create().into(2)
-
+        
 }
 
 if(params.mapsplice){
     if(params.bowtieindex){
         Bowtieindex = Channel
-                .fromPath(params.bowtieindex+"/*.ebwt")
+                .fromPath(params.bowtieindex+"*.ebwt")
                 .ifEmpty { exit 1, "Bowtie index not found: ${params.bowtieindex}" }
+        bowtie_run_index=params.bowtieindex                
     }else{
          LikeletUtils.print_yellow("Seems that you did not provide a Bowtie index for mapsplice, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBowtieindex {
@@ -366,6 +374,7 @@ if(params.mapsplice){
             bowtie-build ${genomefile} genome
             """
         }
+        bowtie_run_index = "genome"
     }
 }else{
     // avoiding throw errors  by nextflow
@@ -378,6 +387,7 @@ if(params.ciri){
         bwaindex = Channel
                 .fromPath(params.bwaindex+"*.{ann,amb,pac,bwt,sa}")
                 .ifEmpty { exit 1, "BWA index not found: ${params.bwaindex}" }
+        bowtie_run_index = params.bwaindex
     }else{
         LikeletUtils.print_yellow("Seems that you did not provide a BWA index for ciri, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBWAindex {
@@ -392,9 +402,11 @@ if(params.ciri){
 
             script:
             """
-             bwa index ${genomefile} 
+             bwa index -p genome ${genomefile} 
             """
+            bowtie_run_index="genome"
         }
+
     }
 }else{
     // avoiding throw errors  by nextflow
@@ -404,7 +416,7 @@ if(params.ciri){
 if(params.segemehl){
     if(params.segindex){
        Segindex = Channel
-                .fromPath(params.segindex+"/*.idx")
+                .fromPath(params.segindex+"*.idx")
                 .ifEmpty { exit 1, "Segemehl index not found: ${params.segindex}" }
     }else{
         LikeletUtils.print_yellow("Seems that you did not provide a segemehl index for runing segemehl, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
@@ -434,11 +446,20 @@ if(params.segemehl){
 
 log.info LikeletUtils.print_green("==========Index pass!...==========")
 log.info LikeletUtils.print_green("==========Start running CircPipe...==========")
+
+
+
 /*
 ========================================================================================
                        first step : run the fastp (QC tool)
 ========================================================================================
 */
+
+if(params.skip_fastp){
+    (fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount)=read_pairs_fastp.into(7)
+    fastp_for_waiting=Channel.create()
+    fastp_for_multiqc=Channel.create()
+}else{
 process Fastp{
     tag "$pair_id"
     publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
@@ -451,6 +472,9 @@ process Fastp{
     file ('*.html') into fastp_for_waiting
     file ('*_fastp.json') into fastp_for_multiqc
 
+    when:
+    !params.skip_fastp
+    
     script:
     if(params.singleEnd){
         """
@@ -474,6 +498,10 @@ process Fastp{
 
 
 }
+}
+
+
+
 
 fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process first
 
@@ -507,7 +535,7 @@ process Star{
         STAR \
         --runThreadN ${task.cpus} \
         --chimSegmentMin 10 \
-        --genomeDir $index \
+        --genomeDir ${star_run_index} \
         --readFilesIn ${query_file} \
         --outFileNamePrefix star_${pair_id}_
         """
@@ -516,7 +544,7 @@ process Star{
         STAR \
         --runThreadN ${task.cpus} \
         --chimSegmentMin 10 \
-        --genomeDir $index \
+        --genomeDir ${star_run_index} \
         --readFilesIn ${query_file[0]} ${query_file[1]} \
         --outFileNamePrefix star_${pair_id}_
         """
@@ -591,7 +619,7 @@ process Circexplorer2_Bed{
     | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
     > !{pair_id}_modify_circexplorer2.temp.bed
     
-    python !{baseDir}/bin/quchong.py !{pair_id}_modify_circexplorer2.temp.bed !{pair_id}_modify_circexplorer2.candidates.bed
+    python !{baseDir}/bin/quchong.py !{pair_id}_modify_circexplorer2.temp.bed circexplorer2_!{pair_id}_modify.candidates.bed
     fi
     '''
 }
@@ -758,7 +786,7 @@ process Bwa{
         -k 15 \
         -T 19  -M -R \
         "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        ${genomefile} \
+        ${bowtie_run_index} \
         ${query_file} \
         > bwa_${pair_id}.mem.sam
         """
@@ -768,7 +796,7 @@ process Bwa{
         mem -t ${task.cpus} \
         -T 19 -M -R \
         "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        ${genomefile} \
+        ${bowtie_run_index} \
         ${query_file[0]} ${query_file[1]} \
         > bwa_${pair_id}.mem.sam
         """
@@ -1013,7 +1041,7 @@ process Mapsplice{
         --qual-scale phred33 \
         --non-canonical-double-anchor \
         --min-fusion-distance 200 \
-        -x genome \
+        -x ${bowtie_run_index} \
         --gene-gtf ${gtffile} \
         -c ${refmapsplice_dir} \
         -1 ${query_file} \
@@ -1028,7 +1056,7 @@ process Mapsplice{
         --fusion-non-canonical \
         --non-canonical-double-anchor \
         --min-fusion-distance 200 \
-        -x genome \
+        -x ${bowtie_run_index} \
         --gene-gtf ${gtffile} \
         -c ${refmapsplice_dir} \
         -1 ${query_file[0]} \
@@ -1082,7 +1110,7 @@ process Mapsplice_Bed{
     | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
     > !{pair_id}_modify_mapsplice.temp.bed
     
-    python !{baseDir}/bin/quchong.py !{pair_id}_modify_mapsplice.temp.bed !{pair_id}_modify_mapsplice.candidates.bed
+    python !{baseDir}/bin/quchong.py !{pair_id}_modify_mapsplice.temp.bed mapsplice_!{pair_id}_modify.candidates.bed
     fi
     '''
 }
@@ -1246,7 +1274,7 @@ if(params.mRNA){
                 """
                 segemehl.x \
                 -d ${genomefile} \
-                -i ${index} \
+                -i ${params.segindex} \
                 -q ${query_file} \
                 -t ${task.cpus} \
                 -S \
@@ -1266,7 +1294,7 @@ if(params.mRNA){
                 """
                 segemehl.x \
                 -d ${genomefile} \
-                -i ${index} \
+                 -i ${params.segindex} \
                 -q ${query_file[0]} \
                 -p ${query_file[1]} \
                 -t ${task.cpus} \
@@ -1326,7 +1354,7 @@ if(params.mRNA){
         | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
         > !{pair_id}_modify_segemehl.temp.bed
         
-        python !{baseDir}/bin/quchong.py !{pair_id}_modify_segemehl.temp.bed !{pair_id}_modify_segemehl.candidates.bed
+        python !{baseDir}/bin/quchong.py !{pair_id}_modify_segemehl.temp.bed segemehl_!{pair_id}_modify.candidates.bed
         fi
         '''
     }
@@ -1494,7 +1522,7 @@ process Bowtie2{
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
-        -x genome \
+        -x ${bowtie2_run_index} \
         -q \
         -U ${query_file} 2> bowtie2_${pair_id}.log \
         | samtools view -hbuS - \
@@ -1512,7 +1540,7 @@ process Bowtie2{
         --very-sensitive \
         --score-min=C,-15,0 \
         --mm \
-        -x genome \
+        -x ${bowtie2_run_index} \
         -q \
         -1 ${query_file[0]} \
         -2 ${query_file[1]} 2> bowtie2_${pair_id}.log \
@@ -1562,7 +1590,7 @@ process Find_circ{
     --mm \
     --score-min=C,-15,0 \
     -q \
-    -x genome \
+    -x ${bowtie2_run_index} \
     -U find_circ_${pair_id}_anchors.qfa.gz \
     | find_circ.py \
     -G ${genomefile} \
@@ -2424,9 +2452,9 @@ println LikeletUtils.print_cyan( workflow.success ? "Done!" : "Oops .. something
 
 
 // Set up the e-mail variables
-/*   def subject = "[nf-core/cirpipe] Successful: $workflow.runName"
+/*   def subject = "[circpipe] Successful: $workflow.runName"
 if(!workflow.success){
-    subject = "[nf-core/cirpipe] FAILED: $workflow.runName"
+    subject = "[circpipe] FAILED: $workflow.runName"
 }
 def email_fields = [:]
 email_fields['version'] = workflow.manifest.version
@@ -2452,7 +2480,7 @@ email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
 email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
 
-log.info "[nf-core/cirpipe] Pipeline Complete"
+log.info "[circpipe] Pipeline Complete"
 */
 
 
