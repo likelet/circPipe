@@ -323,7 +323,8 @@ if(params.find_circ){
     if(params.bowtie2index){
         (Bowtie2index,Bowtie2index_fc)= Channel
                 .fromPath(params.bowtie2index+"*.bt2")
-                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}, and it required by find_circ " }.into(2)
+                .ifEmpty { exit 1, "Bowtie2 index not found: ${params.bowtie2index}, and it required by find_circ"}.into(2)
+
 
         bowtie2_run_index = params.bowtie2index
     }else{
