@@ -104,6 +104,7 @@ if( params.selectTools ==~ /.*1.*/ ){
     number_of_tools=number_of_tools+1
 }else{
     run_circexplorer2 = false
+    Star_multiqc=Channel.create()
 }
 if( params.selectTools ==~ /.*2.*/ ){
     run_ciri = true
@@ -116,6 +117,7 @@ if( params.selectTools ==~ /.*3.*/ ){
     number_of_tools=number_of_tools+1
 }else{
     run_find_circ = false
+    Bowtie2_multiqc=Channel.create()
 }
 if( params.selectTools ==~ /.*4.*/ ){
     run_mapsplice = true
@@ -139,7 +141,7 @@ if( params.selectTools ==~ /.*6.*/ ){
 // jugde wether multiple tools involved 
 run_multi_tools=false
 if(number_of_tools>1){
-run_multi_tools=true
+    run_multi_tools=true
 }
 
 
@@ -397,7 +399,6 @@ if(run_mapsplice){
 
 }
 
-
 if(params.ciri){
     if(params.bwaindex){
         bwaindex = Channel
@@ -469,9 +470,6 @@ if(run_knife){
     Name_knife=Channel.create()
 }
 
-
-
-
 log.info LikeletUtils.print_green("==========Index pass!...==========")
 log.info LikeletUtils.print_green("==========Start running CircPipe...==========")
 
@@ -486,46 +484,46 @@ log.info LikeletUtils.print_green("==========Start running CircPipe...==========
 if(params.skip_fastp){
     (fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount)=read_pairs_fastp.into(7)
     fastp_for_waiting=Channel.create()
-    fastp_for_multiqc=Channel.create()
+    Fastp_for_multiqc=Channel.create()
 }else{
-process Fastp{
-    tag "$pair_id"
-    publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
+    process Fastp{
+        tag "$pair_id"
+        publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
 
-    input:
-    set pair_id, file(query_file) from read_pairs_fastp
+        input:
+        set pair_id, file(query_file) from read_pairs_fastp
 
-    output:
-    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount
-    file ('*.html') into fastp_for_waiting
-    file ('*_fastp.json') into fastp_for_multiqc
+        output:
+        set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount
+        file ('*.html') into fastp_for_waiting
+        file ('*_fastp.json') into Fastp_for_multiqc
 
-    when:
-    !params.skip_fastp
-    
-    script:
-    if(params.singleEnd){
-        """
-        fastp \
-        -i ${query_file} \
-        -o unzip_fastp_${pair_id}.fq \
-        -h ${pair_id}_fastpreport.html \
-        -j ${pair_id}_fastp.json
-        """
-    }else{
-        """
-        fastp \
-        -i ${query_file[0]} \
-        -I ${query_file[1]} \
-        -o unzip_fastp_${pair_id}_1.fq \
-        -O unzip_fastp_${pair_id}_2.fq \
-        -h ${pair_id}_fastpreport.html \
-        -j ${pair_id}_fastp.json 
-        """
+        when:
+        !params.skip_fastp
+        
+        script:
+        if(params.singleEnd){
+            """
+            fastp \
+            -i ${query_file} \
+            -o unzip_fastp_${pair_id}.fq \
+            -h ${pair_id}_fastpreport.html \
+            -j ${pair_id}_fastp.json
+            """
+        }else{
+            """
+            fastp \
+            -i ${query_file[0]} \
+            -I ${query_file[1]} \
+            -o unzip_fastp_${pair_id}_1.fq \
+            -O unzip_fastp_${pair_id}_2.fq \
+            -h ${pair_id}_fastpreport.html \
+            -j ${pair_id}_fastp.json 
+            """
+        }
+
+
     }
-
-
-}
 }
 
 
@@ -535,6 +533,19 @@ fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process fir
 
 
 
+
+//   $$$$$$\  $$\                                                   $$\                                      $$$$$$\  
+//  $$  __$$\ \__|                                                  $$ |                                    $$  __$$\ 
+//  $$ /  \__|$$\  $$$$$$\   $$$$$$$\  $$$$$$\  $$\   $$\  $$$$$$\  $$ | $$$$$$\   $$$$$$\   $$$$$$\        \__/  $$ |
+//  $$ |      $$ |$$  __$$\ $$  _____|$$  __$$\ \$$\ $$  |$$  __$$\ $$ |$$  __$$\ $$  __$$\ $$  __$$\        $$$$$$  |
+//  $$ |      $$ |$$ |  \__|$$ /      $$$$$$$$ | \$$$$  / $$ /  $$ |$$ |$$ /  $$ |$$ |  \__|$$$$$$$$ |      $$  ____/ 
+//  $$ |  $$\ $$ |$$ |      $$ |      $$   ____| $$  $$<  $$ |  $$ |$$ |$$ |  $$ |$$ |      $$   ____|      $$ |      
+//  \$$$$$$  |$$ |$$ |      \$$$$$$$\ \$$$$$$$\ $$  /\$$\ $$$$$$$  |$$ |\$$$$$$  |$$ |      \$$$$$$$\       $$$$$$$$\ 
+//   \______/ \__|\__|       \_______| \_______|\__/  \__|$$  ____/ \__| \______/ \__|       \_______|      \________|
+//                                                        $$ |                                                        
+//                                                        $$ |                                                        
+//                                                        \__|                                                        
+                                                                                                                                                                                                                                                         
 
 /*
 ========================================================================================
@@ -552,7 +563,7 @@ process Star{
 
     output:
     set pair_id, file ('*.junction') into starfiles
-    file ('*.out') into star_multiqc
+    file ('*.out') into Star_multiqc
 
     when:
     run_circexplorer2
@@ -773,6 +784,20 @@ if(params.mRNA){
     }
 }
 
+
+//   $$$$$$\  $$\           $$\ 
+//  $$  __$$\ \__|          \__|
+//  $$ /  \__|$$\  $$$$$$\  $$\ 
+//  $$ |      $$ |$$  __$$\ $$ |
+//  $$ |      $$ |$$ |  \__|$$ |
+//  $$ |  $$\ $$ |$$ |      $$ |
+//  \$$$$$$  |$$ |$$ |      $$ |
+//   \______/ \__|\__|      \__|
+//                              
+//                              
+//                              
+                                                    
+
 /*
 ========================================================================================
                               the second tool : bwa - ciri
@@ -987,6 +1012,21 @@ if(params.mRNA){
     }
 }
 
+
+
+//  $$\      $$\                                         $$\ $$\                     
+//  $$$\    $$$ |                                        $$ |\__|                    
+//  $$$$\  $$$$ | $$$$$$\   $$$$$$\   $$$$$$$\  $$$$$$\  $$ |$$\  $$$$$$$\  $$$$$$\  
+//  $$\$$\$$ $$ | \____$$\ $$  __$$\ $$  _____|$$  __$$\ $$ |$$ |$$  _____|$$  __$$\ 
+//  $$ \$$$  $$ | $$$$$$$ |$$ /  $$ |\$$$$$$\  $$ /  $$ |$$ |$$ |$$ /      $$$$$$$$ |
+//  $$ |\$  /$$ |$$  __$$ |$$ |  $$ | \____$$\ $$ |  $$ |$$ |$$ |$$ |      $$   ____|
+//  $$ | \_/ $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |$$$$$$$  |$$ |$$ |\$$$$$$$\ \$$$$$$$\ 
+//  \__|     \__| \_______|$$  ____/ \_______/ $$  ____/ \__|\__| \_______| \_______|
+//                         $$ |                $$ |                                  
+//                         $$ |                $$ |                                  
+//                         \__|                \__|                                  
+                                                                                                                    
+
 /*
 ========================================================================================
                               the third tool : mapsplice
@@ -1176,7 +1216,7 @@ if(params.mRNA){
         
 
         when:
-        run_mapsplice && params.separate
+        run_mapsplice 
 
         output:
         file ('*') into cor_plot_mapsplice
@@ -1189,6 +1229,20 @@ if(params.mRNA){
 }
 
 
+
+//   $$$$$$\                                                        $$\       $$\ 
+//  $$  __$$\                                                       $$ |      $$ |
+//  $$ /  \__| $$$$$$\   $$$$$$\   $$$$$$\  $$$$$$\$$$$\   $$$$$$\  $$$$$$$\  $$ |
+//  \$$$$$$\  $$  __$$\ $$  __$$\ $$  __$$\ $$  _$$  _$$\ $$  __$$\ $$  __$$\ $$ |
+//   \____$$\ $$$$$$$$ |$$ /  $$ |$$$$$$$$ |$$ / $$ / $$ |$$$$$$$$ |$$ |  $$ |$$ |
+//  $$\   $$ |$$   ____|$$ |  $$ |$$   ____|$$ | $$ | $$ |$$   ____|$$ |  $$ |$$ |
+//  \$$$$$$  |\$$$$$$$\ \$$$$$$$ |\$$$$$$$\ $$ | $$ | $$ |\$$$$$$$\ $$ |  $$ |$$ |
+//   \______/  \_______| \____$$ | \_______|\__| \__| \__| \_______|\__|  \__|\__|
+//                      $$\   $$ |                                                
+//                      \$$$$$$  |                                                
+//                       \______/                                                 
+                                                                                                        
+
 /*
 ========================================================================================
                               the fourth tool : segemehl
@@ -1196,7 +1250,7 @@ if(params.mRNA){
 ========================================================================================
 */
 
-        process Segemehl{
+process Segemehl{
             tag "$pair_id"
             publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
 
@@ -1257,14 +1311,13 @@ if(params.mRNA){
 
         }
 
-
-    /*
-    ========================================================================================
+/*
+ ========================================================================================
                                 the fourth tool : segemehl
                                     produce the bed6 file
     ========================================================================================
-    */
-    process Segemehl_Bed{
+*/
+process Segemehl_Bed{
         tag "$pair_id"
         publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
 
@@ -1298,15 +1351,15 @@ if(params.mRNA){
         python !{baseDir}/bin/quchong.py !{pair_id}_modify_segemehl.temp.bed segemehl_!{pair_id}_modify.candidates.bed
         fi
         '''
-    }
+}
 
-    /*
-    ========================================================================================
+/*
+========================================================================================
                                 the fourth tool : segemehl
                                     produce the matrix
-    ========================================================================================
-    */
-    process Segemehl_Matrix{
+========================================================================================
+*/
+process Segemehl_Matrix{
         tag "$pair_id"
         publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern: "*.matrix", overwrite: true
 
@@ -1333,15 +1386,14 @@ if(params.mRNA){
         java -jar !{baseDir}/bin/circpipetools.jar -i segemehl_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
         echo -e "segemehl" > Name_segemehl.txt
         '''
-    }
-
-    /*
-    ========================================================================================
+}
+/*   
+========================================================================================
                                 the fourth tool : segemehl
                                     Differential Expression
-    ========================================================================================
-    */
-    process Segemehl_DE{
+========================================================================================
+*/
+process Segemehl_DE{
         publishDir "${params.outdir}/DE_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
 
         input:
@@ -1356,21 +1408,21 @@ if(params.mRNA){
         file ('*') into end_segemehl
 
         when:
-        params.separate && run_segemehl 
+        run_segemehl 
 
         shell:
         '''
         Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
         '''
-    }
+}
 
-    /*
-    ========================================================================================
+/*
+========================================================================================
                                     the fourth tool : segemehl
                                             Correlation
-    ========================================================================================
-    */
-    if(params.mRNA){
+========================================================================================
+*/
+if(params.mRNA){
         process Segemehl_Cor{
             publishDir "${params.outdir}/Corrrelation_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
 
@@ -1382,7 +1434,7 @@ if(params.mRNA){
             
 
             when:
-            run_segemehl && params.separate
+            run_segemehl 
 
             output:
             file ('*') into cor_plot_segemehl
@@ -1392,7 +1444,21 @@ if(params.mRNA){
             Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
             '''
         }
-    }
+}
+
+
+
+//  $$$$$$$$\ $$\                 $$\                 $$\                     
+//  $$  _____|\__|                $$ |                \__|                    
+//  $$ |      $$\ $$$$$$$\   $$$$$$$ |       $$$$$$$\ $$\  $$$$$$\   $$$$$$$\ 
+//  $$$$$\    $$ |$$  __$$\ $$  __$$ |      $$  _____|$$ |$$  __$$\ $$  _____|
+//  $$  __|   $$ |$$ |  $$ |$$ /  $$ |      $$ /      $$ |$$ |  \__|$$ /      
+//  $$ |      $$ |$$ |  $$ |$$ |  $$ |      $$ |      $$ |$$ |      $$ |      
+//  $$ |      $$ |$$ |  $$ |\$$$$$$$ |      \$$$$$$$\ $$ |$$ |      \$$$$$$$\ 
+//  \__|      \__|\__|  \__| \_______|$$$$$$\\_______|\__|\__|       \_______|
+//                                    \______|                                
+//                                                                            
+//                                                                             
 
 
 /*
@@ -1412,7 +1478,7 @@ process Bowtie2{
     output:
     set pair_id, file ('bowtie2_unmapped_*') into Bowtie2files
     set pair_id, file ('bowtie2_unmapped_*') into Bowtie2files_for_autocirc
-    file ('*.log') into bowtie2_multiqc
+    file ('*.log') into Bowtie2_multiqc
 
     when:
     run_find_circ
@@ -1458,6 +1524,7 @@ process Bowtie2{
     }
 
 }
+
 
 /*
 ========================================================================================
@@ -1628,7 +1695,7 @@ if(params.mRNA){
         
 
         when:
-        run_find_circ && params.separate
+        run_find_circ 
 
         output:
         file ('*') into cor_plot_find_circ
@@ -1639,6 +1706,22 @@ if(params.mRNA){
         '''
     }
 }
+
+
+
+
+//  $$\                 $$\  $$$$$$\           
+//  $$ |                \__|$$  __$$\          
+//  $$ |  $$\ $$$$$$$\  $$\ $$ /  \__|$$$$$$\  
+//  $$ | $$  |$$  __$$\ $$ |$$$$\    $$  __$$\ 
+//  $$$$$$  / $$ |  $$ |$$ |$$  _|   $$$$$$$$ |
+//  $$  _$$<  $$ |  $$ |$$ |$$ |     $$   ____|
+//  $$ | \$$\ $$ |  $$ |$$ |$$ |     \$$$$$$$\ 
+//  \__|  \__|\__|  \__|\__|\__|      \_______|
+//                                             
+//                                             
+//                                             
+
 
 
 /*
@@ -1815,7 +1898,7 @@ process Knife_DE{
     file ('*') into end_knife
 
     when:
-    run_knife && params.separate
+    run_knife 
 
     shell:
     '''
@@ -1841,7 +1924,7 @@ if(params.mRNA){
         
 
         when:
-         run_knife && params.separate
+         run_knife 
 
         output:
         file ('*') into cor_plot_knife
@@ -1863,16 +1946,31 @@ process Multiqc{
     publishDir "${params.outdir}/MultiQC", mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
-    file (query_file) from fastp_for_multiqc.concat( star_multiqc, bowtie2_multiqc ).collect()
+    file (query_file) from Fastp_for_multiqc.concat( Star_multiqc, Bowtie2_multiqc ).collect()
 
     output:
-    file ('*.html') into multiqc_results
+    file ('*.html') into Multiqc_results
 
     script:
     """
     multiqc .
     """
 }
+
+
+
+//                                     __        __                     
+//                                    /  |      /  |                    
+//    _______   ______   _____  ____  $$ |____  $$/  _______    ______  
+//   /       | /      \ /     \/    \ $$      \ /  |/       \  /      \ 
+//  /$$$$$$$/ /$$$$$$  |$$$$$$ $$$$  |$$$$$$$  |$$ |$$$$$$$  |/$$$$$$  |
+//  $$ |      $$ |  $$ |$$ | $$ | $$ |$$ |  $$ |$$ |$$ |  $$ |$$    $$ |
+//  $$ \_____ $$ \__$$ |$$ | $$ | $$ |$$ |__$$ |$$ |$$ |  $$ |$$$$$$$$/ 
+//  $$       |$$    $$/ $$ | $$ | $$ |$$    $$/ $$ |$$ |  $$ |$$       |
+//   $$$$$$$/  $$$$$$/  $$/  $$/  $$/ $$$$$$$/  $$/ $$/   $$/  $$$$$$$/ 
+//                                                                      
+//                                                                      
+//                                                                      
 
 
 
@@ -2078,7 +2176,7 @@ process Merge_DE{
     
 
     output:
-    file ('*') into end_merge
+    file ('*') into End_merge
 
     when:
     run_multi_tools
@@ -2141,7 +2239,7 @@ process Merge_Annotation{
     run_multi_tools
 
     output:
-    file ('*') into annotation_plot
+    file ('*') into Annotation_plot
 
     shell:
     '''
@@ -2183,11 +2281,11 @@ process Report_production{
     publishDir "${params.outdir}/Report", mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
-    file (de_file) from end_merge.collect()
+    file (de_file) from End_merge.collect()
     file (cor_file) from CorPlotMerge.collect()
-    file (anno_file) from annotation_plot.collect()
+    file (anno_file) from Annotation_plot.collect()
     file (calculate_file) from Tools_merge_html
-    file (multiqc_file) from multiqc_results
+    file (multiqc_file) from Multiqc_results
     
     
 
@@ -2214,8 +2312,6 @@ emailaddress = params.email
 
 
 workflow.onComplete {
-
-println LikeletUtils.print_cyan( workflow.success ? "Done!" : "Oops .. something went wrong" )
 
     def msg = """\
 <html>
@@ -2286,37 +2382,6 @@ println LikeletUtils.print_cyan( workflow.success ? "Done!" : "Oops .. something
 
 
 
-// Set up the e-mail variables
-/*   def subject = "[circpipe] Successful: $workflow.runName"
-if(!workflow.success){
-    subject = "[circpipe] FAILED: $workflow.runName"
-}
-def email_fields = [:]
-email_fields['version'] = workflow.manifest.version
-//email_fields['runName'] = custom_runName ?: workflow.runName
-email_fields['success'] = workflow.success
-email_fields['dateComplete'] = workflow.complete
-email_fields['duration'] = workflow.duration
-email_fields['exitStatus'] = workflow.exitStatus
-email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
-email_fields['errorReport'] = (workflow.errorReport ?: 'None')
-email_fields['commandLine'] = workflow.commandLine
-email_fields['projectDir'] = workflow.projectDir
-email_fields['summary'] = summary
-email_fields['summary']['Date Started'] = workflow.start
-email_fields['summary']['Date Completed'] = workflow.complete
-email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
-email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
-email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
-email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
-
-
-log.info "[circpipe] Pipeline Complete"
-*/
 
 
 
