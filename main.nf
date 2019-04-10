@@ -51,8 +51,6 @@ def helpMessage() {
 
                                     If not set, the pipeline will create the index itself.
       --singleEnd                   Specify that the reads are single ended
-      --merge                       Merge the different matrixes produce by different tools and draw the venn graph
-      --separate                    Annotate the results separately
       --selectTools                 Specify which tools should be use. 
                                     1 for circexplorer2, 2 for ciri, 3 for find_circ, 4 for mapsplice, 5 for segemehl, 6 for knife. 
                                     For example, you can set 1,2,3,4,5 for running five tools in the same time.
@@ -100,38 +98,49 @@ assert params.library == 'rnase' || params.aligner == 'total' : "Invalid library
                          select the analysis tools
 ========================================================================================
 */
+number_of_tools=0
 if( params.selectTools ==~ /.*1.*/ ){
-    params.circexplorer2 = true
+    run_circexplorer2 = true
+    number_of_tools=number_of_tools+1
 }else{
-    params.circexplorer2 = false
+    run_circexplorer2 = false
 }
 if( params.selectTools ==~ /.*2.*/ ){
-    params.ciri = true
+    run_ciri = true
+    number_of_tools=number_of_tools+1
 }else{
-    params.ciri = false
+    run_ciri = false
 }
 if( params.selectTools ==~ /.*3.*/ ){
-    params.find_circ = true
+    run_find_circ = true
+    number_of_tools=number_of_tools+1
 }else{
-    params.find_circ = false
+    run_find_circ = false
 }
 if( params.selectTools ==~ /.*4.*/ ){
-    params.mapsplice = true
+    run_mapsplice = true
+    number_of_tools=number_of_tools+1
 }else{
-    params.mapsplice = false
+    run_mapsplice = false
 }
 if( params.selectTools ==~ /.*5.*/ ){
-    params.segemehl = true
+    run_segemehl = true
+    number_of_tools=number_of_tools+1
 }else{
-    params.segemehl = false
+    run_segemehl = false
 }
 if( params.selectTools ==~ /.*6.*/ ){
-    params.knife = true
+    run_knife = true
+    number_of_tools=number_of_tools+1
 }else{
-    params.knife = false
+    run_knife = false
 }
 
-
+// jugde wether multiple tools involved 
+run_multi_tools=false
+if(number_of_tools>1){
+run_multi_tools=true
+}
 
 
 
@@ -153,7 +162,7 @@ if(params.mRNA){
 
 
 
-if(params.circexplorer2){
+if(run_circexplorer2){
     annotationfile = file(params.annotationfile) //the annotationfile
     if( !annotationfile.exists() ) exit 1, LikeletUtils.print_red("Missing annotation file: ${annotationfile}")
 }
@@ -161,7 +170,7 @@ if(params.circexplorer2){
 genomefile = file(params.genomefile) //the genomefile
 if( !genomefile.exists() ) exit 1, LikeletUtils.print_red("Missing genome file: ${genomefile}")
 
-if(params.mapsplice){
+if(run_mapsplice){
     if(params.refmapsplice){
         Refmapsplice = Channel.fromPath(params.refmapsplice) //the mapsplice reference genome directory
     }else{
@@ -243,12 +252,12 @@ log.info LikeletUtils.print_yellow("=====================================Reads t
 log.info LikeletUtils.print_yellow("SingleEnd :                     ") + LikeletUtils.print_green(params.singleEnd)
 log.info "\n"
 log.info LikeletUtils.print_yellow("====================================Tools selected==============================")
-log.info LikeletUtils.print_yellow("Circexplorer2 :                 ") + LikeletUtils.print_green(params.circexplorer2)
-log.info LikeletUtils.print_yellow("Find_circ :                     ") + LikeletUtils.print_green(params.find_circ)
+log.info LikeletUtils.print_yellow("Circexplorer2 :                 ") + LikeletUtils.print_green(run_circexplorer2)
+log.info LikeletUtils.print_yellow("Find_circ :                     ") + LikeletUtils.print_green(run_find_circ)
 log.info LikeletUtils.print_yellow("Ciri :                          ") + LikeletUtils.print_green(params.ciri)
-log.info LikeletUtils.print_yellow("Mapsplice :                     ") + LikeletUtils.print_green(params.mapsplice)
-log.info LikeletUtils.print_yellow("Segemehl :                      ") + LikeletUtils.print_green(params.segemehl)
-log.info LikeletUtils.print_yellow("Knife :                         ") + LikeletUtils.print_green(params.knife)
+log.info LikeletUtils.print_yellow("Mapsplice :                     ") + LikeletUtils.print_green(run_mapsplice)
+log.info LikeletUtils.print_yellow("Segemehl :                      ") + LikeletUtils.print_green(run_segemehl)
+log.info LikeletUtils.print_yellow("Knife :                         ") + LikeletUtils.print_green(run_knife)
 log.info "\n"
 log.info LikeletUtils.print_yellow("==================================Input files selected==========================")
 log.info LikeletUtils.print_yellow("Reads :                         ") + LikeletUtils.print_green(params.reads)
@@ -280,7 +289,7 @@ log.info LikeletUtils.print_yellow("===================check or build the index=
                              check or build the index
 ========================================================================================
 */
-if(params.circexplorer2){
+if(run_circexplorer2){
     if(params.starindex){
         starindex = Channel
                 .fromPath(params.starindex)
@@ -315,11 +324,13 @@ if(params.circexplorer2){
 }else{
     // avoiding throw errors  by nextflow
     starindex=Channel.create()
+    Merge_circexplorer2=Channel.create()
+    Name_circexplorer2=Channel.create()
     
 }
 
 
-if(params.find_circ){
+if(run_find_circ){
     if(params.bowtie2index){
         (Bowtie2index,Bowtie2index_fc)= Channel
                 .fromPath(params.bowtie2index+"*.bt2")
@@ -350,10 +361,11 @@ if(params.find_circ){
 }else{
     // avoiding throw errors  by nextflow
      (Bowtie2index,Bowtie2index_fc)=Channel.create().into(2)
-        
+     Merge_find_circ=Channel.create()
+     Name_find_circ=Channel.create()
 }
 
-if(params.mapsplice){
+if(run_mapsplice){
     if(params.bowtieindex){
         Bowtieindex = Channel
                 .fromPath(params.bowtieindex+"*.ebwt")
@@ -380,6 +392,9 @@ if(params.mapsplice){
 }else{
     // avoiding throw errors  by nextflow
     (Bowtieindex,Bowtie_build_knife)=Channel.create().into(2)
+    Merge_mapsplice=Channel.create()
+    Name_mapsplice=Channel.create()
+
 }
 
 
@@ -412,9 +427,12 @@ if(params.ciri){
 }else{
     // avoiding throw errors  by nextflow
     bwaindex=Channel.create()
+    Merge_ciri=Channel.create()
+        Name_ciri=Channel.create()
+
 }
 
-if(params.segemehl){
+if(run_segemehl){
     if(params.segindex){
        Segindex = Channel
                 .fromPath(params.segindex+"*.idx")
@@ -440,6 +458,15 @@ if(params.segemehl){
 }else{
     // avoiding throw errors  by nextflow
     Segindex=Channel.create()
+    Merge_segemehl=Channel.create()
+        Name_segemehl=Channel.create()
+
+}
+if(run_knife){
+     
+}else{
+    Merge_knife=Channel.create()
+    Name_knife=Channel.create()
 }
 
 
@@ -457,7 +484,7 @@ log.info LikeletUtils.print_green("==========Start running CircPipe...==========
 */
 
 if(params.skip_fastp){
-    (fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount)=read_pairs_fastp.into(7)
+    (fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount)=read_pairs_fastp.into(7)
     fastp_for_waiting=Channel.create()
     fastp_for_multiqc=Channel.create()
 }else{
@@ -469,7 +496,7 @@ process Fastp{
     set pair_id, file(query_file) from read_pairs_fastp
 
     output:
-    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,fastpfiles_bwa,fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount
+    set pair_id, file ('unzip_fastp_*') into fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount
     file ('*.html') into fastp_for_waiting
     file ('*_fastp.json') into fastp_for_multiqc
 
@@ -520,7 +547,7 @@ process Star{
     publishDir "${params.outdir}/Alignment/STAR", mode: 'link', overwrite: true
 
     input:
-    set pair_id, file(query_file) from fastpfiles_star
+    set pair_id, file(query_file) from Fastpfiles_star
     file index from starindex.collect()
 
     output:
@@ -528,28 +555,53 @@ process Star{
     file ('*.out') into star_multiqc
 
     when:
-    params.circexplorer2
+    run_circexplorer2
 
     shell:
-    if(params.singleEnd){
-        """
-        STAR \
-        --runThreadN ${task.cpus} \
-        --chimSegmentMin 10 \
-        --genomeDir ${star_run_index} \
-        --readFilesIn ${query_file} \
-        --outFileNamePrefix star_${pair_id}_
-        """
+    if(params.skip_fastp){
+            if(params.singleEnd){
+            """
+            STAR \
+            --runThreadN ${task.cpus} \
+            --chimSegmentMin 10 \
+            --genomeDir ${star_run_index} \
+            --readFilesIn ${query_file} \
+            --readFilesCommand zcat \
+            --outFileNamePrefix star_${pair_id}_
+            """
+        }else{
+            """
+            STAR \
+            --runThreadN ${task.cpus} \
+            --chimSegmentMin 10 \
+            --genomeDir ${star_run_index} \
+            --readFilesCommand zcat \
+            --readFilesIn ${query_file[0]} ${query_file[1]} \
+            --outFileNamePrefix star_${pair_id}_
+            """
+        }
     }else{
-        """
-        STAR \
-        --runThreadN ${task.cpus} \
-        --chimSegmentMin 10 \
-        --genomeDir ${star_run_index} \
-        --readFilesIn ${query_file[0]} ${query_file[1]} \
-        --outFileNamePrefix star_${pair_id}_
-        """
+        if(params.singleEnd){
+            """
+            STAR \
+            --runThreadN ${task.cpus} \
+            --chimSegmentMin 10 \
+            --genomeDir ${star_run_index} \
+            --readFilesIn ${query_file} \
+            --outFileNamePrefix star_${pair_id}_
+            """
+        }else{
+            """
+            STAR \
+            --runThreadN ${task.cpus} \
+            --chimSegmentMin 10 \
+            --genomeDir ${star_run_index} \
+            --readFilesIn ${query_file[0]} ${query_file[1]} \
+            --outFileNamePrefix star_${pair_id}_
+            """
+        }   
     }
+    
 
 }
 
@@ -572,7 +624,7 @@ process Circexplorer2{
     set pair_id, file ('*known.txt') into circexplorer2files
 
     when:
-    params.circexplorer2
+    run_circexplorer2
 
     script:
     """
@@ -608,7 +660,7 @@ process Circexplorer2_Bed{
     val (pair_id) into modify_circexplorer2_id
 
     when:
-    params.circexplorer2
+    run_circexplorer2
 
     shell :
     '''
@@ -643,57 +695,22 @@ process Circexplorer2_Matrix{
     file gtffile
 
     output:
-    file ('circexplorer2.txt') into merge_circexplorer2
-    file ('*.matrix') into output_circexplorer2
-    file ('name_circexplorer2.txt') into name_circexplorer2
-    file ('*annote.txt') into de_circexplorer2
-    file ('*.matrix') into plot_circexplorer2
-    file ('*annote.txt') into cor_circexplorer2
-    file ('*.matrix') into plot_circexplorer2_cor
-
+    file ('circexplorer2_merge.matrix') into (Output_circexplorer2,Plot_circexplorer2,Plot_circexplorer2_cor)
+    file ('Name_circexplorer2.txt') into Name_circexplorer2
+    file ('annoted_circexplorer2_merge_annote.txt') into (De_circexplorer2,Cor_circexplorer2,Merge_circexplorer2)
     when:
-    params.circexplorer2
+    run_circexplorer2
 
     shell :
     '''
-    for file in !{query_file}
-    do
-        cat $file >> concatenate.bed
-    done
-    
-    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-    cat mergeconcatenate.bed > circexplorer2.txt
-        
-    cat circexplorer2.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o circexplorer2_ -gtf !{gtffile} -uniq
 
-    cat !{designfile} > designfile.txt
-    sed -i '1d' designfile.txt
-    cat designfile.txt | awk '{print $1}' > samplename.txt
-    
-    echo -e "id\\c" > merge_header.txt
-    
-    cat samplename.txt | while read line
-    do
-        if [ $((`cat ${line}_modify_circexplorer2.candidates.bed | wc -l`)) == 0 ];then
-        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
-        else
-        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_circexplorer2.candidates.bed counts.txt
-        fi
-        paste -d"\t" id.txt counts.txt > temp.txt
-        cat temp.txt > id.txt
-        echo -e "\\t${line}\\c" >> merge_header.txt
-    done   
-    
-    sed -i 's/\\[//g' merge_header.txt
-    sed -i 's/\\,//g' merge_header.txt
-    sed -i 's/\\]//g' merge_header.txt
-    echo -e "\\n\\c" >> merge_header.txt
-     
-    cat merge_header.txt id.txt > circexplorer2_merge.matrix
-    echo -e "circexplorer2" > name_circexplorer2.txt
+    # merge sample into matrix 
+    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o circexplorer2 -sup 5 -merge
+    mv circexplorer2_merge.bed circexplorer2_merge.matrix
+    # annotate circRNA with GTFs
+    java -jar !{baseDir}/bin/circpipetools.jar -i circexplorer2_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+
+    echo -e "circexplorer2" > Name_circexplorer2.txt
     '''
 }
 
@@ -707,18 +724,18 @@ process Circexplorer2_DE{
     publishDir "${params.outdir}/DE_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (anno_file) from de_circexplorer2
+    file (anno_file) from De_circexplorer2
     
     file designfile
     file comparefile
-    file (matrix_file) from plot_circexplorer2
+    file (matrix_file) from Plot_circexplorer2
     
 
     output:
-    file ('*') into end_circexplorer2
+    file ('*') into End_circexplorer2
 
     when:
-    params.circexplorer2 && params.separate
+    run_circexplorer2 
 
     shell:
     '''
@@ -737,14 +754,14 @@ if(params.mRNA){
         publishDir "${params.outdir}/Corrrelation_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (matrix_file) from plot_circexplorer2_cor
-        file (anno_file) from cor_circexplorer2
+        file (matrix_file) from Plot_circexplorer2_cor
+        file (anno_file) from Cor_circexplorer2
         file mRNAfile
         
         
 
         when:
-        params.mRNA && params.circexplorer2 && params.separate
+        params.mRNA && run_circexplorer2 
 
         output:
         file ('*') into cor_plot_circexplorer2
@@ -767,7 +784,7 @@ process Bwa{
     publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
 
     input:
-    set pair_id, file (query_file) from fastpfiles_bwa
+    set pair_id, file (query_file) from Fastpfiles_bwa
     file index from bwaindex.collect()
     file genomefile
 
@@ -855,7 +872,6 @@ process Ciri_Bed{
 
     output:
     file ('*candidates.bed') into modify_ciri_file
-    val (pair_id) into modify_ciri_id
 
     when:
     params.ciri
@@ -888,64 +904,27 @@ process Ciri_Matrix{
 
     input:
     file (query_file) from modify_ciri_file.collect()
-    val (pair_id) from modify_ciri_id.collect()
-    
-    file designfile
     file gtffile
 
 
     output:
-    file ('ciri.txt') into merge_ciri
-    file ('*.matrix') into output_ciri
-    file ('name_ciri.txt') into name_ciri
-    file ('*annote.txt') into de_ciri
-    file ('*.matrix') into plot_ciri
-    file ('*annote.txt') into cor_ciri
-    file ('*.matrix') into plot_ciri_cor
+    file ('ciri_merge.matrix') into (Output_ciri,Plot_ciri_cor,Plot_ciri,Merge_ciri)
+    file ('Name_ciri.txt') into Name_ciri
+    file ('annoted_ciri_merge_annote.txt') into (De_ciri,Cor_ciri)
 
     when:
     params.ciri
 
     shell :
     '''
-    for file in !{query_file}
-    do
-        cat $file >> concatenate.bed
-    done
-    
-    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-    cat mergeconcatenate.bed > ciri.txt    
-        
-    cat ciri.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o ciri_ -gtf !{gtffile} -uniq
+    # merge sample into matrix 
+    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
+    mv ciri_merge.bed ciri_merge.matrix
+    # annotate circRNA with GTFs
+    java -jar !{baseDir}/bin/circpipetools.jar -i ciri_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
-    cat !{designfile} > designfile.txt
-    sed -i '1d' designfile.txt
-    cat designfile.txt | awk '{print $1}' > samplename.txt
-    
-    echo -e "id\\c" > merge_header.txt
-    
-    cat samplename.txt | while read line
-    do
-        if [ $((`cat ${line}_modify_ciri.candidates.bed | wc -l`)) == 0 ];then
-        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
-        else
-        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_ciri.candidates.bed counts.txt
-        fi
-        paste -d"\t" id.txt counts.txt > temp.txt
-        cat temp.txt > id.txt
-        echo -e "\\t${line}\\c" >> merge_header.txt
-    done   
-       
-    sed -i 's/\\[//g' merge_header.txt
-    sed -i 's/\\,//g' merge_header.txt
-    sed -i 's/\\]//g' merge_header.txt
-    echo -e "\\n\\c" >> merge_header.txt
-     
-    cat merge_header.txt id.txt > ciri_merge.matrix
-    echo -e "ciri" > name_ciri.txt
+    #for what 
+    echo -e "ciri" > Name_ciri.txt
     '''
 }
 
@@ -959,18 +938,18 @@ process Ciri_DE{
     publishDir "${params.outdir}/DE_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (anno_file) from de_ciri
+    file (anno_file) from De_ciri
     
     file designfile
     file comparefile
-    file (matrix_file) from plot_ciri
+    file (matrix_file) from Plot_ciri
     
 
     output:
-    file ('*') into end_ciri
+    file ('*') into End_ciri
 
     when:
-    params.ciri && params.separate
+    run_ciri 
 
     shell:
     '''
@@ -989,14 +968,14 @@ if(params.mRNA){
         publishDir "${params.outdir}/Corrrelation_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (matrix_file) from plot_ciri_cor
-        file (anno_file) from cor_ciri
+        file (matrix_file) from Plot_ciri_cor
+        file (anno_file) from Cor_ciri
         file mRNA
         
         
 
         when:
-        params.mRNA && params.ciri && params.separate
+        params.mRNA && run_ciri 
 
         output:
         file ('*') into cor_plot_ciri
@@ -1030,7 +1009,7 @@ process Mapsplice{
 
 
     when:
-    params.mapsplice
+    run_mapsplice
 
     shell:
     if(params.singleEnd){
@@ -1086,10 +1065,10 @@ process Mapsplice_Bed{
 
     output:
     file ('*candidates.bed') into modify_mapsplice
-    val (pair_id) into modify_mapsplice_id
+
 
     when:
-    params.mapsplice
+    run_mapsplice
 
     shell :
     '''
@@ -1128,63 +1107,25 @@ process Mapsplice_Matrix{
 
     input:
     file (query_file) from modify_mapsplice.collect()
-    val (pair_id) from modify_mapsplice_id.collect()
-    
-    file designfile
     file gtffile
 
     output:
-    file ('mapsplice.txt') into merge_mapsplice
-    file ('*.matrix') into output_mapsplice
-    file ('name_mapsplice.txt') into name_mapsplice
-    file ('*annote.txt') into de_mapsplice
-    file ('*.matrix') into plot_mapsplice
-    file ('*annote.txt') into cor_mapsplice
-    file ('*.matrix') into plot_mapsplice_cor
+    file ('mapsplice_merge.matrix') into (Output_mapsplice,Plot_mapsplice,Plot_mapsplice_cor,Merge_mapsplice)
+    file ('Name_mapsplice.txt') into Name_mapsplice
+    file ('annoted_mapsplice_merge_annote.txt') into (De_mapsplice,Cor_mapsplice)
 
     when:
-    params.mapsplice
+    run_mapsplice
 
     shell :
     '''
-    for file in !{query_file}
-    do
-        cat $file >> concatenate.bed
-    done
-    
-    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-    cat mergeconcatenate.bed > mapsplice.txt
-        
-    cat mapsplice.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o mapsplice_ -gtf !{gtffile} -uniq
-    
-    cat !{designfile} > designfile.txt
-    sed -i '1d' designfile.txt
-    cat designfile.txt | awk '{print $1}' > samplename.txt
-    
-    echo -e "id\\c" > merge_header.txt
-    
-    cat samplename.txt | while read line
-    do
-        if [ $((`cat ${line}_modify_mapsplice.candidates.bed | wc -l`)) == 0 ];then
-        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
-        else
-        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_mapsplice.candidates.bed counts.txt
-        fi
-        paste -d"\t" id.txt counts.txt > temp.txt
-        cat temp.txt > id.txt
-        echo -e "\\t${line}\\c" >> merge_header.txt
-    done   
+     # merge sample into matrix 
+    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
+    mv mapsplice_merge.bed mapsplice_merge.matrix
+    # annotate circRNA with GTFs
+    java -jar !{baseDir}/bin/circpipetools.jar -i mapsplice_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
-    sed -i 's/\\[//g' merge_header.txt
-    sed -i 's/\\,//g' merge_header.txt
-    sed -i 's/\\]//g' merge_header.txt
-    echo -e "\\n\\c" >> merge_header.txt
-     
-    cat merge_header.txt id.txt > mapsplice_merge.matrix
-    echo -e "mapsplice" > name_mapsplice.txt
+    echo -e "mapsplice" > Name_mapsplice.txt
     '''
 }
 
@@ -1198,18 +1139,18 @@ process Mapsplice_DE{
     publishDir "${params.outdir}/DE_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (anno_file) from de_mapsplice
+    file (anno_file) from De_mapsplice
     
     file designfile
     file comparefile
-    file (matrix_file) from plot_mapsplice
+    file (matrix_file) from Plot_mapsplice
     
 
     output:
     file ('*') into end_mapsplice
 
     when:
-    params.mapsplice && params.separate
+    run_mapsplice 
 
     shell:
     '''
@@ -1228,14 +1169,14 @@ if(params.mRNA){
         publishDir "${params.outdir}/Corrrelation_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (matrix_file) from plot_mapsplice_cor
-        file (anno_file) from cor_mapsplice
+        file (matrix_file) from Plot_mapsplice_cor
+        file (anno_file) from Cor_mapsplice
         file mRNAfile
         
         
 
         when:
-        params.mapsplice && params.separate
+        run_mapsplice && params.separate
 
         output:
         file ('*') into cor_plot_mapsplice
@@ -1268,7 +1209,7 @@ if(params.mRNA){
             set pair_id, file ('*splicesites.bed') into segemehlfiles
 
             when:
-            params.segemehl 
+            run_segemehl 
 
             shell:
             if(params.singleEnd){
@@ -1333,10 +1274,9 @@ if(params.mRNA){
 
         output:
         file ('*candidates.bed') into modify_segemehl
-        val (pair_id) into modify_segemehl_id
 
         when:
-        params.segemehl 
+        run_segemehl 
 
         shell :
         '''
@@ -1372,64 +1312,26 @@ if(params.mRNA){
 
         input:
         file (query_file) from modify_segemehl.collect()
-        val (pair_id) from modify_segemehl_id.collect()
-        
-        file designfile
         file gtffile
 
         output:
-        file ('segemehl.txt') into merge_segemehl
-        file ('*.matrix') into output_segemehl
-        file ('*annote.txt') into de_segemehl
-        file ('*.matrix') into plot_segemehl
-        file ('name_segemehl.txt') into name_segemehl
-        file ('*annote.txt') into cor_segemehl
-        file ('*.matrix') into plot_segemehl_cor
+        file ('segemehl_merge.matrix') into (Output_segemehl,Plot_segemehl,Merge_segemehl,Plot_segemehl_cor)
+        file ('Name_segemehl.txt') into Name_segemehl
+        file ('annoted_segemehl_merge_annote.txt') into (Cor_segemehl,De_segemehl)
+ 
 
 
         when:
-        params.segemehl 
+        run_segemehl 
 
         shell :
         '''
-        for file in !{query_file}
-        do
-            cat $file >> concatenate.bed
-        done
-        
-        python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
-        sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-        cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-        cat mergeconcatenate.bed > segemehl.txt
-        
-        cat segemehl.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-        java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o segemehl_ -gtf !{gtffile} -uniq
-
-        cat !{designfile} > designfile.txt
-        sed -i '1d' designfile.txt
-        cat designfile.txt | awk '{print $1}' > samplename.txt
-        
-        echo -e "id\\c" > merge_header.txt
-        
-        cat samplename.txt | while read line
-        do
-            if [ $((`cat ${line}_modify_segemehl.candidates.bed | wc -l`)) == 0 ];then
-            python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
-            else
-            python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_segemehl.candidates.bed counts.txt
-            fi
-            paste -d"\t" id.txt counts.txt > temp.txt
-            cat temp.txt > id.txt
-            echo -e "\\t${line}\\c" >> merge_header.txt
-        done   
-        
-        sed -i 's/\\[//g' merge_header.txt
-        sed -i 's/\\,//g' merge_header.txt
-        sed -i 's/\\]//g' merge_header.txt
-        echo -e "\\n\\c" >> merge_header.txt
-        
-        cat merge_header.txt id.txt > segemehl_merge.matrix
-        echo -e "segemehl" > name_segemehl.txt
+        # merge sample into matrix 
+        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o segemehl -sup 5 -merge
+        mv segemehl_merge.bed segemehl_merge.matrix
+        # annotate circRNA with GTFs
+        java -jar !{baseDir}/bin/circpipetools.jar -i segemehl_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+        echo -e "segemehl" > Name_segemehl.txt
         '''
     }
 
@@ -1443,18 +1345,18 @@ if(params.mRNA){
         publishDir "${params.outdir}/DE_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (anno_file) from de_segemehl
+        file (anno_file) from De_segemehl
         
         file designfile
         file comparefile
-        file (matrix_file) from plot_segemehl
+        file (matrix_file) from Plot_segemehl
         
 
         output:
         file ('*') into end_segemehl
 
         when:
-        params.separate && params.segemehl 
+        params.separate && run_segemehl 
 
         shell:
         '''
@@ -1473,14 +1375,14 @@ if(params.mRNA){
             publishDir "${params.outdir}/Corrrelation_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
 
             input:
-            file (matrix_file) from plot_segemehl_cor
-            file (anno_file) from cor_segemehl
+            file (matrix_file) from Plot_segemehl_cor
+            file (anno_file) from Cor_segemehl
             file mRNAfile
             
             
 
             when:
-            params.segemehl && params.separate
+            run_segemehl && params.separate
 
             output:
             file ('*') into cor_plot_segemehl
@@ -1513,7 +1415,7 @@ process Bowtie2{
     file ('*.log') into bowtie2_multiqc
 
     when:
-    params.find_circ
+    run_find_circ
 
     shell:
     if(params.singleEnd){
@@ -1577,7 +1479,7 @@ process Find_circ{
 
 
     when:
-    params.find_circ
+    run_find_circ
 
     shell:
     """     
@@ -1619,10 +1521,9 @@ process Find_circ_Bed{
 
     output:
     file ('*candidates.bed') into modify_find_circfiles
-    val (pair_id) into modify_find_circ_id
 
     when:
-    params.find_circ
+    run_find_circ
 
     shell :
     '''
@@ -1654,64 +1555,29 @@ process Find_circ_Matrix{
 
     input:
     file (query_file) from modify_find_circfiles.collect()
-    val (pair_id) from modify_find_circ_id.collect()
-    
-    file designfile
     file gtffile
 
     output:
-    file ('find_circ.txt') into merge_find_circ
-    file ('*annote.txt') into de_find_circ
-    file ('*.matrix') into output_find_circ
-    file ('*.matrix') into plot_find_circ
-    file ('name_find_circ.txt') into name_find_circ
-    file ('*annote.txt') into cor_find_circ
-    file ('*.matrix') into plot_find_circ_cor
+
+    file ('find_circ_merge.matrix') into (Output_find_circ,Plot_find_circ,Plot_find_circ_cor,Merge_find_circ)
+    file ('Name_find_circ.txt') into Name_find_circ
+    file ('annoted_find_circ_merge_annote.txt') into (Cor_find_circ,De_find_circ)
+
 
 
     when:
-    params.find_circ
+    run_find_circ
 
     shell :
     '''
-    for file in !{query_file}
-    do
-        cat $file >> concatenate.bed
-    done
-    
-    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-    cat mergeconcatenate.bed > find_circ.txt
-    
-    cat find_circ.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o find_circ_ -gtf !{gtffile} -uniq
 
-    cat !{designfile} > designfile.txt
-    sed -i '1d' designfile.txt
-    cat designfile.txt | awk '{print $1}' > samplename.txt
-    
-    echo -e "id\\c" > merge_header.txt
-    
-    cat samplename.txt | while read line
-    do
-        if [ $((`cat ${line}_modify_find_circ.candidates.bed | wc -l`)) == 0 ];then
-        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
-        else
-        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_find_circ.candidates.bed counts.txt
-        fi
-        paste -d"\t" id.txt counts.txt > temp.txt
-        cat temp.txt > id.txt
-        echo -e "\\t${line}\\c" >> merge_header.txt
-    done   
-    
-    sed -i 's/\\[//g' merge_header.txt
-    sed -i 's/\\,//g' merge_header.txt
-    sed -i 's/\\]//g' merge_header.txt
-    echo -e "\\n\\c" >> merge_header.txt
-     
-    cat merge_header.txt id.txt > find_circ_merge.matrix
-    echo -e "find_circ" > name_find_circ.txt
+    # merge sample into matrix 
+    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o find_circ -sup 5 -merge
+    mv find_circ_merge.bed find_circ_merge.matrix
+    # annotate circRNA with GTFs
+    java -jar !{baseDir}/bin/circpipetools.jar -i find_circ_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+
+    echo -e "find_circ" > Name_find_circ.txt
     '''
 }
 
@@ -1725,18 +1591,18 @@ process Find_circ_DE{
     publishDir "${params.outdir}/DE_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (anno_file) from de_find_circ
+    file (anno_file) from De_find_circ
     
     file designfile
     file comparefile
-    file (matrix_file) from plot_find_circ
+    file (matrix_file) from Plot_find_circ
     
 
     output:
     file ('*') into end_find_circ
 
     when:
-    params.find_circ && params.separate
+    run_find_circ
 
     shell:
     '''
@@ -1755,14 +1621,14 @@ if(params.mRNA){
         publishDir "${params.outdir}/Corrrelation_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (matrix_file) from plot_find_circ_cor
-        file (anno_file) from cor_find_circ
+        file (matrix_file) from Plot_find_circ_cor
+        file (anno_file) from Cor_find_circ
         file mRNAfile
         
         
 
         when:
-        params.find_circ && params.separate
+        run_find_circ && params.separate
 
         output:
         file ('*') into cor_plot_find_circ
@@ -1795,11 +1661,11 @@ process Knife{
 
 
     when:
-    params.knife
+    run_knife
 
     shell:
-    knifedir = params.knifedir
-    knfieprefix = params.knifeprefix
+    knifedir = run_knifedir
+    knfieprefix = run_knifeprefix
     if(params.singleEnd){
         '''
         ln -s !{knifedir} ./
@@ -1836,10 +1702,9 @@ process Knife_Bed{
 
     output:
     file ('*candidates.bed') into modify_knifefiles
-    val (pair_id) into modify_knife_id
 
     when:
-    params.knife
+    run_knife
 
     shell :
     '''
@@ -1901,64 +1766,31 @@ process Knife_Matrix{
 
     input:
     file (query_file) from modify_knifefiles.collect()
-    val (pair_id) from modify_knife_id.collect()
-    
-    file designfile
     file gtffile
 
     output:
-    file ('knife.txt') into merge_knife
-    file ('*annote.txt') into de_knife
-    file ('*.matrix') into output_knife
-    file ('*.matrix') into plot_knife
-    file ('name_knife.txt') into name_knife
-    file ('*annote.txt') into cor_knife
-    file ('*.matrix') into plot_knife_cor
+
+    file ('knife_merge.matrix') into (Output_knife,Merge_knife,Plot_knife_cor,Plot_knife)
+    file ('annoted_knife_merge_annote.txt') into (Cor_knife,De_knife)
+    file ('Name_knife.txt') into Name_knife
+    
+
 
 
     when:
-    params.knife
+    run_knife
 
     shell :
     '''
-    for file in !{query_file}
-    do
-        cat $file >> concatenate.bed
-    done
-    
-    python !{baseDir}/bin/hebinglist.py concatenate.bed merge_concatenate.bed
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 merge_concatenate.bed > mergeconcatenate.bed 
-    cat mergeconcatenate.bed | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id.txt
-    cat mergeconcatenate.bed > knife.txt
-    
-    cat knife.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > annotation.bed
-    java -jar !{baseDir}/bin/bed1114.jar -i annotation.bed -o knife_ -gtf !{gtffile} -uniq
+   # merge sample into matrix 
+    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o knife -sup 5 -merge
+    mv knife_merge.bed knife_merge.matrix
+    # annotate circRNA with GTFs
+    java -jar !{baseDir}/bin/circpipetools.jar -i knife_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
-    cat !{designfile} > designfile.txt
-    sed -i '1d' designfile.txt
-    cat designfile.txt | awk '{print $1}' > samplename.txt
-    
-    echo -e "id\\c" > merge_header.txt
-    
-    cat samplename.txt | while read line
-    do
-        if [ $((`cat ${line}_modify_knife.candidates.bed | wc -l`)) == 0 ];then
-        python !{baseDir}/bin/createzero.py mergeconcatenate.bed counts.txt
-        else
-        python !{baseDir}/bin/quchongsamples.py mergeconcatenate.bed ${line}_modify_knife.candidates.bed counts.txt
-        fi
-        paste -d"\t" id.txt counts.txt > temp.txt
-        cat temp.txt > id.txt
-        echo -e "\\t${line}\\c" >> merge_header.txt
-    done   
-    
-    sed -i 's/\\[//g' merge_header.txt
-    sed -i 's/\\,//g' merge_header.txt
-    sed -i 's/\\]//g' merge_header.txt
-    echo -e "\\n\\c" >> merge_header.txt
-     
-    cat merge_header.txt id.txt > knife_merge.matrix
-    echo -e "knife" > name_knife.txt
+
+
+    echo -e "knife" > Name_knife.txt
     '''
 }
 
@@ -1972,18 +1804,18 @@ process Knife_DE{
     publishDir "${params.outdir}/DE_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (anno_file) from de_knife
+    file (anno_file) from De_knife
     
     file designfile
     file comparefile
-    file (matrix_file) from plot_knife
+    file (matrix_file) from Plot_knife
     
 
     output:
     file ('*') into end_knife
 
     when:
-    params.knife && params.separate
+    run_knife && params.separate
 
     shell:
     '''
@@ -2002,14 +1834,14 @@ if(params.mRNA){
         publishDir "${params.outdir}/Corrrelation_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (matrix_file) from plot_knife_cor
-        file (anno_file) from cor_knife
+        file (matrix_file) from Plot_knife_cor
+        file (anno_file) from Cor_knife
         file mRNAfile
         
         
 
         when:
-         params.knife && params.separate
+         run_knife && params.separate
 
         output:
         file ('*') into cor_plot_knife
@@ -2044,6 +1876,9 @@ process Multiqc{
 
 
 
+Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl, Merge_knife ).collect()
+Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl, Name_knife ).collect()
+
 /*
 ========================================================================================
                                 after running the tools
@@ -2054,20 +1889,20 @@ process Tools_Merge{
     publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
-    file (query_file) from merge_find_circ.concat( merge_circexplorer2, merge_ciri, merge_mapsplice, merge_segemehl, merge_knife ).collect()
-    file (name_file) from name_find_circ.concat( name_circexplorer2, name_ciri, name_mapsplice, name_segemehl, name_knife ).collect()
+    file (query_file) from Combine_matrix_file
+    file (name_file) from Combine_name_file
     
     
 
     output:
-    file ('all_tools_merge.matrix') into tools_merge
-    file ('all_tools_merge.matrix') into tools_merge_html
+    file ('all_tools_merge.matrix') into Tools_merge
+    file ('all_tools_merge.matrix') into Tools_merge_html
     file ('for_annotation.bed') into Med_for_annotation
     file ('for_annotation.bed') into Bed_for_recount
-    file ('for_annotation.bed') into bed_for_merge
-    file ('*annote.txt') into de_merge
-    file ('*annote.txt') into cor_merge
-    file ('all_tools_intersect.matrix') into tools_intersect
+    file ('for_annotation.bed') into Bed_for_merge
+    file ('*annote.txt') into De_merge
+    file ('*annote.txt') into Cor_merge
+    file ('all_tools_intersect.matrix') into Tools_intersect
 
 
     shell :
@@ -2127,7 +1962,7 @@ process Recount_index_step{
         file ('tmp_candidate_circRNA.gff3') into Gff3_file
 
     when:
-        params.merge
+        run_multi_tools
 
     shell:
         '''
@@ -2165,8 +2000,7 @@ process Recount_estimate_step{
         file('*circRNA_requantity.count') into single_sample_recount
 
     when:
-        params.merge
-
+        run_multi_tools
     shell:
     if(params.singleEnd){
         '''
@@ -2188,13 +2022,13 @@ process Recount_results_combine{
     input:
         file (query_file) from single_sample_recount.collect()
         file designfile
-        file (bed_file) from bed_for_merge
+        file (bed_file) from Bed_for_merge
 
     output:
         file ("final.matrix") into (Matrix_for_circos, Plot_merge, PlotMergeCor)
     
     when:
-        params.merge
+        run_multi_tools
 
     shell:
         '''
@@ -2236,7 +2070,7 @@ process Merge_DE{
     publishDir "${params.outdir}/DE_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (anno_file) from de_merge
+    file (anno_file) from De_merge
     
     file designfile
     file comparefile
@@ -2247,7 +2081,7 @@ process Merge_DE{
     file ('*') into end_merge
 
     when:
-    params.merge
+    run_multi_tools
 
     shell:
     '''
@@ -2268,13 +2102,13 @@ if(params.mRNA){
 
         input:
         file (matrix_file) from PlotMergeCor
-        file (anno_file) from cor_merge
+        file (anno_file) from Cor_merge
         file mRNAfile
         
         
 
         when:
-        params.merge
+        run_multi_tools
 
         output:
         file("*") into CorPlotMerge
@@ -2304,7 +2138,7 @@ process Merge_Annotation{
     file gtffile 
 
     when:
-    params.merge
+    run_multi_tools
 
     output:
     file ('*') into annotation_plot
@@ -2322,12 +2156,12 @@ process Venn{
     publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
 
     input:
-    file (matrix_file) from tools_merge
+    file (matrix_file) from Tools_merge
     
 
 
     when:
-    params.selectTools=='1,2,3,4,6'
+    (run_multi_tools < 6) && (run_multi_tools > 1)
 
     output:
     file ('*') into venn_plot
@@ -2352,13 +2186,13 @@ process Report_production{
     file (de_file) from end_merge.collect()
     file (cor_file) from CorPlotMerge.collect()
     file (anno_file) from annotation_plot.collect()
-    file (calculate_file) from tools_merge_html
+    file (calculate_file) from Tools_merge_html
     file (multiqc_file) from multiqc_results
     
     
 
     when:
-    params.merge
+    run_multi_tools
 
     output:
     file ('*.html') into report_html
@@ -2414,22 +2248,22 @@ println LikeletUtils.print_cyan( workflow.success ? "Done!" : "Oops .. something
     <table style="width:100%; max-width:100%; border-spacing: 0; border-collapse: collapse; border:0; margin-bottom: 30px;">
     <tbody style="border-bottom: 1px solid #ddd;">
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Circexplorer2 : ${params.circexplorer2} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Circexplorer2 : ${run_circexplorer2} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Find_circ : ${params.find_circ} </pre></td>
+    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Find_circ : ${run_find_circ} </pre></td>
     </tr>
     <tr>
     <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Ciri : ${params.ciri} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Mapsplice : ${params.mapsplice} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Mapsplice : ${run_mapsplice} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Segemehl : ${params.segemehl} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Segemehl : ${run_segemehl} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Knife : ${params.knife} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Knife : ${run_knife} </pre></td>
     </tr>
     </tbody>
     </table>
