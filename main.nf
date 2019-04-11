@@ -54,6 +54,7 @@ def helpMessage() {
       --selectTools                 Specify which tools should be use. 
                                     1 for circexplorer2, 2 for ciri, 3 for find_circ, 4 for mapsplice, 5 for segemehl, 6 for knife. 
                                     For example, you can set 1,2,3,4,5 for running five tools in the same time.
+      --skipDE                      skip differential expression analysis                       
       --outdir                      The output directory of the results
       --mRNA                        Path to the mRNA expression matrix. Only need to be set when you want to do the correlation.
 
@@ -99,39 +100,40 @@ assert params.library == 'rnase' || params.aligner == 'total' : "Invalid library
 ========================================================================================
 */
 number_of_tools=0
-if( params.selectTools ==~ /.*1.*/ ){
+String toolstring = params.selectTools 
+if( toolstring.indexOf("1")!=-1){
     run_circexplorer2 = true
     number_of_tools=number_of_tools+1
 }else{
     run_circexplorer2 = false
-    Star_multiqc=Channel.create()
+    Star_multiqc=Channel.empty()
 }
-if( params.selectTools ==~ /.*2.*/ ){
+if( toolstring.indexOf("2")!=-1){
     run_ciri = true
     number_of_tools=number_of_tools+1
 }else{
     run_ciri = false
 }
-if( params.selectTools ==~ /.*3.*/ ){
+if( toolstring.indexOf("3")!=-1){
     run_find_circ = true
     number_of_tools=number_of_tools+1
 }else{
     run_find_circ = false
-    Bowtie2_multiqc=Channel.create()
+    Bowtie2_multiqc=Channel.empty()
 }
-if( params.selectTools ==~ /.*4.*/ ){
+if( toolstring.indexOf("4")!=-1){
     run_mapsplice = true
     number_of_tools=number_of_tools+1
 }else{
     run_mapsplice = false
 }
-if( params.selectTools ==~ /.*5.*/ ){
+if( toolstring.indexOf("5")!=-1){
     run_segemehl = true
     number_of_tools=number_of_tools+1
 }else{
     run_segemehl = false
 }
-if( params.selectTools ==~ /.*6.*/ ){
+if( toolstring.indexOf("6")!=-1 ){
     run_knife = true
     number_of_tools=number_of_tools+1
 }else{
@@ -210,16 +212,23 @@ if( !gtffile.exists() ) exit 1, LikeletUtils.print_red("Missing gtf annotation f
 ========================================================================================
 */
 //design file
-designfile = file(params.designfile)
-if(params.designfile) {
-    if( !designfile.exists() ) exit 1, LikeletUtils.print_red("Design file not found: ${params.designfile}")
-}
-//compare file
-comparefile = file(params.comparefile)
-if(params.comparefile){
+if(!params.skipDE){
+    designfile = file(params.designfile)
+    if(params.designfile) {
+        if( !designfile.exists() ) exit 1, LikeletUtils.print_red("Design file not found: ${params.designfile}")
+    }
+    //compare file
+    comparefile = file(params.comparefile)
+    if(params.comparefile){
 
-    if( !comparefile.exists() ) exit 1, LikeletUtils.print_red("Compare file not found: ${params.comparefile}")
+        if( !comparefile.exists() ) exit 1, LikeletUtils.print_red("Compare file not found: ${params.comparefile}")
+    }
+}else {
+    // add the sentence avoiding errors by nextflow 
+    designfile=file(params.genomefile)
+    comparefile=file(params.genomefile)
 }
+
 
 
 
@@ -243,7 +252,6 @@ log.info LikeletUtils.print_cyan("""
                                                      | |
                                                      | |
                                                      |_|
-
  =======================================================================
          """)
         .stripIndent()
@@ -256,7 +264,7 @@ log.info "\n"
 log.info LikeletUtils.print_yellow("====================================Tools selected==============================")
 log.info LikeletUtils.print_yellow("Circexplorer2 :                 ") + LikeletUtils.print_green(run_circexplorer2)
 log.info LikeletUtils.print_yellow("Find_circ :                     ") + LikeletUtils.print_green(run_find_circ)
-log.info LikeletUtils.print_yellow("Ciri :                          ") + LikeletUtils.print_green(params.ciri)
+log.info LikeletUtils.print_yellow("Ciri :                          ") + LikeletUtils.print_green(run_ciri)
 log.info LikeletUtils.print_yellow("Mapsplice :                     ") + LikeletUtils.print_green(run_mapsplice)
 log.info LikeletUtils.print_yellow("Segemehl :                      ") + LikeletUtils.print_green(run_segemehl)
 log.info LikeletUtils.print_yellow("Knife :                         ") + LikeletUtils.print_green(run_knife)
@@ -271,6 +279,7 @@ log.info LikeletUtils.print_yellow("==================================Output fil
 log.info LikeletUtils.print_yellow("Output directory :              ") + LikeletUtils.print_green(params.outdir)
 log.info LikeletUtils.print_yellow("==================================          Others      ========================")
 log.info LikeletUtils.print_yellow("Skip Fastqc :                   ") + LikeletUtils.print_green(params.skip_fastp)
+log.info LikeletUtils.print_yellow("Skip DE analysis :              ") + LikeletUtils.print_green(params.skipDE)
 log.info "\n"
 
 
@@ -291,6 +300,7 @@ log.info LikeletUtils.print_yellow("===================check or build the index=
                              check or build the index
 ========================================================================================
 */
+//check star index
 if(run_circexplorer2){
     if(params.starindex){
         starindex = Channel
@@ -325,13 +335,12 @@ if(run_circexplorer2){
     }
 }else{
     // avoiding throw errors  by nextflow
-    starindex=Channel.create()
-    Merge_circexplorer2=Channel.create()
-    Name_circexplorer2=Channel.create()
+    starindex=Channel.empty()
+    
     
 }
 
-
+// check bowtie2 index 
 if(run_find_circ){
     if(params.bowtie2index){
         (Bowtie2index,Bowtie2index_fc)= Channel
@@ -362,11 +371,11 @@ if(run_find_circ){
     }
 }else{
     // avoiding throw errors  by nextflow
-     (Bowtie2index,Bowtie2index_fc)=Channel.create().into(2)
-     Merge_find_circ=Channel.create()
-     Name_find_circ=Channel.create()
+     (Bowtie2index,Bowtie2index_fc)=Channel.empty().into(2)
+     
 }
 
+// check bowtie index
 if(run_mapsplice){
     if(params.bowtieindex){
         Bowtieindex = Channel
@@ -393,13 +402,13 @@ if(run_mapsplice){
     }
 }else{
     // avoiding throw errors  by nextflow
-    (Bowtieindex,Bowtie_build_knife)=Channel.create().into(2)
-    Merge_mapsplice=Channel.create()
-    Name_mapsplice=Channel.create()
+    (Bowtieindex,Bowtie_build_knife)=Channel.empty().into(2)
+    
 
 }
 
-if(params.ciri){
+// check bwa index 
+if(run_ciri){
     if(params.bwaindex){
         bwaindex = Channel
                 .fromPath(params.bwaindex+"*.{ann,amb,pac,bwt,sa}")
@@ -427,12 +436,12 @@ if(params.ciri){
     }
 }else{
     // avoiding throw errors  by nextflow
-    bwaindex=Channel.create()
-    Merge_ciri=Channel.create()
-        Name_ciri=Channel.create()
+    bwaindex=Channel.empty()
+    
 
 }
 
+// check segemehl index
 if(run_segemehl){
     if(params.segindex){
        Segindex = Channel
@@ -458,16 +467,16 @@ if(run_segemehl){
     }
 }else{
     // avoiding throw errors  by nextflow
-    Segindex=Channel.create()
-    Merge_segemehl=Channel.create()
-        Name_segemehl=Channel.create()
+    Segindex=Channel.empty()
+    
 
 }
+
+// check knife index , plz be causion of this tools. as this tools required a lot index for analysis and also need a fairly long running time 
 if(run_knife){
      
 }else{
-    Merge_knife=Channel.create()
-    Name_knife=Channel.create()
+    
 }
 
 log.info LikeletUtils.print_green("==========Index pass!...==========")
@@ -483,8 +492,8 @@ log.info LikeletUtils.print_green("==========Start running CircPipe...==========
 
 if(params.skip_fastp){
     (fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount)=read_pairs_fastp.into(7)
-    fastp_for_waiting=Channel.create()
-    Fastp_for_multiqc=Channel.create()
+    fastp_for_waiting=Channel.empty()
+    Fastp_for_multiqc=Channel.empty()
 }else{
     process Fastp{
         tag "$pair_id"
@@ -498,8 +507,7 @@ if(params.skip_fastp){
         file ('*.html') into fastp_for_waiting
         file ('*_fastp.json') into Fastp_for_multiqc
 
-        when:
-        !params.skip_fastp
+       
         
         script:
         if(params.singleEnd){
@@ -547,242 +555,243 @@ fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process fir
 //                                                        \__|                                                        
                                                                                                                                                                                                                                                          
 
+if(run_circexplorer2){
+    process Star{
+        tag "$pair_id"
+        publishDir "${params.outdir}/Alignment/STAR", mode: 'link', overwrite: true
+
+        input:
+        set pair_id, file(query_file) from Fastpfiles_star
+        file index from starindex.collect()
+
+        output:
+        set pair_id, file ('*.junction') into starfiles
+        file ('*.out') into Star_multiqc
+
+
+
+        shell:
+        if(params.skip_fastp){
+                if(params.singleEnd){
+                """
+                STAR \
+                --runThreadN ${task.cpus} \
+                --chimSegmentMin 10 \
+                --genomeDir ${star_run_index} \
+                --readFilesIn ${query_file} \
+                --readFilesCommand zcat \
+                --outFileNamePrefix star_${pair_id}_
+                """
+            }else{
+                """
+                STAR \
+                --runThreadN ${task.cpus} \
+                --chimSegmentMin 10 \
+                --genomeDir ${star_run_index} \
+                --readFilesCommand zcat \
+                --readFilesIn ${query_file[0]} ${query_file[1]} \
+                --outFileNamePrefix star_${pair_id}_
+                """
+            }
+        }else{
+            if(params.singleEnd){
+                """
+                STAR \
+                --runThreadN ${task.cpus} \
+                --chimSegmentMin 10 \
+                --genomeDir ${star_run_index} \
+                --readFilesIn ${query_file} \
+                --outFileNamePrefix star_${pair_id}_
+                """
+            }else{
+                """
+                STAR \
+                --runThreadN ${task.cpus} \
+                --chimSegmentMin 10 \
+                --genomeDir ${star_run_index} \
+                --readFilesIn ${query_file[0]} ${query_file[1]} \
+                --outFileNamePrefix star_${pair_id}_
+                """
+            }   
+        }
+        
+
+    }
+
+    /*
+    ========================================================================================
+                            the first tool : star - circexplorer2
+                                    run the circexplorer2
+    ========================================================================================
+    */
+    process Circexplorer2{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', overwrite: true
+
+        input:
+        set pair_id, file (query_file) from starfiles
+        file annotationfile
+        file genomefile
+
+        output:
+        set pair_id, file ('*known.txt') into circexplorer2files
+
+
+
+        script:
+        """
+            CIRCexplorer2 \
+            parse -t STAR ${query_file} \
+            > CIRCexplorer2_parse_${pair_id}.log
+
+            CIRCexplorer2 \
+            annotate -r ${annotationfile} \
+            -g ${genomefile} \
+            -b back_spliced_junction.bed \
+            -o CIRCexplorer2_${pair_id}_circularRNA_known.txt \
+            > CIRCexplorer2_annotate_${pair_id}.log
+            """
+    }
+
+    /*
+    ========================================================================================
+                            the first tool : star - circexplorer2
+                                    produce the bed6 file
+    ========================================================================================
+    */
+    process Circexplorer2_Bed{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+
+        input:
+        set pair_id, file (query_file) from circexplorer2files
+        
+
+        output:
+        file ('*candidates.bed') into modify_circexplorer2
+        val (pair_id) into modify_circexplorer2_id
+
+
+
+        shell :
+        '''
+        if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
+        touch !{pair_id}_modify_circexplorer2.candidates.bed
+        else
+        grep circ !{query_file} \
+        | grep -v chrM \
+        | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
+        > !{pair_id}_modify_circexplorer2.temp.bed
+        
+        python !{baseDir}/bin/quchong.py !{pair_id}_modify_circexplorer2.temp.bed circexplorer2_!{pair_id}_modify.candidates.bed
+        fi
+        '''
+    }
+
+    /*
+    ========================================================================================
+                            the first tool : star - circexplorer2
+                                    produce the matrix
+    ========================================================================================
+    */
+    process Circexplorer2_Matrix{
+        publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        input:
+        file (query_file) from modify_circexplorer2.collect()
+        
+        file designfile
+        file gtffile
+
+        output:
+        file ('circexplorer2_merge.matrix') into (Output_circexplorer2,Plot_circexplorer2,Plot_circexplorer2_cor,Merge_circexplorer2)
+        file ('Name_circexplorer2.txt') into Name_circexplorer2
+        file ('annoted_circexplorer2_merge_annote.txt') into (De_circexplorer2,Cor_circexplorer2)
+ 
+
+        shell :
+        '''
+
+        # merge sample into matrix 
+        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o circexplorer2 -sup 5 -merge
+        mv circexplorer2_merge.bed circexplorer2_merge.matrix
+        # annotate circRNA with GTFs
+        java -jar !{baseDir}/bin/circpipetools.jar -i circexplorer2_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+
+        # remove non samplename string from matrix header 
+        sed -i 's/circexplorer2_//g' circexplorer2_merge.matrix
+        sed -i 's/_modify.candidates.bed//g' circexplorer2_merge.matrix
+
+
+        echo -e "circexplorer2" > Name_circexplorer2.txt
+        '''
+    }
+
+    /*
+    ========================================================================================
+                            the first tool : star - circexplorer2
+                                    Differential Expression
+    ========================================================================================
+    */
+    if(!params.skipDE){
+    process Circexplorer2_DE{
+        publishDir "${params.outdir}/DE_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
+
+        input:
+        file (anno_file) from De_circexplorer2
+        
+        file designfile
+        file comparefile
+        file (matrix_file) from Plot_circexplorer2
+        
+
+        output:
+        file ('*') into End_circexplorer2
+
+     
+
+        shell:
+        '''
+        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+        '''
+    }
+    }
+
+    /*
+    ========================================================================================
+                            the first tool : star - circexplorer2
+                                            Correlation
+    ========================================================================================
+    */
+    if(params.mRNA){
+        process Circexplorer2_Cor{
+            publishDir "${params.outdir}/Corrrelation_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
+
+            input:
+            file (matrix_file) from Plot_circexplorer2_cor
+            file (anno_file) from Cor_circexplorer2
+            file mRNAfile
+
+            output:
+            file ('*') into cor_plot_circexplorer2
+
+            shell:
+            '''
+            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+            '''
+        }
+    }
+
+}else{
+    Merge_circexplorer2=Channel.empty()
+    Name_circexplorer2=Channel.empty()
+}
 /*
 ========================================================================================
                          the first tool : star - circexplorer2
                                       run the star
 ========================================================================================
 */
-process Star{
-    tag "$pair_id"
-    publishDir "${params.outdir}/Alignment/STAR", mode: 'link', overwrite: true
-
-    input:
-    set pair_id, file(query_file) from Fastpfiles_star
-    file index from starindex.collect()
-
-    output:
-    set pair_id, file ('*.junction') into starfiles
-    file ('*.out') into Star_multiqc
-
-    when:
-    run_circexplorer2
-
-    shell:
-    if(params.skip_fastp){
-            if(params.singleEnd){
-            """
-            STAR \
-            --runThreadN ${task.cpus} \
-            --chimSegmentMin 10 \
-            --genomeDir ${star_run_index} \
-            --readFilesIn ${query_file} \
-            --readFilesCommand zcat \
-            --outFileNamePrefix star_${pair_id}_
-            """
-        }else{
-            """
-            STAR \
-            --runThreadN ${task.cpus} \
-            --chimSegmentMin 10 \
-            --genomeDir ${star_run_index} \
-            --readFilesCommand zcat \
-            --readFilesIn ${query_file[0]} ${query_file[1]} \
-            --outFileNamePrefix star_${pair_id}_
-            """
-        }
-    }else{
-        if(params.singleEnd){
-            """
-            STAR \
-            --runThreadN ${task.cpus} \
-            --chimSegmentMin 10 \
-            --genomeDir ${star_run_index} \
-            --readFilesIn ${query_file} \
-            --outFileNamePrefix star_${pair_id}_
-            """
-        }else{
-            """
-            STAR \
-            --runThreadN ${task.cpus} \
-            --chimSegmentMin 10 \
-            --genomeDir ${star_run_index} \
-            --readFilesIn ${query_file[0]} ${query_file[1]} \
-            --outFileNamePrefix star_${pair_id}_
-            """
-        }   
-    }
-    
-
-}
-
-/*
-========================================================================================
-                         the first tool : star - circexplorer2
-                                 run the circexplorer2
-========================================================================================
-*/
-process Circexplorer2{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', overwrite: true
-
-    input:
-    set pair_id, file (query_file) from starfiles
-    file annotationfile
-    file genomefile
-
-    output:
-    set pair_id, file ('*known.txt') into circexplorer2files
-
-    when:
-    run_circexplorer2
-
-    script:
-    """
-        CIRCexplorer2 \
-        parse -t STAR ${query_file} \
-        > CIRCexplorer2_parse_${pair_id}.log
-
-        CIRCexplorer2 \
-        annotate -r ${annotationfile} \
-        -g ${genomefile} \
-        -b back_spliced_junction.bed \
-        -o CIRCexplorer2_${pair_id}_circularRNA_known.txt \
-        > CIRCexplorer2_annotate_${pair_id}.log
-        """
-}
-
-/*
-========================================================================================
-                         the first tool : star - circexplorer2
-                                 produce the bed6 file
-========================================================================================
-*/
-process Circexplorer2_Bed{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    input:
-    set pair_id, file (query_file) from circexplorer2files
-    
-
-    output:
-    file ('*candidates.bed') into modify_circexplorer2
-    val (pair_id) into modify_circexplorer2_id
-
-    when:
-    run_circexplorer2
-
-    shell :
-    '''
-    if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
-    touch !{pair_id}_modify_circexplorer2.candidates.bed
-    else
-    grep circ !{query_file} \
-    | grep -v chrM \
-    | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
-    > !{pair_id}_modify_circexplorer2.temp.bed
-    
-    python !{baseDir}/bin/quchong.py !{pair_id}_modify_circexplorer2.temp.bed circexplorer2_!{pair_id}_modify.candidates.bed
-    fi
-    '''
-}
-
-/*
-========================================================================================
-                         the first tool : star - circexplorer2
-                                  produce the matrix
-========================================================================================
-*/
-process Circexplorer2_Matrix{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    input:
-    file (query_file) from modify_circexplorer2.collect()
-    val (pair_id) from modify_circexplorer2_id.collect()
-    
-    file designfile
-    file gtffile
-
-    output:
-    file ('circexplorer2_merge.matrix') into (Output_circexplorer2,Plot_circexplorer2,Plot_circexplorer2_cor)
-    file ('Name_circexplorer2.txt') into Name_circexplorer2
-    file ('annoted_circexplorer2_merge_annote.txt') into (De_circexplorer2,Cor_circexplorer2,Merge_circexplorer2)
-    when:
-    run_circexplorer2
-
-    shell :
-    '''
-
-    # merge sample into matrix 
-    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o circexplorer2 -sup 5 -merge
-    mv circexplorer2_merge.bed circexplorer2_merge.matrix
-    # annotate circRNA with GTFs
-    java -jar !{baseDir}/bin/circpipetools.jar -i circexplorer2_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
-    echo -e "circexplorer2" > Name_circexplorer2.txt
-    '''
-}
-
-/*
-========================================================================================
-                          the first tool : star - circexplorer2
-                                 Differential Expression
-========================================================================================
-*/
-process Circexplorer2_DE{
-    publishDir "${params.outdir}/DE_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (anno_file) from De_circexplorer2
-    
-    file designfile
-    file comparefile
-    file (matrix_file) from Plot_circexplorer2
-    
-
-    output:
-    file ('*') into End_circexplorer2
-
-    when:
-    run_circexplorer2 
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-    '''
-}
-
-/*
-========================================================================================
-                           the first tool : star - circexplorer2
-                                        Correlation
-========================================================================================
-*/
-if(params.mRNA){
-    process Circexplorer2_Cor{
-        publishDir "${params.outdir}/Corrrelation_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
-
-        input:
-        file (matrix_file) from Plot_circexplorer2_cor
-        file (anno_file) from Cor_circexplorer2
-        file mRNAfile
-        
-        
-
-        when:
-        params.mRNA && run_circexplorer2 
-
-        output:
-        file ('*') into cor_plot_circexplorer2
-
-        shell:
-        '''
-        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
-        '''
-    }
-}
 
 
 //   $$$$$$\  $$\           $$\ 
@@ -804,212 +813,207 @@ if(params.mRNA){
                                       run the bwa
 ========================================================================================
 */
-process Bwa{
-    tag "$pair_id"
-    publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
-
-    input:
-    set pair_id, file (query_file) from Fastpfiles_bwa
-    file index from bwaindex.collect()
-    file genomefile
-
-
-    output:
-    set pair_id, file ('*.sam') into bwafiles
-
-    when:
-    params.ciri
-
-    shell:
-    
-    if(params.singleEnd){
-        """
-        bwa \
-        mem -t ${task.cpus} \
-        -k 15 \
-        -T 19  -M -R \
-        "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        ${bowtie_run_index} \
-        ${query_file} \
-        > bwa_${pair_id}.mem.sam
-        """
-    }else{
-        """
-        bwa \
-        mem -t ${task.cpus} \
-        -T 19 -M -R \
-        "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
-        ${bowtie_run_index} \
-        ${query_file[0]} ${query_file[1]} \
-        > bwa_${pair_id}.mem.sam
-        """
-    }
-
-}
-
-/*
-========================================================================================
-                              the second tool : bwa - ciri
-                                      run the ciri
-========================================================================================
-*/
-process Ciri{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', overwrite: true
-
-    input:
-    set pair_id, file (query_file) from bwafiles
-    file gtffile
-    file genomefile
-
-    output:
-    set pair_id, file ('*.txt') into cirifiles
-
-    when:
-    params.ciri
-
-    script:
-        """
-        CIRI2.pl \
-        -T 10 \
-        -F ${genomefile} \
-        -A ${gtffile} \
-        -G CIRI_${pair_id}.log \
-        -I ${query_file} \
-        -O CIRI_${pair_id}.txt \
-        > CIRI_${pair_id}_detail.log
-        """
-}
-
-/*
-========================================================================================
-                              the second tool : bwa - ciri
-                                  produce the bed6 file
-========================================================================================
-*/
-process Ciri_Bed{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    input:
-    set pair_id, file (query_file) from cirifiles
-    
-
-    output:
-    file ('*candidates.bed') into modify_ciri_file
-
-    when:
-    params.ciri
-
-    shell :
-    '''
-        if [ $((`cat !{query_file} | wc -l`)) == 1 ];then
-        touch !{pair_id}_modify_ciri.candidates.bed
-        else
-        cat !{query_file} \
-	    | sed -e '1d' \
-        | grep -v chrM \
-        | awk '{print $2 "\t" $3 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
-        > !{pair_id}_modify_ciri.temp.bed
-        
-        python !{baseDir}/bin/quchong.py !{pair_id}_modify_ciri.temp.bed !{pair_id}_modify_ciri.candidates.bed
-        fi
-        '''
-}
-
-/*
-========================================================================================
-                              the second tool : bwa - ciri
-                                  produce the matrix
-========================================================================================
-*/
-process Ciri_Matrix{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    input:
-    file (query_file) from modify_ciri_file.collect()
-    file gtffile
-
-
-    output:
-    file ('ciri_merge.matrix') into (Output_ciri,Plot_ciri_cor,Plot_ciri,Merge_ciri)
-    file ('Name_ciri.txt') into Name_ciri
-    file ('annoted_ciri_merge_annote.txt') into (De_ciri,Cor_ciri)
-
-    when:
-    params.ciri
-
-    shell :
-    '''
-    # merge sample into matrix 
-    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
-    mv ciri_merge.bed ciri_merge.matrix
-    # annotate circRNA with GTFs
-    java -jar !{baseDir}/bin/circpipetools.jar -i ciri_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
-    #for what 
-    echo -e "ciri" > Name_ciri.txt
-    '''
-}
-
-/*
-========================================================================================
-                               the second tool : bwa - ciri
-                                 Differential Expression
-========================================================================================
-*/
-process Ciri_DE{
-    publishDir "${params.outdir}/DE_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (anno_file) from De_ciri
-    
-    file designfile
-    file comparefile
-    file (matrix_file) from Plot_ciri
-    
-
-    output:
-    file ('*') into End_ciri
-
-    when:
-    run_ciri 
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-    '''
-}
-
-/*
-========================================================================================
-                                the second tool : bwa - ciri
-                                        Correlation
-========================================================================================
-*/
-if(params.mRNA){
-    process Ciri_Cor{
-        publishDir "${params.outdir}/Corrrelation_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
+if(run_ciri){
+        process Bwa{
+        tag "$pair_id"
+        publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
 
         input:
-        file (matrix_file) from Plot_ciri_cor
-        file (anno_file) from Cor_ciri
-        file mRNA
-        
-        
+        set pair_id, file (query_file) from Fastpfiles_bwa
+        file index from bwaindex.collect()
+        file genomefile
 
-        when:
-        params.mRNA && run_ciri 
 
         output:
-        file ('*') into cor_plot_ciri
+        set pair_id, file ('*.sam') into bwafiles
+
 
         shell:
+        
+        if(params.singleEnd){
+            """
+            bwa \
+            mem -t ${task.cpus} \
+            -k 15 \
+            -T 19  -M -R \
+            "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
+            ${bowtie_run_index} \
+            ${query_file} \
+            > bwa_${pair_id}.mem.sam
+            """
+        }else{
+            """
+            bwa \
+            mem -t ${task.cpus} \
+            -T 19 -M -R \
+            "@RG\\tID:fastp_${pair_id}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${pair_id}" \
+            ${bowtie_run_index} \
+            ${query_file[0]} ${query_file[1]} \
+            > bwa_${pair_id}.mem.sam
+            """
+        }
+
+    }
+
+    /*
+    ========================================================================================
+                                the second tool : bwa - ciri
+                                        run the ciri
+    ========================================================================================
+    */
+    process Ciri{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', overwrite: true
+
+        input:
+        set pair_id, file (query_file) from bwafiles
+        file gtffile
+        file genomefile
+
+        output:
+        set pair_id, file ('*.txt') into cirifiles
+        script:
+            """
+            CIRI2.pl \
+            -T 10 \
+            -F ${genomefile} \
+            -A ${gtffile} \
+            -G CIRI_${pair_id}.log \
+            -I ${query_file} \
+            -O CIRI_${pair_id}.txt \
+            > CIRI_${pair_id}_detail.log
+            """
+    }
+
+    /*
+    ========================================================================================
+                                the second tool : bwa - ciri
+                                    produce the bed6 file
+    ========================================================================================
+    */
+    process Ciri_Bed{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+
+        input:
+        set pair_id, file (query_file) from cirifiles
+        
+
+        output:
+        file ('*candidates.bed') into modify_ciri_file
+
+
+        shell :
         '''
-        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+            if [ $((`cat !{query_file} | wc -l`)) == 1 ];then
+            touch !{pair_id}_modify_ciri.candidates.bed
+            else
+            cat !{query_file} \
+            | sed -e '1d' \
+            | grep -v chrM \
+            | awk '{print $2 "\t" $3 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
+            > !{pair_id}_modify_ciri.temp.bed
+            
+            python !{baseDir}/bin/quchong.py !{pair_id}_modify_ciri.temp.bed !{pair_id}_modify_ciri.candidates.bed
+            fi
+            '''
+    }
+
+    /*
+    ========================================================================================
+                                the second tool : bwa - ciri
+                                    produce the matrix
+    ========================================================================================
+    */
+    process Ciri_Matrix{
+
+        publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        input:
+        file (query_file) from modify_ciri_file.collect()
+        file gtffile
+
+
+        output:
+        file ('ciri_merge.matrix') into (Output_ciri,Plot_ciri_cor,Plot_ciri,Merge_ciri)
+        file ('Name_ciri.txt') into Name_ciri
+        file ('annoted_ciri_merge_annote.txt') into (De_ciri,Cor_ciri)
+
+
+        shell :
+        '''
+        # merge sample into matrix 
+        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
+        mv ciri_merge.bed ciri_merge.matrix
+        # annotate circRNA with GTFs
+        java -jar !{baseDir}/bin/circpipetools.jar -i ciri_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+
+            sed -i 's/ciri_//g' ciri_merge.matrix
+        sed -i 's/_modify.candidates.bed//g' ciri_merge.matrix
+
+        #for what 
+        echo -e "ciri" > Name_ciri.txt
         '''
     }
+
+    /*
+    ========================================================================================
+                                the second tool : bwa - ciri
+                                    Differential Expression
+    ========================================================================================
+    */
+    if(!params.skipDE){
+        process Ciri_DE{
+            publishDir "${params.outdir}/DE_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
+
+            input:
+            file (anno_file) from De_ciri
+            
+            file designfile
+            file comparefile
+            file (matrix_file) from Plot_ciri
+            
+
+            output:
+            file ('*') into End_ciri
+
+
+            shell:
+            '''
+            Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+            '''
+        }
+    }
+
+    /*
+    ========================================================================================
+                                    the second tool : bwa - ciri
+                                            Correlation
+    ========================================================================================
+    */
+    if(params.mRNA){
+        process Ciri_Cor{
+            publishDir "${params.outdir}/Corrrelation_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
+
+            input:
+            file (matrix_file) from Plot_ciri_cor
+            file (anno_file) from Cor_ciri
+            file mRNA
+            
+
+            output:
+            file ('*') into cor_plot_ciri
+
+            shell:
+            '''
+            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
+            '''
+        }
+    }
+
+}else{
+    Merge_ciri=Channel.empty()
+    Name_ciri=Channel.empty()
 }
 
 
@@ -1026,207 +1030,204 @@ if(params.mRNA){
 //                         $$ |                $$ |                                  
 //                         \__|                \__|                                  
                                                                                                                     
-
-/*
-========================================================================================
-                              the third tool : mapsplice
-                                  run the mapsplice
-========================================================================================
-*/
-process Mapsplice{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', overwrite: true
-
-    input:
-    set pair_id, file (query_file) from fastpfiles_mapsplice
-    file gtffile
-    file refmapsplice_dir from Refmapsplice
-    file outdir
-    file index from Bowtieindex.collect()
-
-    output:
-    set pair_id, file('*') into mapsplicefiles
-
-
-    when:
-    run_mapsplice
-
-    shell:
-    if(params.singleEnd){
-        """
-        mapsplice.py \
-        -p ${task.cpus} \
-        -k 1 \
-        --fusion-non-canonical \
-        --qual-scale phred33 \
-        --non-canonical-double-anchor \
-        --min-fusion-distance 200 \
-        -x ${bowtie_run_index} \
-        --gene-gtf ${gtffile} \
-        -c ${refmapsplice_dir} \
-        -1 ${query_file} \
-        -o output_mapsplice_${pair_id} 2 \
-        > ${pair_id}_mapsplice.log
-        """
-    }else{
-        """
-        mapsplice.py \
-        -p ${task.cpus} \
-        -k 1 \
-        --fusion-non-canonical \
-        --non-canonical-double-anchor \
-        --min-fusion-distance 200 \
-        -x ${bowtie_run_index} \
-        --gene-gtf ${gtffile} \
-        -c ${refmapsplice_dir} \
-        -1 ${query_file[0]} \
-        -2 ${query_file[1]} \
-        -o output_mapsplice_${pair_id} 2 \
-        > ${pair_id}_mapsplice.log
-        """
-    }
-
-}
-
-/*
-========================================================================================
-                              the third tool : mapsplice
-                                 produce the bed6 file
-========================================================================================
-*/
-process Mapsplice_Bed{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    input:
-    set pair_id, file (query_file) from mapsplicefiles
-    file outdir
-    
-
-    output:
-    file ('*candidates.bed') into modify_mapsplice
-
-
-    when:
-    run_mapsplice
-
-    shell :
-    '''
-    if [ $((`cat output_mapsplice_!{pair_id}/circular_RNAs.txt | wc -l`)) == 0 ];then
-    touch !{pair_id}_modify_mapsplice.candidates.bed
-    else
-    cat output_mapsplice_!{pair_id}/circular_RNAs.txt \
-    | awk '{print $6}' \
-    | sed -e 's/.//' \
-    > !{pair_id}_mapsplice_temp1.bed
-
-    cat output_mapsplice_!{pair_id}/circular_RNAs.txt \
-    | awk '{print $1}' \
-    | awk -F"~" '{print $2}' \
-    > !{pair_id}_mapsplice_temp.bed
-
-    paste !{pair_id}_mapsplice_temp.bed !{pair_id}_mapsplice_temp1.bed output_mapsplice_!{pair_id}/circular_RNAs.txt \
-    | grep -v chrM \
-    | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
-    > !{pair_id}_modify_mapsplice.temp.bed
-    
-    python !{baseDir}/bin/quchong.py !{pair_id}_modify_mapsplice.temp.bed mapsplice_!{pair_id}_modify.candidates.bed
-    fi
-    '''
-}
-
-/*
-========================================================================================
-                              the third tool : mapsplice
-                                  produce the matrix
-========================================================================================
-*/
-process Mapsplice_Matrix{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    input:
-    file (query_file) from modify_mapsplice.collect()
-    file gtffile
-
-    output:
-    file ('mapsplice_merge.matrix') into (Output_mapsplice,Plot_mapsplice,Plot_mapsplice_cor,Merge_mapsplice)
-    file ('Name_mapsplice.txt') into Name_mapsplice
-    file ('annoted_mapsplice_merge_annote.txt') into (De_mapsplice,Cor_mapsplice)
-
-    when:
-    run_mapsplice
-
-    shell :
-    '''
-     # merge sample into matrix 
-    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
-    mv mapsplice_merge.bed mapsplice_merge.matrix
-    # annotate circRNA with GTFs
-    java -jar !{baseDir}/bin/circpipetools.jar -i mapsplice_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
-    echo -e "mapsplice" > Name_mapsplice.txt
-    '''
-}
-
-/*
-========================================================================================
+if(run_mapsplice){
+        /*
+    ========================================================================================
                                 the third tool : mapsplice
-                                 Differential Expression
-========================================================================================
-*/
-process Mapsplice_DE{
-    publishDir "${params.outdir}/DE_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (anno_file) from De_mapsplice
-    
-    file designfile
-    file comparefile
-    file (matrix_file) from Plot_mapsplice
-    
-
-    output:
-    file ('*') into end_mapsplice
-
-    when:
-    run_mapsplice 
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-    '''
-}
-
-/*
-========================================================================================
-                                  the third tool : mapsplice
-                                        Correlation
-========================================================================================
-*/
-if(params.mRNA){
-    process Mapsplice_Cor{
-        publishDir "${params.outdir}/Corrrelation_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
+                                    run the mapsplice
+    ========================================================================================
+    */
+    process Mapsplice{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', overwrite: true
 
         input:
-        file (matrix_file) from Plot_mapsplice_cor
-        file (anno_file) from Cor_mapsplice
-        file mRNAfile
-        
-        
-
-        when:
-        run_mapsplice 
+        set pair_id, file (query_file) from fastpfiles_mapsplice
+        file gtffile
+        file refmapsplice_dir from Refmapsplice
+        file outdir
+        file index from Bowtieindex.collect()
 
         output:
-        file ('*') into cor_plot_mapsplice
+        set pair_id, file('*') into mapsplicefiles
+
+
+
+        shell:
+        if(params.singleEnd){
+            """
+            mapsplice.py \
+            -p ${task.cpus} \
+            -k 1 \
+            --fusion-non-canonical \
+            --qual-scale phred33 \
+            --non-canonical-double-anchor \
+            --min-fusion-distance 200 \
+            -x ${bowtie_run_index} \
+            --gene-gtf ${gtffile} \
+            -c ${refmapsplice_dir} \
+            -1 ${query_file} \
+            -o output_mapsplice_${pair_id} 2 \
+            > ${pair_id}_mapsplice.log
+            """
+        }else{
+            """
+            mapsplice.py \
+            -p ${task.cpus} \
+            -k 1 \
+            --fusion-non-canonical \
+            --non-canonical-double-anchor \
+            --min-fusion-distance 200 \
+            -x ${bowtie_run_index} \
+            --gene-gtf ${gtffile} \
+            -c ${refmapsplice_dir} \
+            -1 ${query_file[0]} \
+            -2 ${query_file[1]} \
+            -o output_mapsplice_${pair_id} 2 \
+            > ${pair_id}_mapsplice.log
+            """
+        }
+
+    }
+
+    /*
+    ========================================================================================
+                                the third tool : mapsplice
+                                    produce the bed6 file
+    ========================================================================================
+    */
+    process Mapsplice_Bed{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+
+        input:
+        set pair_id, file (query_file) from mapsplicefiles
+        file outdir
+        
+
+        output:
+        file ('*candidates.bed') into modify_mapsplice
+
+
+
+        shell :
+        '''
+        if [ $((`cat output_mapsplice_!{pair_id}/circular_RNAs.txt | wc -l`)) == 0 ];then
+        touch !{pair_id}_modify_mapsplice.candidates.bed
+        else
+        cat output_mapsplice_!{pair_id}/circular_RNAs.txt \
+        | awk '{print $6}' \
+        | sed -e 's/.//' \
+        > !{pair_id}_mapsplice_temp1.bed
+
+        cat output_mapsplice_!{pair_id}/circular_RNAs.txt \
+        | awk '{print $1}' \
+        | awk -F"~" '{print $2}' \
+        > !{pair_id}_mapsplice_temp.bed
+
+        paste !{pair_id}_mapsplice_temp.bed !{pair_id}_mapsplice_temp1.bed output_mapsplice_!{pair_id}/circular_RNAs.txt \
+        | grep -v chrM \
+        | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
+        > !{pair_id}_modify_mapsplice.temp.bed
+        
+        python !{baseDir}/bin/quchong.py !{pair_id}_modify_mapsplice.temp.bed mapsplice_!{pair_id}_modify.candidates.bed
+        fi
+        '''
+    }
+
+    /*
+    ========================================================================================
+                                the third tool : mapsplice
+                                    produce the matrix
+    ========================================================================================
+    */
+    process Mapsplice_Matrix{
+        publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        input:
+        file (query_file) from modify_mapsplice.collect()
+        file gtffile
+
+        output:
+        file ('mapsplice_merge.matrix') into (Output_mapsplice,Plot_mapsplice,Plot_mapsplice_cor,Merge_mapsplice)
+        file ('Name_mapsplice.txt') into Name_mapsplice
+        file ('annoted_mapsplice_merge_annote.txt') into (De_mapsplice,Cor_mapsplice)
+
+
+        shell :
+        '''
+        # merge sample into matrix 
+        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
+        mv mapsplice_merge.bed mapsplice_merge.matrix
+        # annotate circRNA with GTFs
+        java -jar !{baseDir}/bin/circpipetools.jar -i mapsplice_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+
+        sed -i 's/mapsplice_//g' mapsplice_merge.matrix
+        sed -i 's/_modify.candidates.bed//g' mapsplice_merge.matrix
+        echo -e "mapsplice" > Name_mapsplice.txt
+        '''
+    }
+
+    /*
+    ========================================================================================
+                                    the third tool : mapsplice
+                                    Differential Expression
+    ========================================================================================
+    */
+    if(!params.skipDE){
+        process Mapsplice_DE{
+        publishDir "${params.outdir}/DE_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
+
+        input:
+        file (anno_file) from De_mapsplice
+        
+        file designfile
+        file comparefile
+        file (matrix_file) from Plot_mapsplice
+        
+
+        output:
+        file ('*') into end_mapsplice
+
 
         shell:
         '''
-        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
         '''
+        }
     }
+
+    /*
+    ========================================================================================
+                                    the third tool : mapsplice
+                                            Correlation
+    ========================================================================================
+    */
+    if(params.mRNA){
+        process Mapsplice_Cor{
+            publishDir "${params.outdir}/Corrrelation_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
+
+            input:
+            file (matrix_file) from Plot_mapsplice_cor
+            file (anno_file) from Cor_mapsplice
+            file mRNAfile
+            
+
+            output:
+            file ('*') into cor_plot_mapsplice
+
+            shell:
+            '''
+            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+            '''
+        }
+    }
+}else{
+    Merge_mapsplice=Channel.empty()
+    Name_mapsplice=Channel.empty()
 }
+
+
 
 
 
@@ -1242,209 +1243,202 @@ if(params.mRNA){
 //                      \$$$$$$  |                                                
 //                       \______/                                                 
                                                                                                         
+if(run_segemehl){
+    /*
+    ========================================================================================
+                                the fourth tool : segemehl
+                                    run the segemehl
+    ========================================================================================
+    */
 
-/*
-========================================================================================
-                              the fourth tool : segemehl
-                                   run the segemehl
-========================================================================================
-*/
+    process Segemehl{
+                tag "$pair_id"
+                publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
 
-process Segemehl{
-            tag "$pair_id"
-            publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
+                input:
+                set pair_id, file (query_file) from fastpfiles_segemehl
+                file genomefile
+                file index from Segindex.collect()
 
-            input:
-            set pair_id, file (query_file) from fastpfiles_segemehl
-            file genomefile
-            file index from Segindex.collect()
+                output:
+                set pair_id, file ('*splicesites.bed') into segemehlfiles
 
-            output:
-            set pair_id, file ('*splicesites.bed') into segemehlfiles
+                shell:
+                if(params.singleEnd){
+                    """
+                    segemehl.x \
+                    -d ${genomefile} \
+                    -i ${params.segindex} \
+                    -q ${query_file} \
+                    -t ${task.cpus} \
+                    -S \
+                    | samtools view -bS - \
+                    | samtools sort -o - \
+                    | samtools view -h - \
+                    > segemehl_${pair_id}_mapped.sam
 
-            when:
-            run_segemehl 
+                    testrealign.x \
+                    -d ${genomefile} \
+                    -q segemehl_${pair_id}_mapped.sam \
+                    -n \
+                    -U segemehl_${pair_id}_splicesites.bed \
+                    -T segemehl_${pair_id}_transrealigned.bed
+                    """
+                }else{
+                    """
+                    segemehl.x \
+                    -d ${genomefile} \
+                    -i ${params.segindex} \
+                    -q ${query_file[0]} \
+                    -p ${query_file[1]} \
+                    -t ${task.cpus} \
+                    -S \
+                    | samtools view -bS - \
+                    | samtools sort -o - \
+                    | samtools view -h - \
+                    > segemehl_${pair_id}_mapped.sam
 
-            shell:
-            if(params.singleEnd){
-                """
-                segemehl.x \
-                -d ${genomefile} \
-                -i ${params.segindex} \
-                -q ${query_file} \
-                -t ${task.cpus} \
-                -S \
-                | samtools view -bS - \
-                | samtools sort -o - \
-                | samtools view -h - \
-                > segemehl_${pair_id}_mapped.sam
+                    testrealign.x \
+                    -d ${genomefile} \
+                    -q segemehl_${pair_id}_mapped.sam \
+                    -n \
+                    -U segemehl_${pair_id}_splicesites.bed \
+                    -T segemehl_${pair_id}_transrealigned.bed
+                    """
+                }
 
-                testrealign.x \
-                -d ${genomefile} \
-                -q segemehl_${pair_id}_mapped.sam \
-                -n \
-                -U segemehl_${pair_id}_splicesites.bed \
-                -T segemehl_${pair_id}_transrealigned.bed
-                """
-            }else{
-                """
-                segemehl.x \
-                -d ${genomefile} \
-                 -i ${params.segindex} \
-                -q ${query_file[0]} \
-                -p ${query_file[1]} \
-                -t ${task.cpus} \
-                -S \
-                | samtools view -bS - \
-                | samtools sort -o - \
-                | samtools view -h - \
-                > segemehl_${pair_id}_mapped.sam
-
-                testrealign.x \
-                -d ${genomefile} \
-                -q segemehl_${pair_id}_mapped.sam \
-                -n \
-                -U segemehl_${pair_id}_splicesites.bed \
-                -T segemehl_${pair_id}_transrealigned.bed
-                """
             }
 
-        }
-
-/*
- ========================================================================================
-                                the fourth tool : segemehl
-                                    produce the bed6 file
+    /*
     ========================================================================================
-*/
-process Segemehl_Bed{
-        tag "$pair_id"
-        publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
-
-        input:
-        set pair_id , file ( query_file ) from segemehlfiles
-        
-
-        output:
-        file ('*candidates.bed') into modify_segemehl
-
-        when:
-        run_segemehl 
-
-        shell :
-        '''
-        if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
-        touch !{pair_id}_modify_segemehl.candidates.bed
-        else
-        cat !{query_file} \
-        | awk '{print $4}' \
-        | awk -F":" '{print $2 "\t" $5 "\t" $6}' \
-        > !{pair_id}_segemehl.temp.bed
-
-        paste !{query_file} !{pair_id}_segemehl.temp.bed \
-        | grep C \
-        | grep P \
-        | grep -v chrM \
-        | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
-        > !{pair_id}_modify_segemehl.temp.bed
-        
-        python !{baseDir}/bin/quchong.py !{pair_id}_modify_segemehl.temp.bed segemehl_!{pair_id}_modify.candidates.bed
-        fi
-        '''
-}
-
-/*
-========================================================================================
-                                the fourth tool : segemehl
-                                    produce the matrix
-========================================================================================
-*/
-process Segemehl_Matrix{
-        tag "$pair_id"
-        publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-        input:
-        file (query_file) from modify_segemehl.collect()
-        file gtffile
-
-        output:
-        file ('segemehl_merge.matrix') into (Output_segemehl,Plot_segemehl,Merge_segemehl,Plot_segemehl_cor)
-        file ('Name_segemehl.txt') into Name_segemehl
-        file ('annoted_segemehl_merge_annote.txt') into (Cor_segemehl,De_segemehl)
- 
-
-
-        when:
-        run_segemehl 
-
-        shell :
-        '''
-        # merge sample into matrix 
-        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o segemehl -sup 5 -merge
-        mv segemehl_merge.bed segemehl_merge.matrix
-        # annotate circRNA with GTFs
-        java -jar !{baseDir}/bin/circpipetools.jar -i segemehl_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-        echo -e "segemehl" > Name_segemehl.txt
-        '''
-}
-/*   
-========================================================================================
-                                the fourth tool : segemehl
-                                    Differential Expression
-========================================================================================
-*/
-process Segemehl_DE{
-        publishDir "${params.outdir}/DE_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
-
-        input:
-        file (anno_file) from De_segemehl
-        
-        file designfile
-        file comparefile
-        file (matrix_file) from Plot_segemehl
-        
-
-        output:
-        file ('*') into end_segemehl
-
-        when:
-        run_segemehl 
-
-        shell:
-        '''
-        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-        '''
-}
-
-/*
-========================================================================================
                                     the fourth tool : segemehl
-                                            Correlation
-========================================================================================
-*/
-if(params.mRNA){
-        process Segemehl_Cor{
-            publishDir "${params.outdir}/Corrrelation_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
+                                        produce the bed6 file
+        ========================================================================================
+    */
+    process Segemehl_Bed{
+            tag "$pair_id"
+            publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
 
             input:
-            file (matrix_file) from Plot_segemehl_cor
-            file (anno_file) from Cor_segemehl
-            file mRNAfile
+            set pair_id , file ( query_file ) from segemehlfiles
             
-            
-
-            when:
-            run_segemehl 
 
             output:
-            file ('*') into cor_plot_segemehl
+            file ('*candidates.bed') into modify_segemehl
 
-            shell:
+            shell :
             '''
-            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+            if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
+            touch !{pair_id}_modify_segemehl.candidates.bed
+            else
+            cat !{query_file} \
+            | awk '{print $4}' \
+            | awk -F":" '{print $2 "\t" $5 "\t" $6}' \
+            > !{pair_id}_segemehl.temp.bed
+
+            paste !{query_file} !{pair_id}_segemehl.temp.bed \
+            | grep C \
+            | grep P \
+            | grep -v chrM \
+            | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
+            > !{pair_id}_modify_segemehl.temp.bed
+            
+            python !{baseDir}/bin/quchong.py !{pair_id}_modify_segemehl.temp.bed segemehl_!{pair_id}_modify.candidates.bed
+            fi
             '''
+    }
+
+    /*
+    ========================================================================================
+                                    the fourth tool : segemehl
+                                        produce the matrix
+    ========================================================================================
+    */
+    process Segemehl_Matrix{
+            publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+            input:
+            file (query_file) from modify_segemehl.collect()
+            file gtffile
+
+            output:
+            file ('segemehl_merge.matrix') into (Output_segemehl,Plot_segemehl,Merge_segemehl,Plot_segemehl_cor)
+            file ('Name_segemehl.txt') into Name_segemehl
+            file ('annoted_segemehl_merge_annote.txt') into (Cor_segemehl,De_segemehl)
+    
+            shell :
+            '''
+            # merge sample into matrix 
+            java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o segemehl -sup 5 -merge
+            mv segemehl_merge.bed segemehl_merge.matrix
+            # annotate circRNA with GTFs
+            java -jar !{baseDir}/bin/circpipetools.jar -i segemehl_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+
+            sed -i 's/segemehl_//g' segemehl_merge.matrix
+            sed -i 's/_modify.candidates.bed//g' segemehl_merge.matrix
+            echo -e "segemehl" > Name_segemehl.txt
+            '''
+    }
+    /*   
+    ========================================================================================
+                                    the fourth tool : segemehl
+                                        Differential Expression
+    ========================================================================================
+    */
+    if(!params.skipDE){
+        process Segemehl_DE{
+                publishDir "${params.outdir}/DE_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
+
+                input:
+                file (anno_file) from De_segemehl
+                
+                file designfile
+                file comparefile
+                file (matrix_file) from Plot_segemehl
+                
+
+                output:
+                file ('*') into end_segemehl
+
+                shell:
+                '''
+                Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+                '''
         }
+    }
+
+    /*
+    ========================================================================================
+                                        the fourth tool : segemehl
+                                                Correlation
+    ========================================================================================
+    */
+    if(params.mRNA){
+            process Segemehl_Cor{
+                publishDir "${params.outdir}/Corrrelation_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
+
+                input:
+                file (matrix_file) from Plot_segemehl_cor
+                file (anno_file) from Cor_segemehl
+                file mRNAfile
+                
+                
+
+                output:
+                file ('*') into cor_plot_segemehl
+
+                shell:
+                '''
+                Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+                '''
+            }
+    }
+
+}else{
+    Merge_segemehl=Channel.empty()
+    Name_segemehl=Channel.empty()
 }
+
 
 
 
@@ -1460,252 +1454,247 @@ if(params.mRNA){
 //                                                                            
 //                                                                             
 
+if(run_find_circ){
+    process Bowtie2{
+        tag "$pair_id"
+        publishDir "${params.outdir}/Alignment/Bowtie2", mode: 'link', overwrite: true
 
+        input:
+        set pair_id, file (query_file) from Fastpfiles_bowtie2
+        file index from Bowtie2index.collect()
+
+        output:
+        set pair_id, file ('bowtie2_unmapped_*') into Bowtie2files
+        set pair_id, file ('bowtie2_unmapped_*') into Bowtie2files_for_autocirc
+        file ('*.log') into Bowtie2_multiqc
+
+
+        shell:
+        if(params.singleEnd){
+            """
+            bowtie2 \
+            -p ${task.cpus} \
+            --very-sensitive \
+            --score-min=C,-15,0 \
+            --mm \
+            -x ${bowtie2_run_index} \
+            -q \
+            -U ${query_file} 2> bowtie2_${pair_id}.log \
+            | samtools view -hbuS - \
+            | samtools sort - > bowtie2_output_${pair_id}.bam
+
+            samtools \
+            view -hf 4 bowtie2_output_${pair_id}.bam \
+            | samtools view -Sb - \
+            > bowtie2_unmapped_${pair_id}.bam
+            """
+        }else{
+            """
+            bowtie2 \
+            -p ${task.cpus} \
+            --very-sensitive \
+            --score-min=C,-15,0 \
+            --mm \
+            -x ${bowtie2_run_index} \
+            -q \
+            -1 ${query_file[0]} \
+            -2 ${query_file[1]} 2> bowtie2_${pair_id}.log \
+            | samtools view -hbuS - \
+            | samtools sort - > bowtie2_output_${pair_id}.bam
+
+            samtools \
+            view -hf 4 bowtie2_output_${pair_id}.bam \
+            | samtools view -Sb - \
+            > bowtie2_unmapped_${pair_id}.bam
+            """
+        }
+
+    }
+
+
+    /*
+    ========================================================================================
+                            the fifth tool : bowtie2 - find_circ
+                                    run the find_circ
+    ========================================================================================
+    */
+    process Find_circ{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', overwrite: true
+
+        input:
+        set pair_id, file (query_file) from Bowtie2files
+        file genomefile
+        file index from Bowtie2index_fc.collect()
+
+        output:
+        set pair_id, file ('*splice_sites.bed') into find_circfiles
+
+
+
+        shell:
+        """     
+        unmapped2anchors.py ${query_file} \
+        | gzip \
+        > find_circ_${pair_id}_anchors.qfa.gz
+
+        bowtie2 \
+        -p ${task.cpus} \
+        --reorder \
+        --mm \
+        --score-min=C,-15,0 \
+        -q \
+        -x ${bowtie2_run_index} \
+        -U find_circ_${pair_id}_anchors.qfa.gz \
+        | find_circ.py \
+        -G ${genomefile} \
+        -p ${pair_id}_ \
+        -s find_circ_${pair_id}_stats.sites.log \
+        -n find_circ \
+        -R find_circ_${pair_id}_spliced_reads.fa \
+        > find_circ_${pair_id}_splice_sites.bed   
+        """
+    }
+
+    /*
+    ========================================================================================
+                            the fifth tool : bowtie2 - find_circ
+                                    produce the bed6 file
+    ========================================================================================
+    */
+    process Find_circ_Bed{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*candidates.bed", overwrite: true
+
+        input:
+        set pair_id, file (query_file) from find_circfiles
+        
+
+        output:
+        file ('*candidates.bed') into modify_find_circfiles
+
+        shell :
+        '''
+        if [ $((`cat !{query_file} | wc -l`)) == 1 ];then
+        touch !{pair_id}_modify_find_circ.candidates.bed
+        else
+        grep CIRCULAR !{query_file} \
+        | grep -v chrM \
+        | grep UNAMBIGUOUS_BP \
+        | grep ANCHOR_UNIQUE \
+        | awk '{print $1 "\t" $2 "\t" $3 "\t" $11 "\t" $5 "\t" $6}' \
+        | sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 \
+        > !{pair_id}_modify_find_circ.temp.bed
+        
+        python !{baseDir}/bin/quchong.py !{pair_id}_modify_find_circ.temp.bed !{pair_id}_modify_find_circ.candidates.bed
+        fi
+        '''
+    }
+
+    /*
+    ========================================================================================
+                            the fifth tool : bowtie2 - find_circ
+                                    produce the matrix
+    ========================================================================================
+    */
+    process Find_circ_Matrix{
+        publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        input:
+        file (query_file) from modify_find_circfiles.collect()
+        file gtffile
+
+        output:
+
+        file ('find_circ_merge.matrix') into (Output_find_circ,Plot_find_circ,Plot_find_circ_cor,Merge_find_circ)
+        file ('Name_find_circ.txt') into Name_find_circ
+        file ('annoted_find_circ_merge_annote.txt') into (Cor_find_circ,De_find_circ)
+
+
+        shell :
+        '''
+
+        # merge sample into matrix 
+        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o find_circ -sup 5 -merge
+        mv find_circ_merge.bed find_circ_merge.matrix
+        # annotate circRNA with GTFs
+        java -jar !{baseDir}/bin/circpipetools.jar -i find_circ_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+
+
+        sed -i 's/_modify_find_circ.candidates.bed//g' find_circ_merge.matrix
+
+        echo -e "find_circ" > Name_find_circ.txt
+        '''
+    }
+
+    /*
+    ========================================================================================
+                            the fifth tool : bowtie2 - find_circ
+                                    Differential Expression
+    ========================================================================================
+    */
+    if(!params.skipDE){
+        process Find_circ_DE{
+        publishDir "${params.outdir}/DE_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
+
+        input:
+        file (anno_file) from De_find_circ
+        
+        file designfile
+        file comparefile
+        file (matrix_file) from Plot_find_circ
+        
+
+        output:
+        file ('*') into end_find_circ
+
+   
+
+        shell:
+        '''
+        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+        '''
+        }
+    }
+
+
+    /*
+    ========================================================================================
+                            the fifth tool : bowtie2 - find_circ
+                                            Correlation
+    ========================================================================================
+    */
+    if(params.mRNA){
+        process Find_circ_Cor{
+            publishDir "${params.outdir}/Corrrelation_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
+
+            input:
+            file (matrix_file) from Plot_find_circ_cor
+            file (anno_file) from Cor_find_circ
+            file mRNAfile
+            
+    
+
+            output:
+            file ('*') into cor_plot_find_circ
+
+            shell:
+            '''
+            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+            '''
+        }
+    }
+ 
+}else{
+    Merge_find_circ=Channel.empty()
+     Name_find_circ=Channel.empty()
+}
 /*
 ========================================================================================
                           the fifth tool : bowtie2 - find_circ
                                    run the bowtie2
 ========================================================================================
 */
-process Bowtie2{
-    tag "$pair_id"
-    publishDir "${params.outdir}/Alignment/Bowtie2", mode: 'link', overwrite: true
-
-    input:
-    set pair_id, file (query_file) from Fastpfiles_bowtie2
-    file index from Bowtie2index.collect()
-
-    output:
-    set pair_id, file ('bowtie2_unmapped_*') into Bowtie2files
-    set pair_id, file ('bowtie2_unmapped_*') into Bowtie2files_for_autocirc
-    file ('*.log') into Bowtie2_multiqc
-
-    when:
-    run_find_circ
-
-    shell:
-    if(params.singleEnd){
-        """
-        bowtie2 \
-        -p ${task.cpus} \
-        --very-sensitive \
-        --score-min=C,-15,0 \
-        --mm \
-        -x ${bowtie2_run_index} \
-        -q \
-        -U ${query_file} 2> bowtie2_${pair_id}.log \
-        | samtools view -hbuS - \
-        | samtools sort - > bowtie2_output_${pair_id}.bam
-
-        samtools \
-        view -hf 4 bowtie2_output_${pair_id}.bam \
-        | samtools view -Sb - \
-        > bowtie2_unmapped_${pair_id}.bam
-        """
-    }else{
-        """
-        bowtie2 \
-        -p ${task.cpus} \
-        --very-sensitive \
-        --score-min=C,-15,0 \
-        --mm \
-        -x ${bowtie2_run_index} \
-        -q \
-        -1 ${query_file[0]} \
-        -2 ${query_file[1]} 2> bowtie2_${pair_id}.log \
-        | samtools view -hbuS - \
-        | samtools sort - > bowtie2_output_${pair_id}.bam
-
-        samtools \
-        view -hf 4 bowtie2_output_${pair_id}.bam \
-        | samtools view -Sb - \
-        > bowtie2_unmapped_${pair_id}.bam
-        """
-    }
-
-}
-
-
-/*
-========================================================================================
-                          the fifth tool : bowtie2 - find_circ
-                                   run the find_circ
-========================================================================================
-*/
-process Find_circ{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', overwrite: true
-
-    input:
-    set pair_id, file (query_file) from Bowtie2files
-    file genomefile
-    file index from Bowtie2index_fc.collect()
-
-    output:
-    set pair_id, file ('*splice_sites.bed') into find_circfiles
-
-
-    when:
-    run_find_circ
-
-    shell:
-    """     
-    unmapped2anchors.py ${query_file} \
-    | gzip \
-    > find_circ_${pair_id}_anchors.qfa.gz
-
-    bowtie2 \
-    -p ${task.cpus} \
-    --reorder \
-    --mm \
-    --score-min=C,-15,0 \
-    -q \
-    -x ${bowtie2_run_index} \
-    -U find_circ_${pair_id}_anchors.qfa.gz \
-    | find_circ.py \
-    -G ${genomefile} \
-    -p ${pair_id}_ \
-    -s find_circ_${pair_id}_stats.sites.log \
-    -n find_circ \
-    -R find_circ_${pair_id}_spliced_reads.fa \
-    > find_circ_${pair_id}_splice_sites.bed   
-    """
-}
-
-/*
-========================================================================================
-                          the fifth tool : bowtie2 - find_circ
-                                 produce the bed6 file
-========================================================================================
-*/
-process Find_circ_Bed{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*candidates.bed", overwrite: true
-
-    input:
-    set pair_id, file (query_file) from find_circfiles
-    
-
-    output:
-    file ('*candidates.bed') into modify_find_circfiles
-
-    when:
-    run_find_circ
-
-    shell :
-    '''
-    if [ $((`cat !{query_file} | wc -l`)) == 1 ];then
-    touch !{pair_id}_modify_find_circ.candidates.bed
-    else
-    grep CIRCULAR !{query_file} \
-    | grep -v chrM \
-    | grep UNAMBIGUOUS_BP \
-    | grep ANCHOR_UNIQUE \
-    | awk '{print $1 "\t" $2 "\t" $3 "\t" $11 "\t" $5 "\t" $6}' \
-    | sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 \
-    > !{pair_id}_modify_find_circ.temp.bed
-    
-    python !{baseDir}/bin/quchong.py !{pair_id}_modify_find_circ.temp.bed !{pair_id}_modify_find_circ.candidates.bed
-    fi
-    '''
-}
-
-/*
-========================================================================================
-                          the fifth tool : bowtie2 - find_circ
-                                 produce the matrix
-========================================================================================
-*/
-process Find_circ_Matrix{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    input:
-    file (query_file) from modify_find_circfiles.collect()
-    file gtffile
-
-    output:
-
-    file ('find_circ_merge.matrix') into (Output_find_circ,Plot_find_circ,Plot_find_circ_cor,Merge_find_circ)
-    file ('Name_find_circ.txt') into Name_find_circ
-    file ('annoted_find_circ_merge_annote.txt') into (Cor_find_circ,De_find_circ)
-
-
-
-    when:
-    run_find_circ
-
-    shell :
-    '''
-
-    # merge sample into matrix 
-    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o find_circ -sup 5 -merge
-    mv find_circ_merge.bed find_circ_merge.matrix
-    # annotate circRNA with GTFs
-    java -jar !{baseDir}/bin/circpipetools.jar -i find_circ_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
-    echo -e "find_circ" > Name_find_circ.txt
-    '''
-}
-
-/*
-========================================================================================
-                          the fifth tool : bowtie2 - find_circ
-                                 Differential Expression
-========================================================================================
-*/
-process Find_circ_DE{
-    publishDir "${params.outdir}/DE_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (anno_file) from De_find_circ
-    
-    file designfile
-    file comparefile
-    file (matrix_file) from Plot_find_circ
-    
-
-    output:
-    file ('*') into end_find_circ
-
-    when:
-    run_find_circ
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-    '''
-}
-
-/*
-========================================================================================
-                          the fifth tool : bowtie2 - find_circ
-                                        Correlation
-========================================================================================
-*/
-if(params.mRNA){
-    process Find_circ_Cor{
-        publishDir "${params.outdir}/Corrrelation_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
-
-        input:
-        file (matrix_file) from Plot_find_circ_cor
-        file (anno_file) from Cor_find_circ
-        file mRNAfile
-        
-        
-
-        when:
-        run_find_circ 
-
-        output:
-        file ('*') into cor_plot_find_circ
-
-        shell:
-        '''
-        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
-        '''
-    }
-}
 
 
 
@@ -1723,219 +1712,212 @@ if(params.mRNA){
 //                                             
 
 
+if(run_knife){
+    process Knife{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', overwrite: true
 
+        input:
+        set pair_id, file (query_file) from fastpfiles_knife
+
+
+
+        output:
+        set pair_id, file ('*.txt') into knifefiles
+
+
+        shell:
+        knifedir = run_knifedir
+        knfieprefix = run_knifeprefix
+        if(params.singleEnd){
+            '''
+            ln -s !{knifedir} ./
+            
+            pwd | awk '{print "sh completeRun.sh",$0,"complete",$0,"testData 15", !{knfieprefix}, "circReads 40 1 2>&1"}' | bash
+
+            cp ./testData/circReads/combinedReports/naiveunzip* ./
+            '''
+        }else{
+            '''
+            ln -s !{knifedir} ./
+        
+            pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 13", !{knfieprefix}, "circReads 40 1 2>&1"}' | bash
+            
+            cp ./testData/circReads/combinedReports/naiveunzip* ./
+            '''
+        }
+
+    }
+
+    /*
+    ========================================================================================
+                                the sixth tool : knife
+                                produce the bed6 file
+    ========================================================================================
+    */
+    process Knife_Bed{
+        tag "$pair_id"
+        publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', pattern:"*candidates.bed", overwrite: true
+
+        input:
+        set pair_id , file ( query_file ) from knifefiles
+        
+
+        output:
+        file ('*candidates.bed') into modify_knifefiles
+
+
+        shell :
+        '''
+        if [ $((`cat !{query_file} | grep -v reg | wc -l`)) == 1 ];then
+        touch !{pair_id}_modify_knife.candidates.bed
+        else
+        cat !{query_file} \
+        | awk 'NR>1{print $10}' \
+        > reads.txt
+
+        cat !{query_file} \
+        | awk 'NR>1{print $1}' \
+        | awk -F"|" '{print $1}' \
+        > chr.txt
+
+        cat !{query_file} \
+        | awk 'NR>1{print $1}' \
+        | awk -F"|" '{print $5}' \
+        > strand.txt
+
+        cat !{query_file} \
+        | awk 'NR>1{print $1}' \
+        | awk -F"|" '{print $2}' \
+        | awk -F":" '{print $2}' \
+        > start.txt
+
+        cat !{query_file} \
+        | awk 'NR>1{print $1}' \
+        | awk -F"|" '{print $3}' \
+        | awk -F":" '{print $2}' \
+        > end.txt
+
+        cat !{query_file} \
+        | awk 'NR>1{print $1}' \
+        | awk -F"|" '{print $4}' \
+        > kind.txt
+
+        paste chr.txt start.txt end.txt reads.txt strand.txt kind.txt \
+        | grep -v reg \
+        | grep -v chrM \
+        | awk '{if($5=="-") print $1 "\t" $2 "\t" $3 "\t" "knife" "\t" $4 "\t" $5 ; else print $1 "\t" $3 "\t" $2 "\t" "knife" "\t" $4 "\t" $5 }' \
+        > temp.bed
+
+        python !{baseDir}/bin/quchong.py temp.bed !{pair_id}_modify_knife.candidates.bed
+        fi
+        '''
+
+    }
+
+    /*
+    ========================================================================================
+                                the sixth tool : knife
+                                    produce the matrix
+    ========================================================================================
+    */
+    process Knife_Matrix{
+        publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        input:
+        file (query_file) from modify_knifefiles.collect()
+        file gtffile
+
+        output:
+
+        file ('knife_merge.matrix') into (Output_knife,Merge_knife,Plot_knife_cor,Plot_knife)
+        file ('annoted_knife_merge_annote.txt') into (Cor_knife,De_knife)
+        file ('Name_knife.txt') into Name_knife
+        
+
+        shell :
+        '''
+    # merge sample into matrix 
+        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o knife -sup 5 -merge
+        mv knife_merge.bed knife_merge.matrix
+        # annotate circRNA with GTFs
+        java -jar !{baseDir}/bin/circpipetools.jar -i knife_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+
+        sed -i 's/_modify_knife.candidates.bed//g' knife_merge.matrix
+
+        echo -e "knife" > Name_knife.txt
+        '''
+    }
+
+    /*
+    ========================================================================================
+                                    the sixth tool : knife
+                                    Differential Expression
+    ========================================================================================
+    */
+    if(!params.skipDE){
+        process Knife_DE{
+            publishDir "${params.outdir}/DE_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
+
+            input:
+            file (anno_file) from De_knife
+            
+            file designfile
+            file comparefile
+            file (matrix_file) from Plot_knife
+            
+
+            output:
+            file ('*') into end_knife
+
+            shell:
+            '''
+            Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+            '''
+        }
+    }
+
+    /*
+    ========================================================================================
+                                    the sixth tool : knife
+                                            Correlation
+    ========================================================================================
+    */
+    if(params.mRNA){
+        process Knife_Cor{
+            publishDir "${params.outdir}/Corrrelation_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
+
+            input:
+            file (matrix_file) from Plot_knife_cor
+            file (anno_file) from Cor_knife
+            file mRNAfile
+            
+            
+
+            when:
+            run_knife && (!params.skipDE)
+
+            output:
+            file ('*') into cor_plot_knife
+
+            shell:
+            '''
+            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+            '''
+        }
+    }
+
+
+}else{
+    Merge_knife=Channel.empty()
+    Name_knife=Channel.empty()
+}
 /*
 ========================================================================================
                               the sixth tool : knife
                                    run the knife
 ========================================================================================
 */
-process Knife{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', overwrite: true
-
-    input:
-    set pair_id, file (query_file) from fastpfiles_knife
-
-
-
-    output:
-    set pair_id, file ('*.txt') into knifefiles
-
-
-    when:
-    run_knife
-
-    shell:
-    knifedir = run_knifedir
-    knfieprefix = run_knifeprefix
-    if(params.singleEnd){
-        '''
-        ln -s !{knifedir} ./
-        
-        pwd | awk '{print "sh completeRun.sh",$0,"complete",$0,"testData 15", !{knfieprefix}, "circReads 40 1 2>&1"}' | bash
-
-        cp ./testData/circReads/combinedReports/naiveunzip* ./
-        '''
-    }else{
-        '''
-        ln -s !{knifedir} ./
-       
-        pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 13", !{knfieprefix}, "circReads 40 1 2>&1"}' | bash
-        
-        cp ./testData/circReads/combinedReports/naiveunzip* ./
-        '''
-    }
-
-}
-
-/*
-========================================================================================
-                              the sixth tool : knife
-                              produce the bed6 file
-========================================================================================
-*/
-process Knife_Bed{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', pattern:"*candidates.bed", overwrite: true
-
-    input:
-    set pair_id , file ( query_file ) from knifefiles
-    
-
-    output:
-    file ('*candidates.bed') into modify_knifefiles
-
-    when:
-    run_knife
-
-    shell :
-    '''
-    if [ $((`cat !{query_file} | grep -v reg | wc -l`)) == 1 ];then
-    touch !{pair_id}_modify_knife.candidates.bed
-    else
-    cat !{query_file} \
-    | awk 'NR>1{print $10}' \
-    > reads.txt
-
-    cat !{query_file} \
-    | awk 'NR>1{print $1}' \
-    | awk -F"|" '{print $1}' \
-    > chr.txt
-
-    cat !{query_file} \
-    | awk 'NR>1{print $1}' \
-    | awk -F"|" '{print $5}' \
-    > strand.txt
-
-    cat !{query_file} \
-    | awk 'NR>1{print $1}' \
-    | awk -F"|" '{print $2}' \
-    | awk -F":" '{print $2}' \
-    > start.txt
-
-    cat !{query_file} \
-    | awk 'NR>1{print $1}' \
-    | awk -F"|" '{print $3}' \
-    | awk -F":" '{print $2}' \
-    > end.txt
-
-    cat !{query_file} \
-    | awk 'NR>1{print $1}' \
-    | awk -F"|" '{print $4}' \
-    > kind.txt
-
-    paste chr.txt start.txt end.txt reads.txt strand.txt kind.txt \
-    | grep -v reg \
-    | grep -v chrM \
-    | awk '{if($5=="-") print $1 "\t" $2 "\t" $3 "\t" "knife" "\t" $4 "\t" $5 ; else print $1 "\t" $3 "\t" $2 "\t" "knife" "\t" $4 "\t" $5 }' \
-    > temp.bed
-
-    python !{baseDir}/bin/quchong.py temp.bed !{pair_id}_modify_knife.candidates.bed
-    fi
-    '''
-
-}
-
-/*
-========================================================================================
-                               the sixth tool : knife
-                                 produce the matrix
-========================================================================================
-*/
-process Knife_Matrix{
-    tag "$pair_id"
-    publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    input:
-    file (query_file) from modify_knifefiles.collect()
-    file gtffile
-
-    output:
-
-    file ('knife_merge.matrix') into (Output_knife,Merge_knife,Plot_knife_cor,Plot_knife)
-    file ('annoted_knife_merge_annote.txt') into (Cor_knife,De_knife)
-    file ('Name_knife.txt') into Name_knife
-    
-
-
-
-    when:
-    run_knife
-
-    shell :
-    '''
-   # merge sample into matrix 
-    java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o knife -sup 5 -merge
-    mv knife_merge.bed knife_merge.matrix
-    # annotate circRNA with GTFs
-    java -jar !{baseDir}/bin/circpipetools.jar -i knife_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
-
-
-    echo -e "knife" > Name_knife.txt
-    '''
-}
-
-/*
-========================================================================================
-                                 the sixth tool : knife
-                                 Differential Expression
-========================================================================================
-*/
-process Knife_DE{
-    publishDir "${params.outdir}/DE_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (anno_file) from De_knife
-    
-    file designfile
-    file comparefile
-    file (matrix_file) from Plot_knife
-    
-
-    output:
-    file ('*') into end_knife
-
-    when:
-    run_knife 
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-    '''
-}
-
-/*
-========================================================================================
-                                  the sixth tool : knife
-                                        Correlation
-========================================================================================
-*/
-if(params.mRNA){
-    process Knife_Cor{
-        publishDir "${params.outdir}/Corrrelation_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
-
-        input:
-        file (matrix_file) from Plot_knife_cor
-        file (anno_file) from Cor_knife
-        file mRNAfile
-        
-        
-
-        when:
-         run_knife 
-
-        output:
-        file ('*') into cor_plot_knife
-
-        shell:
-        '''
-        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
-        '''
-    }
-}
-
 
 /*
 ========================================================================================
@@ -1974,8 +1956,11 @@ process Multiqc{
 
 
 
-Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl, Merge_knife ).collect()
-Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl, Name_knife ).collect()
+Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl, Merge_knife )
+Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl, Name_knife )
+
+
+
 
 /*
 ========================================================================================
@@ -1987,28 +1972,23 @@ process Tools_Merge{
     publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
 
     input:
-    file (query_file) from Combine_matrix_file
-    file (name_file) from Combine_name_file
+    file (query_file) from Combine_matrix_file.collect()
+    file (name_file) from Combine_name_file.collect()
     
     
 
     output:
-    file ('all_tools_merge.matrix') into Tools_merge
-    file ('all_tools_merge.matrix') into Tools_merge_html
-    file ('for_annotation.bed') into Med_for_annotation
-    file ('for_annotation.bed') into Bed_for_recount
-    file ('for_annotation.bed') into Bed_for_merge
-    file ('*annote.txt') into De_merge
-    file ('*annote.txt') into Cor_merge
+    file ('all_tools_merge.matrix') into (Tools_merge,Tools_merge_html)
+    file ('for_annotation.bed') into (Med_for_annotation,Bed_for_recount,Bed_for_merge)
+    file ('*annote.txt') into (De_merge,Cor_merge)
     file ('all_tools_intersect.matrix') into Tools_intersect
 
 
     shell :
     '''
-    for file in !{query_file}
-    do
-        cat $file >> temp_concatenate.txt
-    done 
+  
+    cat *_merge.matrix >> temp_concatenate.txt
+
         
     awk '$3-$2>=100' temp_concatenate.txt > concatenate.txt
     
@@ -2016,7 +1996,7 @@ process Tools_Merge{
     sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 id_unsort.txt > id_sort.txt
     
     cat id_sort.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > for_annotation.bed
-    java -jar !{baseDir}/bin/bed1114.jar -i for_annotation.bed -o merge_ -gtf !{gtffile} -uniq 
+    java -jar !{baseDir}/bin/circpipetools.jar -i for_annotation.bed -o merge_ -gtf !{gtffile} -uniq 
     
     echo -e "total\\c" > total.txt
     cat id_sort.txt | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id_merge.txt
@@ -2217,7 +2197,7 @@ if(params.mRNA){
         '''
     }
 }else{
-    CorPlotMerge=Channel.create()
+    CorPlotMerge=Channel.empty()
 }
 
 
@@ -2259,7 +2239,7 @@ process Venn{
 
 
     when:
-    (run_multi_tools < 6) && (run_multi_tools > 1)
+    (number_of_tools < 6) && (number_of_tools > 1)
 
     output:
     file ('*') into venn_plot
@@ -2350,7 +2330,7 @@ workflow.onComplete {
     <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Find_circ : ${run_find_circ} </pre></td>
     </tr>
     <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Ciri : ${params.ciri} </pre></td>
+    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Ciri : ${run_ciri} </pre></td>
     </tr>
     <tr>
     <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Mapsplice : ${run_mapsplice} </pre></td>

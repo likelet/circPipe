@@ -1,48 +1,46 @@
-library("readr")
+# load packages 
+library(data.table)
 library(dplyr)
 library(ggplot2)
-
-#source("/home/wqj/code/circPipe-master/R_function.R")
-
-options(stringsAsFactors=F)
-
-setwd("./")
-library(Biobase)
 library(edgeR)
-########cut off init
+
+# command arguments
+options(stringsAsFactors=F)
+args <-commandArgs(T)
+if(length(args)!=5){
+  print("too few arguments")
+  exit()
+}
+
+rfunction.script<-args[1]
+exp.matrx.path<-args[2]
+designfile.path<-args[3]
+comparefile.path<-args[4]
+annotationfile.path<-args[5]
+
+# constent cut off init
 p_value <- 0.05 # p value of FDR
 lfc <- 0.58  #logFC
-args <-commandArgs(T)
 
-source(args[1])
+# load script 
+source(rfunction.script)
 
-########load data
-# args[2]<-"/home/wqj/code/segemehl_merge.matrix"
-# args[2]<-"/home/wqj/code/circPipe-master/onlychrx.matrix"
-# countData1 <- as.data.frame(read.table(args[2],sep = "\t"))
-countData1 <- as.data.frame(read_delim(args[2],delim = "\t"))
+
+# load data 
+countData1 <- as.data.frame(fread(exp.matrx.path,sep = "\t"))
 countData1 <- countData1[!duplicated(countData1$id), ]
 dim(countData1)
-# colnames(countData1) <- countData1[1,]
-# countData1<-countData1[-1,]
+
 rownames(countData1) <- countData1$id
-#countData1=countData1[,-(2:6)]
 countData=countData1[,-1]
-# countData<-sapply(countData, as.numeric)
-# countData<-data.frame(countData)
-# rownames(countData)<-countData1$id
-# countData[countData==1]=0
-###########pheno data loading
-# args[3]<-"/data1/wqj/database/data/12_21/design.file"
+
 colData1 <- as.data.frame(read_delim(args[3],delim = "\t"))
 colData<-data.frame(Type = colData1$Type)
 rownames(colData)<-colData1[,1]
-# colData <- get_pheno(x = colnames(countData),label1 = "T",label2 = "N",group1 = "Tumor",group2 = "Normal")
 group1 = "Tumor"
 group2 = "Normal"
 label1 = "T"
 label2 = "N"
-# colnames(countData)=sub("X","S",as.character(colnames(countData)))
 countData <- countData[,as.character(rownames(colData))]
 colData$Type <- as.factor(colData$Type)
 # args[4]<-"/home/wqj/code/compare.file"
@@ -60,20 +58,7 @@ Circ_norm_edgeR=cpm(countData)
  circ_feature=read.delim(args[5],header = FALSE,sep="\t",fill = T,col.names = c("chr","start","end","circ_type","exon_number","strand","strand2","ensemble_id","symbol","transcript","gene_feature","type1","type2","m6Astatus"))
  
 ##############edgeR
-
-#sharedCirc_edgeR_tmp <- edgeR_test(expre_mat = shared_circ,group_mat = colData,test_method = "LRT" )
 if( sum(colData$Type==group1)< 3 || sum(colData$Type==group2)< 3 ){
-  # mean.mat = data.frame(group1_mean = rowMeans(Circ_norm_edgeR[,grep(label1,colnames(Circ_norm_edgeR)), drop = FALSE]),
-  #                       group2_mean =rowMeans(Circ_norm_edgeR[,grep(label2,colnames(Circ_norm_edgeR)),drop = FALSE]),
-  #                       all_mean = rowMeans(Circ_norm_edgeR))
-  # rownames(mean.mat) = rownames(Circ_norm_edgeR)
-  # mean.mat = subset(mean.mat,group1_mean > 0)
-  # 
-  # sharedCirc_edgeR = data.frame(logFC=log2(mean.mat$group2_mean/mean.mat$group1_mean+1),
-  #                       logCPM = log2(mean.mat$all_mean),
-  #                   `F`= rep("_",nrow(mean.mat)),PValue = rep("_",nrow(mean.mat)),
-  #                   FDR =rep(0,nrow(mean.mat)))
-  # rownames(sharedCirc_edgeR) = rownames(mean.mat)
   notice="No enough samples!"
   write.table(notice,file = "Message.txt",sep = ' ')
 }else {
