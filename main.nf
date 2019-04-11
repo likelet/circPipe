@@ -1974,14 +1974,13 @@ process Tools_Merge{
     input:
     file (query_file) from Combine_matrix_file.collect()
     file (name_file) from Combine_name_file.collect()
+    file gtffile
     
     
 
     output:
     file ('all_tools_merge.matrix') into (Tools_merge,Tools_merge_html)
-    file ('for_annotation.bed') into (Med_for_annotation,Bed_for_recount,Bed_for_merge)
-    file ('*annote.txt') into (De_merge,Cor_merge)
-    file ('all_tools_intersect.matrix') into Tools_intersect
+    file ('annote_all_tools_merge_annote.txt') into (Med_for_annotation,Bed_for_recount,Bed_for_merge,De_merge,Cor_merge)
 
 
     shell :
@@ -1989,36 +1988,21 @@ process Tools_Merge{
   
     cat *_merge.matrix >> temp_concatenate.txt
 
-        
+    # filtered the circRNA length less than 100bp   
     awk '$3-$2>=100' temp_concatenate.txt > concatenate.txt
     
-    python !{baseDir}/bin/hebingtoolsid.py concatenate.txt id_unsort.txt
-    sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 id_unsort.txt > id_sort.txt
-    
-    cat id_sort.txt | awk '{print $1 "\t" $2 "\t" $3 "\t" "." "\t" "." "\t" $4 }' > for_annotation.bed
-    java -jar !{baseDir}/bin/circpipetools.jar -i for_annotation.bed -o merge_ -gtf !{gtffile} -uniq 
-    
-    echo -e "total\\c" > total.txt
-    cat id_sort.txt | awk '{print $1 "_" $2 "_" $3 "_" $4 }' > id_merge.txt
-    cat id_merge.txt total.txt > id_list.txt
-    
+
     for file in !{query_file}
-    do
-        python !{baseDir}/bin/countnumbers.py id_sort.txt $file counts.txt
-        paste -d"\t" id_list.txt counts.txt > temp.txt
-        cat temp.txt > id_list.txt
-    done
+    do 
+        awk '{OFS="\t"}NR>1{print  $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t1"}' $file > ${file%%merge.matrix}merge_temp.matrix
+    done 
+    java -jar !{baseDir}/bin/circpipetools.jar -i merge_temp.matrix -o tools -merge 
+
+    awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merge.matrix 
+
+    # annotation
+    java -jar !{baseDir}/bin/circpipetools.jar -i all_tools_merge.matrix -o  -gtf !{gtffile} -uniq 
     
-    echo -e "id" > header.txt
-    for file in !{name_file}
-    do
-         paste -d"\t" header.txt $file >temp.txt
-         cat temp.txt > header.txt 
-    done
-    
-    cat header.txt id_list.txt > all_tools_merge.matrix
-    
-    Rscript !{baseDir}/bin/intersect.R all_tools_merge.matrix
     '''
 }
 
@@ -2057,8 +2041,6 @@ process Recount_index_step{
         awk 'NR%2==1{print $0}NR%2==0{print $1$1}'  tmp_candidate.circular.fa > tmp_candidate.circular_doulbed.fa
 
         #build index for candidate circRNA sequnce
-        mkdir $tmp_candidate_hisat_index
-
         hisat2-build -p !{task.cpus} tmp_candidate.circular_doulbed.fa candidate_circRNA_doulbed 
 
 
