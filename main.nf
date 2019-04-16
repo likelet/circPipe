@@ -54,7 +54,7 @@ def helpMessage() {
       --selectTools                 Specify which tools should be use. 
                                     1 for circexplorer2, 2 for ciri, 3 for find_circ, 4 for mapsplice, 5 for segemehl, 6 for knife. 
                                     For example, you can set 1,2,3,4,5 for running five tools in the same time.
-      --skipDE                      skip differential expression analysis                       
+      --skipDE                      skip differential expression analysis                  
       --outdir                      The output directory of the results
       --mRNA                        Path to the mRNA expression matrix. Only need to be set when you want to do the correlation.
 
@@ -1954,283 +1954,291 @@ process Multiqc{
 //                                                                      
 //                                                                      
 
+if(number_of_tools==1){
+    log.info LikeletUtils.print_cyan("Only one tool were selected for analysis, skip combine analysis section")
+    End_merge=Channel.empty()
+    CorPlotMerge=Channel.empty()
+    Tools_merge_html=Channel.empty()
 
-
-Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl, Merge_knife )
-Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl, Name_knife )
-
-
-
-
-/*
-========================================================================================
-                                after running the tools
-                       calculate the results by different tools
-========================================================================================
-*/
-process Tools_Merge{
-    publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    input:
-    file (query_file) from Combine_matrix_file.collect()
-    file (name_file) from Combine_name_file.collect()
-    file gtffile
-    
-    
-
-    output:
-    file ('all_tools_merge.matrix') into (Tools_merge,Tools_merge_html)
-    file ('annote_all_tools_merge_annote.txt') into (Med_for_annotation,Bed_for_recount,Bed_for_merge,De_merge,Cor_merge)
-
-
-    shell :
-    '''
-  
-    cat *_merge.matrix >> temp_concatenate.txt
-
-    # filtered the circRNA length less than 100bp   
-    awk '$3-$2>=100' temp_concatenate.txt > concatenate.txt
-    
-
-    for file in !{query_file}
-    do 
-        awk '{OFS="\t"}NR>1{print  $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t1"}' $file > ${file%%merge.matrix}merge_temp.matrix
-    done 
-    java -jar !{baseDir}/bin/circpipetools.jar -i merge_temp.matrix -o tools -merge 
-
-    awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merge.matrix 
-
-    # annotation
-    java -jar !{baseDir}/bin/circpipetools.jar -i all_tools_merge.matrix -o  -gtf !{gtffile} -uniq 
-    
-    '''
-}
-
-
-/*
-========================================================================================
-                                after running the tools
-                                   Recount for merge
-========================================================================================
-*/
-process Recount_index_step{
-    input:
-        file (bed_file) from Bed_for_recount
-        file genomefile
-        file faifile
-
-    output:
-        file "*.ht2" into Candidate_circRNA_index
-        file ('tmp_candidate_circRNA.gff3') into Gff3_file
-
-    when:
-        run_multi_tools
-
-    shell:
-        '''
-        # sort bed (in some result bed file , start > end ) and length filtering( >= 100nt)
-        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' !{bed_file} | awk '$3 - $2 >= 100 ' >  tmp_candidate_circRNA.bed
-
-        # bed to gff3 for htseq-count; sites around junction sites(+/-3bp)
-        awk  '{OFS="\t"}{split($4,a,"_");len=$3-$2; print $4"("a[4]")",".","exon",len-3,len+3,".","+",".","gene_id="$4 }' tmp_candidate_circRNA.bed > tmp_candidate_circRNA.gff3
-
-        # bed to fasta
-        bedtools getfasta -fi  !{genomefile} -s -bed tmp_candidate_circRNA.bed -name > tmp_candidate.circular.fa
-
-        # candidate circRNA sequnces (doulbed).
-        awk 'NR%2==1{print $0}NR%2==0{print $1$1}'  tmp_candidate.circular.fa > tmp_candidate.circular_doulbed.fa
-
-        #build index for candidate circRNA sequnce
-        hisat2-build -p !{task.cpus} tmp_candidate.circular_doulbed.fa candidate_circRNA_doulbed 
+}else{
+    Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl, Merge_knife )
+    Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl, Name_knife )
 
 
 
-        '''
-}
 
-process Recount_estimate_step{
-
-    input:
-        file index from Candidate_circRNA_index.collect()
-        file (gff_file) from Gff3_file
-        set pair_id, file(query_file) from Fastpfiles_recount
-        
-
-    output:
-        file('*circRNA_requantity.count') into single_sample_recount
-
-    when:
-        run_multi_tools
-    shell:
-    if(params.singleEnd){
-        '''
-        sh !{baseDir}/bin/final_recount2.sh !{pair_id} single_end !{task.cpus} !{query_file}
-        '''
-    }else{
-        '''
-        sh !{baseDir}/bin/final_recount2.sh !{pair_id} pair_end !{task.cpus} !{query_file[0]} !{query_file[1]}
-        '''
-    }
-}
-
-
-// test
-process Recount_results_combine{
-
-    publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-    input:
-        file (query_file) from single_sample_recount.collect()
-        file designfile
-        file (bed_file) from Bed_for_merge
-
-    output:
-        file ("final.matrix") into (Matrix_for_circos, Plot_merge, PlotMergeCor)
-    
-    when:
-        run_multi_tools
-
-    shell:
-        '''
-        cat !{designfile} > designfile.txt
-        sed -i '1d' designfile.txt
-        cat designfile.txt | awk '{print $1}' > samplename.txt
-        
-        echo -e "id\\c" > merge_header.txt
-        
-        cat for_annotation.bed | awk '{print $1 "_" $2 "_" $3 "_" $6 }' > id.txt
-        
-        cat samplename.txt | while read line
-        do
-            sed '$d' ${line}_circRNA_requantity.count > temp1.bed
-            sed '$d' temp1.bed > temp2.bed
-            sed '$d' temp2.bed > temp3.bed
-            sed '$d' temp3.bed > temp4.bed
-            sed '$d' temp4.bed > ${line}_modify_circRNA_requantity.count
-            python !{baseDir}/bin/final_countnumbers.py id.txt ${line}_modify_circRNA_requantity.count ${line}_counts.txt
-            paste -d"\t" id.txt ${line}_counts.txt > temp.txt
-            cat temp.txt > id.txt
-            echo -e "\\t${line}\\c" >> merge_header.txt
-        done   
-        
-        echo -e "\\n\\c" >> merge_header.txt
-        
-        cat merge_header.txt id.txt > final.matrix
-        '''
-}
-
-
-/*
-========================================================================================
-                                      after recount
-                                 Differential Expression
-========================================================================================
-*/
-process Merge_DE{
-    publishDir "${params.outdir}/DE_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (anno_file) from De_merge
-    
-    file designfile
-    file comparefile
-    file (matrix_file) from Plot_merge
-    
-
-    output:
-    file ('*') into End_merge
-
-    when:
-    run_multi_tools
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-    '''
-}
-
-/*
-========================================================================================
-                                       after recount
-                                        Correlation
-========================================================================================
-*/
-
-if(params.mRNA){
-    process Merge_Cor{
-        publishDir "${params.outdir}/Corrrelation_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
+    /*
+    ========================================================================================
+                                    after running the tools
+                        calculate the results by different tools
+    ========================================================================================
+    */
+    process Tools_Merge{
+        publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
-        file (matrix_file) from PlotMergeCor
-        file (anno_file) from Cor_merge
-        file mRNAfile
+        file (query_file) from Combine_matrix_file.collect()
+        file (name_file) from Combine_name_file.collect()
+        file gtffile
         
         
+
+        output:
+        file ('all_tools_merge.matrix') into (Tools_merge,Tools_merge_html)
+        file ('annote_all_tools_merge_annote.txt') into (Med_for_annotation,Bed_for_recount,Bed_for_merge,De_merge,Cor_merge)
+
+
+        shell :
+        '''
+    
+        cat *_merge.matrix >> temp_concatenate.txt
+
+        # filtered the circRNA length less than 100bp   
+        awk '$3-$2>=100 && $3-$2 <=100000' temp_concatenate.txt > concatenate.txt
+        
+
+        for file in !{query_file}
+        do 
+            awk '{OFS="\t"}NR>1{print  $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t1"}' $file > ${file%%merge.matrix}merge_temp.matrix
+        done 
+        java -jar !{baseDir}/bin/circpipetools.jar -i merge_temp.matrix -o tools -merge 
+
+        awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merge.matrix 
+
+        # annotation
+        java -jar !{baseDir}/bin/circpipetools.jar -i all_tools_merge.matrix -o annote_  -gtf !{gtffile} -uniq 
+        
+        '''
+    }
+
+
+    /*
+    ========================================================================================
+                                    after running the tools
+                                    Recount for merge
+    ========================================================================================
+    */
+    process Recount_index_step{
+        input:
+            file (bed_file) from Bed_for_recount
+            file genomefile
+            file faifile
+
+        output:
+            file "*.ht2" into Candidate_circRNA_index
+            file ('tmp_candidate_circRNA.gff3') into Gff3_file
+
+        when:
+            run_multi_tools
+
+        shell:
+            '''
+            # sort bed (in some result bed file , start > end ) and length filtering( >= 100nt)
+            awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' !{bed_file} | awk '$3 - $2 >= 100 ' | uniq >  tmp_candidate_circRNA.bed
+
+            # bed to gff3 for htseq-count; sites around junction sites(+/-3bp)
+            awk  '{OFS="\t"}{split($4,a,"_");len=$3-$2; print $4"("a[4]")",".","exon",len-3,len+3,".","+",".","gene_id="$4 }' tmp_candidate_circRNA.bed > tmp_candidate_circRNA.gff3
+
+            # bed to fasta
+            bedtools getfasta -fi  !{genomefile} -s -bed tmp_candidate_circRNA.bed -name > tmp_candidate.circular.fa
+
+            # candidate circRNA sequnces (doulbed).
+            awk 'NR%2==1{print $0}NR%2==0{print $1$1}'  tmp_candidate.circular.fa > tmp_candidate.circular_doulbed.fa
+
+            #build index for candidate circRNA sequnce
+            hisat2-build -p !{task.cpus} tmp_candidate.circular_doulbed.fa candidate_circRNA_doulbed 
+
+
+
+            '''
+    }
+
+    process Recount_estimate_step{
+
+        input:
+            file index from Candidate_circRNA_index.collect()
+            file (gff_file) from Gff3_file
+            set pair_id, file(query_file) from Fastpfiles_recount
+            
+
+        output:
+            file('*circRNA_requantity.count') into single_sample_recount
+
+        when:
+            run_multi_tools
+        shell:
+        if(params.singleEnd){
+            '''
+            sh !{baseDir}/bin/final_recount2.sh !{pair_id} single_end !{task.cpus} !{query_file}
+            '''
+        }else{
+            '''
+            sh !{baseDir}/bin/final_recount2.sh !{pair_id} pair_end !{task.cpus} !{query_file[0]} !{query_file[1]}
+            '''
+        }
+    }
+
+
+    // test
+    process Recount_results_combine{
+
+        publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
+
+        input:
+            file (query_file) from single_sample_recount.collect()
+            file designfile
+            file (bed_file) from Bed_for_merge
+
+        output:
+            file ("final.matrix") into (Matrix_for_circos, Plot_merge, PlotMergeCor)
+        
+        when:
+            run_multi_tools
+
+        shell:
+            '''
+            cat !{designfile} > designfile.txt
+            sed -i '1d' designfile.txt
+            cat designfile.txt | awk '{print $1}' > samplename.txt
+            
+            echo -e "id\\c" > merge_header.txt
+            
+            cat for_annotation.bed | awk '{print $1 "_" $2 "_" $3 "_" $6 }' > id.txt
+            
+            cat samplename.txt | while read line
+            do
+                sed '$d' ${line}_circRNA_requantity.count > temp1.bed
+                sed '$d' temp1.bed > temp2.bed
+                sed '$d' temp2.bed > temp3.bed
+                sed '$d' temp3.bed > temp4.bed
+                sed '$d' temp4.bed > ${line}_modify_circRNA_requantity.count
+                python !{baseDir}/bin/final_countnumbers.py id.txt ${line}_modify_circRNA_requantity.count ${line}_counts.txt
+                paste -d"\t" id.txt ${line}_counts.txt > temp.txt
+                cat temp.txt > id.txt
+                echo -e "\\t${line}\\c" >> merge_header.txt
+            done   
+            
+            echo -e "\\n\\c" >> merge_header.txt
+            
+            cat merge_header.txt id.txt > final.matrix
+            '''
+    }
+
+
+    /*
+    ========================================================================================
+                                        after recount
+                                    Differential Expression
+    ========================================================================================
+    */
+    process Merge_DE{
+        publishDir "${params.outdir}/DE_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
+
+        input:
+        file (anno_file) from De_merge
+        
+        file designfile
+        file comparefile
+        file (matrix_file) from Plot_merge
+        
+
+        output:
+        file ('*') into End_merge
+
+        when:
+        run_multi_tools
+
+        shell:
+        '''
+        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+        '''
+    }
+
+    /*
+    ========================================================================================
+                                        after recount
+                                            Correlation
+    ========================================================================================
+    */
+
+    if(params.mRNA){
+        process Merge_Cor{
+            publishDir "${params.outdir}/Corrrelation_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
+
+            input:
+            file (matrix_file) from PlotMergeCor
+            file (anno_file) from Cor_merge
+            file mRNAfile
+            
+            
+
+            when:
+            run_multi_tools
+
+            output:
+            file("*") into CorPlotMerge
+
+            shell:
+            '''
+            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+            '''
+        }
+    }else{
+        CorPlotMerge=Channel.empty()
+    }
+
+
+    /*
+    ========================================================================================
+                                    after running the tools
+                                            annotation
+    ========================================================================================
+    */
+    process Merge_Annotation{
+        publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
+
+        input:
+        file (bed_file) from Med_for_annotation
+        file (query_file) from Matrix_for_circos
+        file gtffile 
 
         when:
         run_multi_tools
 
         output:
-        file("*") into CorPlotMerge
+        file ('*') into Annotation_plot
 
         shell:
         '''
-        Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+        java -jar !{baseDir}/bin/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
+        Rscript !{baseDir}/bin/circos.R !{query_file}
+        perl !{baseDir}/bin/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
+        Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
         '''
     }
-}else{
-    CorPlotMerge=Channel.empty()
+
+    process Venn{
+        publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
+
+        input:
+        file (matrix_file) from Tools_merge
+        
+
+
+        when:
+        (number_of_tools < 6) && (number_of_tools > 1)
+
+        output:
+        file ('*') into venn_plot
+
+        shell:
+        '''
+        Rscript !{baseDir}/bin/venn.R !{matrix_file} venn.png
+        '''
+    }
 }
 
 
-/*
-========================================================================================
-                                after running the tools
-                                        annotation
-========================================================================================
-*/
-process Merge_Annotation{
-    publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (bed_file) from Med_for_annotation
-    file (query_file) from Matrix_for_circos
-    file gtffile 
-
-    when:
-    run_multi_tools
-
-    output:
-    file ('*') into Annotation_plot
-
-    shell:
-    '''
-    java -jar !{baseDir}/bin/bed1114.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
-    Rscript !{baseDir}/bin/circos.R !{query_file}
-    perl !{baseDir}/bin/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
-    Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
-    '''
-}
-
-process Venn{
-    publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
-
-    input:
-    file (matrix_file) from Tools_merge
-    
-
-
-    when:
-    (number_of_tools < 6) && (number_of_tools > 1)
-
-    output:
-    file ('*') into venn_plot
-
-    shell:
-    '''
-    Rscript !{baseDir}/bin/venn.R !{matrix_file} venn.png
-    '''
-}
 
 
 /*
@@ -2259,7 +2267,7 @@ process Report_production{
 
     shell:
     '''
-    cp !{baseDir}/bin/*.Rmd ./
+    ln -s !{baseDir}/bin/*.Rmd ./
     Rscript -e "require( 'rmarkdown' ); render('report.Rmd', 'html_document')"
     '''
 }
