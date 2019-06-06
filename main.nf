@@ -225,8 +225,8 @@ if(!params.skipDE){
     }
 }else {
     // add the sentence avoiding errors by nextflow 
-    designfile=file(params.genomefile)
-    comparefile=file(params.genomefile)
+    designfile=file(params.designfile)
+    comparefile=file(params.comparefile)
 }
 
 
@@ -1997,8 +1997,9 @@ if(number_of_tools==1){
         
 
         output:
-        file ('all_tools_merge.matrix') into (Tools_merge,Tools_merge_html,Bed_to_sailfish_cir)
-        file ('annote_all_tools_merge_annote.txt') into (Bed_for_annotation,Bed_for_recount,Bed_for_merge,De_merge,Cor_merge)
+        file ('all_tools_merge.matrix') into (Tools_merge,Tools_merge_html,Bed_to_sailfish_cir,Bed_for_recount)
+        file ('annote_all_tools_merge_annote.txt') into (Bed_for_annotation,Bed_for_merge,De_merge,Cor_merge)
+        
 
 
         shell :
@@ -2019,7 +2020,7 @@ if(number_of_tools==1){
         awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merge.matrix 
 
         # annotation
-        java -jar !{baseDir}/bin/circpipetools.jar -i all_tools_merge.matrix -o annote_  -gtf !{gtffile} -uniq 
+        java -jar !{baseDir}/bin/bed1114.jar -i all_tools_merge.matrix -o annote_  -gtf !{gtffile} -uniq 
         
         '''
     }
@@ -2042,7 +2043,7 @@ if(number_of_tools==1){
       script:
       """
       # extract bed file for obtaining seqeuence
-      sh ${baseDir}/ProcessBedforGettingSequence.sh ${bed_file} temp.sort.bed temp.start.bed temp.end.bed
+      sh ${baseDir}/bin/ProcessBedforGettingSequence.sh ${bed_file} temp.sort.bed temp.start.bed temp.end.bed
 
       bedtools getfasta -name -fi ${genomefile} -s -bed temp.start.bed > temp.start.fa
       bedtools getfasta -name -fi ${genomefile} -s -bed temp.end.bed > temp.end.fa
@@ -2050,7 +2051,7 @@ if(number_of_tools==1){
       bedtools getfasta -name -fi ${genomefile} -s -bed temp.sort.bed > temp.sort.fa 
 
       # merge and get combined fasta formatted psudoCirc sequences
-      sh ${baseDir}/MergeBSJsequence.sh temp.sort.fa temp.start.fa temp.end.fa tmp_candidate.circular_BSJ_flank.fa
+      sh ${baseDir}/bin/MergeBSJsequence.sh temp.sort.fa temp.start.fa temp.end.fa tmp_candidate.circular_BSJ_flank.fa
 
       hisat2-build -p ${task.cpus} tmp_candidate.circular_BSJ_flank.fa candidate_circRNA_BSJ_flank 
       
@@ -2058,6 +2059,7 @@ if(number_of_tools==1){
     }
 
     process Recount_generate_BSJ_Bamfile {
+      tag "${sampleID}"
       input:
             file index from Candidate_circRNA_index.collect()
             set sampleID, file(query_file) from Fastpfiles_recount
@@ -2065,15 +2067,15 @@ if(number_of_tools==1){
             set sampleID,file("${sampleID}.bam") into BSJ_mapping_bamfile
       when:
             run_multi_tools
-      shell:
+      script:
        if(params.singleEnd){
-            '''
-             hisat2 -p !{task.cpu} -t -k 1 -x candidate_circRNA_BSJ_flank -U !{query_file} | samtools view -bS - > !{sampleID}.bam 
-            '''
+            """
+             hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS - > ${sampleID}.bam 
+            """
         }else{
-            '''
-            hisat2 -p !{task.cpu} -t -k 1 -x candidate_circRNA_BSJ_flank -1 !{query_file[0]}  -2 !{query_file[1]} | samtools view -bS - > !{sampleID}.bam 
-            '''
+            """
+            hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS - > ${sampleID}.bam 
+            """
         }
     }
 
@@ -2093,9 +2095,8 @@ if(params.singleEnd){
             run_multi_tools
         script:
         """
-        java ${baseDir}/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count
+        java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count
         """
-        
     }
 
 }else{
@@ -2113,7 +2114,8 @@ if(params.singleEnd){
             run_multi_tools
         script:
         """
-         java ${baseDir}/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count -allbam ${allBam}
+         java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count -allbam ${allBam}
+        
         """
         
     }
@@ -2140,7 +2142,7 @@ if(params.singleEnd){
 
         script:
             """
-            java ${baseDir}/circpipetools.jar -MM -dir ./ -suffix .count -out multitools.exp.matrix
+            java -jar ${baseDir}/bin/circpipetools.jar -MM -dir ./ -suffix .count -out multitools.exp.matrix
             """
     }
 
@@ -2151,28 +2153,34 @@ if(params.singleEnd){
                                     Differential Expression
     ========================================================================================
     */
-    process Merge_DE{
+
+        process Merge_DE{
         publishDir "${params.outdir}/DE_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (anno_file) from De_merge
-        
+        file anno_file from De_merge
         file designfile
         file comparefile
-        file (matrix_file) from Plot_merge
+        file matrixFile from Plot_merge
         
 
         output:
         file ('*') into End_merge
 
         when:
-        run_multi_tools
+        run_multi_tools 
 
         shell:
         '''
-        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+        mkdir plotdir
+        Rscript !{baseDir}/bin/circRNA_DE_analysis_with_edgeR.R !{baseDir}/bin/R_function.R !{matrixFile} !{designfile} !{comparefile} !{anno_file} plotdir
         '''
+
+
+    
+
     }
+   
 
     /*
     ========================================================================================
@@ -2200,7 +2208,8 @@ if(params.singleEnd){
 
             shell:
             '''
-            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
+            
+            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file} 
             '''
         }
     }else{

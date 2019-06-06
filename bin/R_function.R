@@ -1,48 +1,102 @@
 
-
-pie_plot <- function(dt){
-#colnames must be Freq and type
-#####Freq is Freq or percent , type is type or label
+size_axisblacktext <- 18 #24
+size_axisgreytext <- 12 #18
+size_legendtext <- 9  #22
+size_axistitle <- 15
 library(ggplot2)
+#library(ggstatsplot)
 library(ggsci)
-#dt = dt[order(dt$Freq, decreasing = TRUE),]   ##  order the Freq 
-  
-myLabel = paste(dt$type, " ( ", round(dt$Freq/sum(dt$Freq)*100,2), "% )   ", sep = "")  
-p = ggplot(dt, aes(x = "", y = Freq, fill = type)) + 
-  geom_bar(stat = "identity", width = 1) + scale_fill_jama(name="",label=myLabel)+ 
-  coord_polar(theta = "y") + theme_void()+
-  labs(x = "", y = "", title = "") + 
-  theme(axis.ticks = element_blank()) + 
-  theme(legend.title = element_blank())#, legend.position = "bottom")
-     
-return(p)
+library(dplyr)
+library(reshape2)
+library(ggpubr)
+##colors for ggplot 
+ggcolors <- c("#BC3C29","#0072B5","#E18727","#20854E","#80397B")#pal_npg("nrc")(5)#gg_color_hue(5)
+#show_col(ggcolors)
+
+plotcolor = c("#BC3C29", "grey", "#0072B5")
+
+## basic config for all ggplot
+gg_theme <- theme(
+  axis.title = element_text(size = size_axistitle, color = "black"),
+  axis.text.x = element_text(size = size_axisgreytext, color = "black"),
+  axis.text.y = element_text(size = size_axisblacktext, color = "black"),
+  legend.key.size = unit(0.3,"cm"),
+  legend.title= element_blank(),
+  legend.text = element_text(size = size_legendtext, face = NULL, color = "black"), 
+  legend.background = element_rect(fill = NA))
+
+
+##################pie_plot##############
+pie_plot <- function(dt){
+  #colnames must be Freq and type
+  #####Freq is Freq or percent , type is type or label
+  ##change color
+  library(ggplot2)
+  #library(ggsci)
+  #dt = dt[order(dt$Freq, decreasing = TRUE),]   ##  order the Freq 
+    
+  myLabel = paste(dt$type, " ( ", round(dt$Freq/sum(dt$Freq)*100,2), "% )   ", sep = "")  
+  p = ggplot(dt, aes(x = "", y = Freq, fill = type)) + 
+    geom_bar(stat = "identity", width = 1) + 
+    scale_fill_manual(name = "", values = rev(ggcolors),label=myLabel)+#scale_fill_jama(name="",label=myLabel)+ 
+    coord_polar(theta = "y") + theme_void()+
+    labs(x = "", y = "", title = "") + 
+    theme(axis.ticks = element_blank()) + 
+    theme(legend.title = element_blank())#, legend.position = "bottom")
+       
+  return(p)
 }
 
+############
+#just plot a starbarplot for prop.table result
+
+starbar_plot <- function(df,x,y,group_value){
+  library(ggplot2)
+  ggplot(df,aes_string(x=x,y=Freq,fill=group_value))+
+    geom_bar(stat = "identity",width = 0.5)+ylab("Percentage")+
+    theme_classic()+scale_fill_manual(values=ggcolors[4:5])+ theme_classic ()+ scale_y_continuous(expand = c(0, 0))+
+    theme(
+      axis.title = element_text(size = size_axistitle, color = "black"),
+      axis.text.x = element_text(size = size_axisgreytext, color = "black"),
+      axis.text.y = element_text(size = size_axisblacktext, color = "black"),
+      legend.title= element_blank(),
+      legend.text = element_text(size = size_legendtext, face = NULL, color = "black"), 
+      legend.background = element_rect(fill = NA),
+      legend.justification=c(1,0),
+      #legend.position=c(1, 0),
+      legend.key.height = unit(1.5,"line")
+    )+xlab("")+ylab("Percentage")
+  
+}
+
+
 ########heatmap with default color
-heatmap_house <- function(dt,colData="",title_hp="Heatmap of Different expressed",cluster_rule="no"){
+heatmap_house <- function(dt,colData="",title_hp="Heatmap of Different expressed",
+                          cluster_rule="no",
+                          color_in_heatmap=c(rep('#1C2B6F',1),'black', rep('#E31E26',1)),
+                          anno_color = c("#E0640D", "#228443")){
   
   ######suit two class 
   library("pheatmap")
-  anno_color <-c("#3A4ABE", "#F33D02")
   comb_inFunc <- combn(levels(as.factor(colData$Type)),2)
   names(anno_color) <- c(comb_inFunc[2,1],comb_inFunc[1,1]) 
   ann_colors = list(Type= anno_color)
   dt=dt[,as.character(rownames(colData))]
   if (cluster_rule=="row") {
     p <- pheatmap(log2(dt+1),cluster_rows=TRUE, cluster_cols=FALSE,scale = "row",show_rownames=F,show_colnames = F,
-                  color = colorRampPalette(c(rep('#1C2B6F',1),'white', rep('#E31E26',1)))(50),
+                  color = colorRampPalette(color_in_heatmap)(50),
                   annotation_col=colData,annotation_colors = ann_colors,main = title_hp)
   } else if (cluster_rule=="col"){
     p <- pheatmap(log2(dt+1),cluster_rows=FALSE,cluster_cols=TRUE, scale = "row",show_rownames=F,show_colnames = F,
-                  color = colorRampPalette(c(rep('#1C2B6F',1),'white', rep('#E31E26',1)))(50),
+                  color = colorRampPalette(color_in_heatmap)(50),
                   annotation_col=colData,annotation_colors = ann_colors,main = title_hp)
   } else if (cluster_rule=="all"){
     p <- pheatmap(log2(dt+1),cluster_rows=TRUE,cluster_cols=TRUE, scale = "row",show_rownames=F,show_colnames = F,
-                  color = colorRampPalette(c(rep('#1C2B6F',1),'white', rep('#E31E26',1)))(50),
+                  color = colorRampPalette(color_in_heatmap)(50),
                   annotation_col=colData,annotation_colors = ann_colors,main = title_hp)
   } else if (cluster_rule=="no"){
     p <- pheatmap(log2(dt+1),cluster_rows=FALSE,cluster_cols=FALSE, scale = "row",show_rownames=F,show_colnames = F,
-                  color = colorRampPalette(c(rep('#1C2B6F',1),'white', rep('#E31E26',1)))(50),
+                  color = colorRampPalette(color_in_heatmap)(50),
                   annotation_col=colData,annotation_colors = ann_colors,main = title_hp)
     
   }
@@ -50,7 +104,7 @@ heatmap_house <- function(dt,colData="",title_hp="Heatmap of Different expressed
   return(p)
 }
 
-########boxplot 
+########boxplot###### 
 box_plot <- function(df,x,y,fill){
 library(ggplot2)
 library(ggpubr)
@@ -65,15 +119,6 @@ library(ggpubr)
 }
 
 
-####################
-# my_comparisons <- list(c("m6A", "non-m6A"))
-# p <- ggboxplot(circ_input_RPM_m6A, x="m6Astatus", y="Log2mean", fill = "m6Astatus", 
-#                palette = c("#374E55FF", "#DF8F44FF"))+
-#   labs(title="The expression level of m6A circRNA and non-m6A circRNA", x="", y="log2(SRPBM+1)")+
-#   stat_compare_means(comparisons = my_comparisons,label = "p.signif")+#不同组间的比较
-#   stat_compare_means(label.y = 18)+theme(plot.title = element_text(hjust = 0.5),legend.position=c(0.9,0.85))
-
-
 ###################
 volcano_plot <- function(res_df,contrast_factor,ylab_variable="FDR",pval = 0.05,fc=1.5){
   ######res_df is DE result data.frame with all genes (with non-sig gene)
@@ -86,7 +131,6 @@ volcano_plot <- function(res_df,contrast_factor,ylab_variable="FDR",pval = 0.05,
   }else {
     tab = data.frame(logFC = res_df$logFC, negLogPval = -log10(res_df$FDR))
   }
-  
   nosigGene = (abs(tab$logFC) < lfc | tab$negLogPval < -log10(pval))
   signGenes_up = (tab$logFC > lfc & tab$negLogPval > -log10(pval))
   signGenes_down = (tab$logFC < -lfc & tab$negLogPval > -log10(pval))
@@ -105,15 +149,12 @@ volcano_plot <- function(res_df,contrast_factor,ylab_variable="FDR",pval = 0.05,
   }
   abline(h = -log10(pval), col = "green3", lty = 2)
   abline(v = c(-lfc, lfc), col = "orange", lty = 2)
-  mtext(c(paste("-", lfc), paste("+", lfc)), side = 1, at = c(-lfc, lfc), cex = 0.8, line = 0.5)
+  mtext(c(paste("-", fc), paste("+", fc)), side = 1, at = c(-lfc, lfc), cex = 1, line = 0.3)
   mtext(paste("FDR =", pval), side = 4, at = -log10(pval), cex = 0.8, line = 0.5, las = 1)
-  mtext(c(as.character(contrast_factor[2]), as.character(contrast_factor[1])), side = 3, at = c(3*lfc, -3*lfc), cex = 1, line = 2)
-  mtext(c(paste(up_count,"genes",sep = " "), paste(down_count,"genes",sep = " ")), side = 3, at = c(3*lfc, -3*lfc), cex = 1, line=0.5)
+  mtext(c(as.character(contrast_factor[2]), as.character(contrast_factor[1])), side = 3, at = c(4*lfc, -4*lfc), cex = 1, line = 2)
+
+  mtext(c(up_count, down_count), side = 3, at = c(4*lfc, -4*lfc), cex = 1, line=0.5)
   legend("top",legend = c("Up regulate","Down regulate"),pch = c(16, 16), col = c("red", "cornflowerblue"))
-  mtext(c(as.character(contrast_factor[2]), as.character(contrast_factor[1])), side = 3, at = c(3*lfc, -3*lfc), cex = 1, line = 2)
-  mtext(c(paste(up_count,"genes",sep = " "), paste(down_count,"genes",sep = " ")), side = 3, at = c(3*lfc, -3*lfc), cex = 1, line=0.5)
-  legend("top",legend = c("Up regulate","Down regulate"),pch = c(16, 16), col = c("red", "cornflowerblue"))
-  
 }
 
 
@@ -177,12 +218,12 @@ plot_for_DM <- function(DM_res0,DM_peaks,colData,norm.mat,rPackage,outpath){
 ################################
 #clussterprofile
 
-GoKegg=function(gene_list,outdir){
+GoKegg=function(gene_list,outdir,prefix=""){
   library(clusterProfiler)
   library(DOSE)
   library(ReactomePA)
   library(pathview)
-  outpath=paste0(outdir,'/GO_KEGG')
+  outpath=paste0(outdir,'/GO_KEGG_',prefix)
   if (!dir.exists(outpath)){
     dir.create(outpath)
   }
@@ -199,7 +240,7 @@ GoKegg=function(gene_list,outdir){
   write.table(as.data.frame(kk@result), file=paste0(outpath,"/kegg.txt"),sep = "\t",quote = F)
   #pdf(paste("GO_KEGG/"kegg.pdf",sep = ""),bg = "transparent")
   pdf(paste0(outpath,"/kegg.pdf"))
-  print(dotplot(kk,showCategory = 10))
+  print(barplot(kk,drop=TRUE,showCategory = 10))
   dev.off()
   cat ("cluster: kegg is ok~\n")
   
@@ -214,14 +255,14 @@ GoKegg=function(gene_list,outdir){
                     qvalueCutoff = 0.1,
                     readable = TRUE)
     write.table(as.data.frame(ego@result), file=paste0(outpath,"/clust_",myont,".txt",sep = ""),sep = "\t",quote = F)
-    print(dotplot(ego,showCategory = 10)+labs(title=paste("enrichment analysis of GO",myont)))
+    print(barplot(ego,drop=TRUE,showCategory = 10)+labs(title=paste("enrichment analysis of GO",myont)))
   }
   
   dev.off()
   cat("cluster: GO is ok~\n")
 }
 
-####################correlation analysis by sample
+####################correlation analysis by sample###############
 #cor matrix : group1 & group2
 cor_for_mat <- function(cor_df.mat,tag1,tag2,cormethod="spearman"){
   print("default cor test spearman")
@@ -242,13 +283,10 @@ cor_for_mat <- function(cor_df.mat,tag1,tag2,cormethod="spearman"){
 
 
 
-####################correlation plot
+####################correlation scatter plot################
 
 Cor_plot <- function(CoxExpPlotData,gene1,gene2,cormethod="spearman"){
   library("ggplot2")
-	# cor_df = data.frame(CoxExpPlotData, 
-	# 	gene1 = CoxExpPlotData[,gene1],
-	# 	gene2 = CoxExpPlotData[,gene2])
 	pcutoff=0.05
 	CoxTest = cor.test(CoxExpPlotData[, gene1], CoxExpPlotData[, gene2], method = cormethod)
 
@@ -261,7 +299,7 @@ Cor_plot <- function(CoxExpPlotData,gene1,gene2,cormethod="spearman"){
   }
   
   print(paste("pvalue =", round(CoxTest$p.value, 4)))
-  if(CoxTest$p.value <= 1){
+  if(CoxTest$p.value <= pcutoff){
     CoxExpPoint = ggplot(data = CoxExpPlotData, aes_string(x= gene1, y = gene2))+theme_classic()+
       geom_point(size = 2, color = "gray36")+
       annotate("text",x=-Inf,y=Inf,label=plottitle,hjust=-.2,vjust=2)+
@@ -276,18 +314,23 @@ Cor_plot <- function(CoxExpPlotData,gene1,gene2,cormethod="spearman"){
   return(CoxExpPoint)
 }  
 
-##############ECDF plot
+##############ECDF plot##################
 
-ECDF_plot <- function(df,value_var,group_var,plot_title,test_result=""){
+ECDF_plot <- function(df,value_var,group_var,plot_title="",test_result=""){
   library(ggplot2)
   
-  if (test_result$p.value <=0){
-    test_anno <- paste(test_result$method,"\n",names(test_result$statistic)," = ",signif(test_result$statistic, 3),
-                        "\nP Value < 2.2e-16",sep = "")
-  } else {
-    test_anno <- paste(test_result$method,"\n",names(test_result$statistic)," = ",signif(test_result$statistic, 3),
-                        "\nP Value= ",signif(test_result$p.value,3),sep = "")
+  if (test_result !=""){
+    if (test_result$p.value <=0){
+      test_anno = paste(test_result$method,"\n",names(test_result$statistic)," = ",signif(test_result$statistic, 3),
+                         "\nP Value < 2.2e-16",sep = "")
+    } else {
+      test_anno = paste(test_result$method,"\n",names(test_result$statistic)," = ",signif(test_result$statistic, 3),
+                         "\nP Value= ",signif(test_result$p.value,3),sep = "")
+    }
+  }else {
+    test_anno = ""
   }
+
   
   p <-  ggplot(df,aes_string(x=value_var,group=group_var,color=group_var))+theme_test()+
     stat_ecdf( size = 1)+theme(legend.position=c(0.85,.15))+
@@ -307,7 +350,8 @@ ECDF_plot <- function(df,value_var,group_var,plot_title,test_result=""){
 
 get_pheno <- function(x,label1,label2,group1,group2){
   #####x is colnames of expr_mat
-  pheno_data = data.frame(Type = c(rep(group1,length(grep(label1,x))), rep(group2,length(grep(label2,x)))))
+  pheno_data = data.frame(Type = c(rep(group1,length(grep(label1,x))),
+                                      rep(group2,length(grep(label2,x)))))
   rownames(pheno_data) = c(x[grep(label1,x)],x[grep(label2,x)])
   rownames(pheno_data)=sub("X","S",as.character(rownames(pheno_data)))
   return(pheno_data)
@@ -356,7 +400,7 @@ edgeR_test <- function(expre_mat,group_mat="",design_mode = "unpaired",test_meth
 
 ##########DE limma
 
-limmaDE <- function(expres_dfsiondata,colData,k=2,cutoff=0.05) {
+limmaDE <- function(expres_dfsiondata,colData,k=2,pvalue=0.05,lfc = 0.58) {
   #####colname of group factor in colData should be Type
   library(limma)
   class=colData$Type
@@ -381,8 +425,10 @@ limmaDE <- function(expres_dfsiondata,colData,k=2,cutoff=0.05) {
   #if(k>2){
   for(i in 1:(k*(k-1)/2)){
     geneset_i<-topTable(fit2,number=Inf,coef=i,adjust.method='BH',sort = "p",p.value=1)
-    cat("sig peaks Pvalue(0.05)",sum(geneset_i$P.Value <= 0.05),"\n")
-    cat("sig peaks adjust P(0.05)",sum(geneset_i$adj.P.Val <= 0.05))
+    cat("sig peaks Pvalue",sum(geneset_i$P.Value <= pvalue & abs(geneset_i$logFC) >=lfc ),"\n")
+    cat("hyper peaks Pvalue",pvalue,sum(geneset_i$P.Value <= pvalue & geneset_i$logFC >=lfc ),"\n")
+    cat("hypo peaks Pvalue",pvalue,sum(geneset_i$P.Value <= pvalue & geneset_i$logFC <= -lfc ),"\n")
+    cat("sig peaks adjust P",pvalue,sum(geneset_i$adj.P.Val <= pvalue))
     r[[length(r)+1]] <- geneset_i
   }
   # }
@@ -390,9 +436,8 @@ limmaDE <- function(expres_dfsiondata,colData,k=2,cutoff=0.05) {
 }
 
 
-##########a function for wilcoxon sum rank test for expre_matrix
+##########a function for wilcoxon sum rank test for expre_matrix###########
 row_wilcox <- function(group_mat,x,test_mode=""){
-  group_mat$Type <- as.factor(group_mat$Type)
   typelevel <- levels(as.factor(group_mat$Type))
   comb_2 <- combn(typelevel,2)
   group1 <- as.character(rownames(subset(group_mat,Type==comb_2[1])))
@@ -403,34 +448,48 @@ row_wilcox <- function(group_mat,x,test_mode=""){
     res_wix0 <- wilcox.test(x[which(rownames(group_mat)%in%group1)],x[which(rownames(group_mat)%in%group2)])
   }
   
-  res_wix <- c(Pvalue=res_wix0$p.value,statistic=res_wix0$statistic)
+  res_wix <- c(PValue=res_wix0$p.value,statistic=res_wix0$statistic,
+               group1_mean=mean(x[which(rownames(group_mat)%in%group1)]),
+               group2_mean=mean(x[which(rownames(group_mat)%in%group2)]),
+               group1_median=median(x[which(rownames(group_mat)%in%group1)]),
+               group2_median=median(x[which(rownames(group_mat)%in%group2)]))
   return(res_wix)
 }
 
 mat_wilcox <- function(expre_mat,group_mat,test_mode=""){
   cat("peak number ",dim(expre_mat)[1],"\n")
+  typelevel <- levels(as.factor(group_mat$Type))
+  comb_2 <- combn(typelevel,2)
+  cat("design : group1--",comb_2[1]," group2--",comb_2[2],"\n")
   expre_mat <- expre_mat[,as.character(rownames(group_mat))]
   res_wix_lst <- apply(expre_mat,1,function(x) row_wilcox(group_mat,x,test_mode))
-  res_wix_lst = as.data.frame(t(res_wix_lst))
-  res_wix_lst$FDR = p.adjust(res_wix_lst$Pvalue,method = "BH")
-  res_wix_lst$BY = p.adjust(res_wix_lst$Pvalue,method = "bonferroni")
-  cat("DM peaks Pvalue(0.05)",sum(res_wix_lst$Pvalue <=0.05),"\n")
-  cat("DM peaks FDR(0.05)",sum(res_wix_lst$FDR <=0.05),"\n")
+  res_wix_lst = data.frame(id=rownames(as.data.frame(na.omit(t(res_wix_lst)))),as.data.frame(na.omit(t(res_wix_lst))))
+  res_wix_lst$PValue = as.numeric(res_wix_lst$PValue)
+  res_wix_lst$FDR = p.adjust(res_wix_lst$PValue,method = "BH")
+  res_wix_lst$Bonferroni = p.adjust(res_wix_lst$PValue,method = "bonferroni")
+  res_wix_lst$logFC = log2((res_wix_lst$group2_mean+1)/(res_wix_lst$group1_mean+1))
+  colnames(res_wix_lst) = gsub("group1",comb_2[1],colnames(res_wix_lst))
+  colnames(res_wix_lst) = gsub("group2",comb_2[2],colnames(res_wix_lst))
+  
+  cat("FC is group2 ",comb_2[2],"vs group1",comb_2[1],"\n")
+  cat("DM peaks Pvalue(0.05)",nrow(subset(res_wix_lst,PValue <=0.05)),"\n")
+  cat("DM peaks FDR(0.05)",nrow(subset(res_wix_lst,FDR <=0.05)),"\n")
   return(res_wix_lst)
 }
 
 
 #############PCA
- PCA_plot<- function(DE_list,df,colData,withtext){
+PCA_plot<- function(DE_list,df,colData){
+  plot.lst <- list()
   colData$Type <- as.factor(colData$Type)
   comb <- combn(levels(as.factor(colData$Type)),2)
   colData <- subset(colData, Type == comb[1,1] | Type == comb[2,1])
   library(ggplot2)
   df <- df[DE_list, rownames(colData)] ########normalized matrix
-  df = log2(df+1)
+  df <- log2(df+1)
   pcaData <- as.data.frame(prcomp(df[DE_list,])$rotation)
-  if(withtext==FALSE){
-    pca_plot <- ggplot(pcaData, aes(PC1, PC2, color=colData$Type)) +
+  
+  pca_plot <- ggplot(pcaData, aes(PC1, PC2, color=colData$Type)) +
     geom_point(size=3) +
     xlab("PC1") +
     ylab("PC2") +
@@ -438,14 +497,71 @@ mat_wilcox <- function(expre_mat,group_mat,test_mode=""){
     #  coord_fixed() +
     theme_bw()
   print(pca_plot)
-  }else{
-    pca_plot_text <- ggplot(pcaData, aes(PC1, PC2, color=colData$Type)) +
+  pca_plot_text <- ggplot(pcaData, aes(PC1, PC2, color=colData$Type)) +
     geom_text(aes(label = row.names(pcaData))) +
-    xlab("PC1") +
-    ylab("PC2") +
+    xlab(paste0("PC1")) +
+    ylab(paste0("PC2")) +
     scale_colour_hue("Type") +
     #  coord_fixed() +
     theme_bw()
   print(pca_plot_text)
+  plot.lst <- list(pca_plot,pca_plot_text)
+}
+
+
+##############count matrix to rank matrix #########
+
+# df.vector <- unlist(df)
+# uniq_count <- sort(unique(df.vector))
+# map.df <- data.frame(new_count = 1:length(uniq_count),raw_count = uniq_count)
+# tmp <- data.frame(raw_mat=df.vector)
+# tmp$new_df.vector <- map.df$new_count[match(df.vector,map.df$raw_count)]
+# new_count.df <- matrix(tmp$new_df.vector,ncol = ncol(df))
+# rownames(new_count.df)= rownames(df)
+# colnames(new_count.df)= colnames(df)
+
+
+##############summarySE###################
+## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
+##   data: a data frame.
+##   measurevar: the name of a column that contains the variable to be summariezed
+##   groupvars: a vector containing names of columns that contain grouping variables
+##   na.rm: a boolean that indicates whether to ignore NA's
+##   conf.interval: the percent range of the confidence interval (default is 95%)
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # 计算长度
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
   }
+  
+  # 以 groupvars 为组,计算每组的长度,均值,以及标准差
+  # ddply 就是 dplyr 中的 group_by + summarise
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # 重命名  
+  datac <- plyr::rename(datac, c("mean" = measurevar))
+  
+  # 计算标准偏差
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  # 计算置信区间
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
 }
