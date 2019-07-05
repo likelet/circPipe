@@ -478,7 +478,7 @@ mat_wilcox <- function(expre_mat,group_mat,test_mode=""){
 }
 
 
-#############PCA
+#############PCA###########
 PCA_plot<- function(DE_list,df,colData){
   plot.lst <- list()
   colData$Type <- as.factor(colData$Type)
@@ -532,14 +532,14 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
                       conf.interval=.95, .drop=TRUE) {
   library(plyr)
   
-  # 计算长度
+  # è®¡ç®é¿åº¦
   length2 <- function (x, na.rm=FALSE) {
     if (na.rm) sum(!is.na(x))
     else       length(x)
   }
   
-  # 以 groupvars 为组,计算每组的长度,均值,以及标准差
-  # ddply 就是 dplyr 中的 group_by + summarise
+  # ä»¥ groupvars ä¸ºç»,è®¡ç®æ¯ç»çé¿åº¦,åå¼,ä»¥åæ åå·®
+  # ddply å°±æ¯ dplyr ä¸­ç group_by + summarise
   datac <- ddply(data, groupvars, .drop=.drop,
                  .fun = function(xx, col) {
                    c(N    = length2(xx[[col]], na.rm=na.rm),
@@ -550,16 +550,16 @@ summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
                  measurevar
   )
   
-  # 重命名  
+  # éå½å  
   datac <- plyr::rename(datac, c("mean" = measurevar))
   
-  # 计算标准偏差
+  # è®¡ç®æ ååå·®
   datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
   
   # Confidence interval multiplier for standard error
   # Calculate t-statistic for confidence interval: 
   # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
-  # 计算置信区间
+  # è®¡ç®ç½®ä¿¡åºé´
   ciMult <- qt(conf.interval/2 + .5, datac$N-1)
   datac$ci <- datac$se * ciMult
   

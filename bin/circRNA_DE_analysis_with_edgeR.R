@@ -11,7 +11,7 @@ p_value <- 0.05 # p value of FDR
 lfc <- 0.58  #logFC
 
 #######arguments#########
-#setwd("D:\\my_project\\the two\\circRNA\\script\\R_script\\for_test")
+
 args <-commandArgs(T)
 function.script <- args[1] 
 expres.mat.filePath <- args[2] 
@@ -26,10 +26,11 @@ source(function.script)
 design.mat = as.data.frame(fread(design.filePath))
 compare.str = as.vector(read.table(compare.filePath))
 expres.mat = as.data.frame(fread(expres.mat.filePath,sep = "\t"))
+colnames(expres.mat)[1]="id"
 annotation.df = as.data.frame(fread(annotation.filePath,sep = "\t"))%>%
   mutate(id = paste(chr,chromStart,chromEnd,strand,sep="_"))
 
-expres.mat = mutate(expres.mat, id = paste(chr,chromStart,chromEnd,strand,sep="_"))%>%select(id,design.mat$Sample_id)
+expres.mat = select(expres.mat,id,design.mat$Sample_id)
 countData = as.matrix(expres.mat[,-1])
 rownames(countData) = expres.mat$id
 
@@ -66,7 +67,10 @@ DE_Circ_norm.mat=Circ_norm.mat[DE_list,]
 
 
 ####output table##########
-write.table(Circ_edgeR.res.anno,file = "outkegg/DE_analysis_result.xls",sep = "\t",row.names = FALSE,quote = FALSE)
+#revised by yy
+write.table(Circ_edgeR.res.anno,file = paste0(outkegg,"/DE_analysis_result.xls"),sep = "\t",row.names = FALSE,quote = FALSE)
+
+if (length(DE_list) >= 2) {
 
 # ################plot#################
 source(function.script)
@@ -83,10 +87,17 @@ PCA_plot(DE_list,Circ_norm.mat[DE_list,],colData)
 
 dev.off()
 
-
 ####################DE enrichment analysis
+
 DE_circ_gene = filter(Circ_edgeR.res.anno,id%in%DE_list)
 gene_list=unique(DE_circ_gene$symbol)
 length(gene_list)
 
-GoKegg(gene_list,outkegg)
+GoKegg(gene_list,outkegg,"DE_circ")
+
+
+
+} else {
+
+print("differnt expression circRNA < 2 ; cannot plot and enrichment analysis !")
+}

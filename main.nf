@@ -502,7 +502,7 @@ if(params.skip_fastp){
         set sampleID, file(query_file) from read_pairs_fastp
 
         output:
-        set sampleID, file ('unzip_fastp_*') into (fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)
+        set sampleID, file ('unzip_fastp_*') into (Fastqfor_swhich,fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)
         file ('*.html') into fastp_for_waiting
         file ('*_fastp.json') into Fastp_for_multiqc
 
@@ -537,6 +537,7 @@ if(params.skip_fastp){
 
 
 fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process first
+
 
 
 
@@ -1997,8 +1998,8 @@ if(number_of_tools==1){
         
 
         output:
-        file ('all_tools_merge.matrix') into (Tools_merge,Tools_merge_html,Bed_to_sailfish_cir,Bed_for_recount)
-        file ('annote_all_tools_merge_annote.txt') into (Bed_for_annotation,Bed_for_merge,De_merge,Cor_merge)
+        file ('all_tools_merge_filtered.matrix') into (Tools_merge,Tools_merge_html,Bed_to_sailfish_cir,Bed_for_recount)
+        file ('annote_all_tools_merge_filtered_annote.txt') into (Bed_for_annotation,Bed_for_merge,De_merge,Cor_merge)
         
 
 
@@ -2008,7 +2009,7 @@ if(number_of_tools==1){
         cat *_merge.matrix >> temp_concatenate.txt
 
         # filtered the circRNA length less than 100bp   
-        awk '$3-$2>=100 && $3-$2 <=100000' temp_concatenate.txt > concatenate.txt
+        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' temp_concatenate.txt  | awk '$3 - $2 >= 100 && $3 - $2 <=100000 ' >  concatenate.txt
         
 
         for file in !{query_file}
@@ -2018,9 +2019,13 @@ if(number_of_tools==1){
         java -jar !{baseDir}/bin/circpipetools.jar -i merge_temp.matrix -o tools -merge 
 
         awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merge.matrix 
-
+        
+        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' all_tools_merge.matrix  | awk '$3 - $2 >= 100 && $3 - $2 <=100000 ' >  all_tools_merge_filtered.matrix 
+        
         # annotation
-        java -jar !{baseDir}/bin/bed1114.jar -i all_tools_merge.matrix -o annote_  -gtf !{gtffile} -uniq 
+        java -jar !{baseDir}/bin/bed1114.jar -i all_tools_merge_filtered.matrix -o annote_  -gtf !{gtffile} -uniq 
+
+        sed -i "1ichr\tchromStart\tchromEnd\tname\tscore\tstrand\tstrand2\tensemble_id\tsymbol\ttranscript\tgene_feature\ttype1\ttype2\tdistant_from_start" annote_all_tools_merge_filtered_annote.txt 
         
         '''
     }
@@ -2230,6 +2235,7 @@ if(params.singleEnd){
         file (bed_file) from Bed_for_annotation
         file (query_file) from Matrix_for_circos
         file gtffile 
+        file faifile
 
         when:
         run_multi_tools
@@ -2240,10 +2246,20 @@ if(params.singleEnd){
         shell:
         '''
         java -jar !{baseDir}/bin/circpipetools.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
-        Rscript !{baseDir}/bin/circos.R !{query_file}
-        perl !{baseDir}/bin/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
+        Rscript !{baseDir}/bin/circos.R !{baseDir}/bin/R_function.R  !{params.genomebuild} !{faifile} !{query_file}
+        #perl !{baseDir}/bin/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
         Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
         '''
+    }
+    process Finder_novel {
+      input:
+      
+      output:
+      
+      script:
+      """
+      
+      """
     }
 
     process Venn{
