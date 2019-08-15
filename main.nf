@@ -1084,8 +1084,7 @@ if(run_mapsplice){
             --gene-gtf ${gtffile} \
             -c ${refmapsplice_dir} \
             -1 ${query_file} \
-            -o output_mapsplice_${sampleID} 2 \
-            > ${sampleID}_mapsplice.log
+            -o output_mapsplice_${sampleID} 
             """
         }else{
             """
@@ -1100,8 +1099,7 @@ if(run_mapsplice){
             -c ${refmapsplice_dir} \
             -1 ${query_file[0]} \
             -2 ${query_file[1]} \
-            -o output_mapsplice_${sampleID} 2 \
-            > ${sampleID}_mapsplice.log
+            -o output_mapsplice_${sampleID} 
             """
         }
 
@@ -1284,6 +1282,7 @@ if(run_segemehl){
                 if(params.singleEnd){
                     """
                     segemehl.x \
+                    -s \
                     -d ${genomefile} \
                     -i ${params.segindex} \
                     -q ${query_file} \
@@ -1295,15 +1294,19 @@ if(run_segemehl){
                     > segemehl_${sampleID}_mapped.sam
 
                     testrealign.x \
+                    -t ${task.cpus} \
                     -d ${genomefile} \
                     -q segemehl_${sampleID}_mapped.sam \
                     -n \
                     -U segemehl_${sampleID}_splicesites.bed \
                     -T segemehl_${sampleID}_transrealigned.bed
+
+
                     """
                 }else{
                     """
                     segemehl.x \
+                    -s \
                     -d ${genomefile} \
                     -i ${params.segindex} \
                     -q ${query_file[0]} \
@@ -1316,6 +1319,7 @@ if(run_segemehl){
                     > segemehl_${sampleID}_mapped.sam
 
                     testrealign.x \
+                    -t ${task.cpus} \
                     -d ${genomefile} \
                     -q segemehl_${sampleID}_mapped.sam \
                     -n \
@@ -1998,8 +2002,9 @@ if(number_of_tools==1){
         
 
         output:
-        file ('all_tools_merge_filtered.matrix') into (Tools_merge,Tools_merge_html,Bed_to_sailfish_cir,Bed_for_recount)
+        file ('all_tools_merge_filtered.matrix') into (Tools_merge_html,Bed_to_sailfish_cir,Bed_for_recount)
         file ('annote_all_tools_merge_filtered_annote.txt') into (Bed_for_annotation,Bed_for_merge,De_merge,Cor_merge)
+        file ('Merged_matrix_forVen.tsv') into Merged_file_for_Venn
         
 
 
@@ -2024,6 +2029,9 @@ if(number_of_tools==1){
         
         # annotation
         java -jar !{baseDir}/bin/bed1114.jar -i all_tools_merge_filtered.matrix -o annote_  -gtf !{gtffile} -uniq 
+
+        # for Ven analysis 
+        java -jar !{baseDir}/bin/cjrcpipetools.jar -collapse !{matrix_file} -dir ./ -suffix _merge.matrix -out Merged_matrix_forVen.tsv
 
         sed -i "1ichr\tchromStart\tchromEnd\tname\tscore\tstrand\tstrand2\tensemble_id\tsymbol\ttranscript\tgene_feature\ttype1\ttype2\tdistant_from_start" annote_all_tools_merge_filtered_annote.txt 
         
@@ -2262,11 +2270,11 @@ if(params.singleEnd){
       """
     }
 
-    process Venn{
+ process Venn{
         publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
 
         input:
-        file (matrix_file) from Tools_merge
+        file (matrix_file) from Merged_file_for_Venn
         
 
 
@@ -2280,7 +2288,9 @@ if(params.singleEnd){
         '''
         Rscript !{baseDir}/bin/venn.R !{matrix_file} venn.png
         '''
-    }
+
+}
+   
 }
 
 
