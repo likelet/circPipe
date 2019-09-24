@@ -716,7 +716,7 @@ if(run_circexplorer2){
         java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o circexplorer2 -sup 5 -merge
         mv circexplorer2_merge.bed circexplorer2_merge.matrix
         # annotate circRNA with GTFs
-        java -jar !{baseDir}/bin/circpipetools.jar -i circexplorer2_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+        java -jar !{baseDir}/bin/bed1114.jar -i circexplorer2_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
         # remove non samplename string from matrix header 
         sed -i 's/circexplorer2_//g' circexplorer2_merge.matrix
@@ -954,7 +954,6 @@ if(run_ciri || run_multi_tools){
         output:
         file ('ciri_merge.matrix') into (Output_ciri,Plot_ciri_cor,Plot_ciri,Merge_ciri)
         file ('Name_ciri.txt') into Name_ciri
-        file ('annoted_ciri_merge_annote.txt') into (De_ciri,Cor_ciri)
 
 
         shell :
@@ -963,7 +962,7 @@ if(run_ciri || run_multi_tools){
         java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
         mv ciri_merge.bed ciri_merge.matrix
         # annotate circRNA with GTFs
-        java -jar !{baseDir}/bin/circpipetools.jar -i ciri_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+        # java -jar !{baseDir}/bin/circpipetools.jar -i ciri_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
             sed -i 's/ciri_//g' ciri_merge.matrix
         sed -i 's/_modify.candidates.bed//g' ciri_merge.matrix
@@ -973,60 +972,7 @@ if(run_ciri || run_multi_tools){
         '''
     }
 
-    /*
-    ========================================================================================
-                                the second tool : bwa - ciri
-                                    Differential Expression
-    ========================================================================================
-    */
-    if(!params.skipDE){
-        process Ciri_DE{
-            publishDir "${params.outdir}/DE_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
-
-            input:
-            file (anno_file) from De_ciri
-            
-            file designfile
-            file comparefile
-            file (matrix_file) from Plot_ciri
-            
-
-            output:
-            file ('*') into End_ciri
-
-
-            shell:
-            '''
-            Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-            '''
-        }
-    }
-
-    /*
-    ========================================================================================
-                                    the second tool : bwa - ciri
-                                            Correlation
-    ========================================================================================
-    */
-    if(params.mRNA){
-        process Ciri_Cor{
-            publishDir "${params.outdir}/Corrrelation_Analysis/CIRI", mode: 'copy', pattern: "*", overwrite: true
-
-            input:
-            file (matrix_file) from Plot_ciri_cor
-            file (anno_file) from Cor_ciri
-            file mRNA
-            
-
-            output:
-            file ('*') into cor_plot_ciri
-
-            shell:
-            '''
-            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNA} !{matrix_file} !{anno_file}
-            '''
-        }
-    }
+    
 
 }else{
     Merge_ciri=Channel.empty()
@@ -1054,12 +1000,35 @@ if(run_mapsplice){
                                     run the mapsplice
     ========================================================================================
     */
+
+    process unzipFastq{
+
+            tag "$sampleID"
+
+            input:
+            set sampleID, file (query_file) from fastpfiles_mapsplice
+            output:
+            set sampleID, file("*.fastq") into fastqraw_mapslice
+            
+            shell:
+            if(params.singleEnd){
+            """
+                gunzip -c ${query_file} > ${sampleID}.fastq
+            """
+            } else{
+            """
+                gunzip -c ${query_file[0]} > ${sampleID}_1.fastq
+                gunzip -c ${query_file[1]} > ${sampleID}_2.fastq
+            """
+            }
+
+    }
     process Mapsplice{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', overwrite: true
 
         input:
-        set sampleID, file (query_file) from fastpfiles_mapsplice
+        set sampleID, file (query_file) from fastqraw_mapslice
         file gtffile
         file refmapsplice_dir from Refmapsplice
         file outdir
@@ -1073,6 +1042,7 @@ if(run_mapsplice){
         shell:
         if(params.singleEnd){
             """
+            source activate mapsplice
             mapsplice.py \
             -p ${task.cpus} \
             -k 1 \
@@ -1083,11 +1053,13 @@ if(run_mapsplice){
             -x ${bowtie_run_index} \
             --gene-gtf ${gtffile} \
             -c ${refmapsplice_dir} \
-            -1 ${query_file} \
+            -1 ${sampleID}.fastq \
+	    --bam \
             -o output_mapsplice_${sampleID} 
             """
         }else{
             """
+            source activate mapsplice
             mapsplice.py \
             -p ${task.cpus} \
             -k 1 \
@@ -1097,8 +1069,9 @@ if(run_mapsplice){
             -x ${bowtie_run_index} \
             --gene-gtf ${gtffile} \
             -c ${refmapsplice_dir} \
-            -1 ${query_file[0]} \
-            -2 ${query_file[1]} \
+            -1 ${sampleID}_1.fastq \
+            -2 ${sampleID}_2.fastq \
+	    --bam \
             -o output_mapsplice_${sampleID} 
             """
         }
@@ -1175,7 +1148,7 @@ if(run_mapsplice){
         java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
         mv mapsplice_merge.bed mapsplice_merge.matrix
         # annotate circRNA with GTFs
-        java -jar !{baseDir}/bin/circpipetools.jar -i mapsplice_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+        # java -jar !{baseDir}/bin/circpipetools.jar -i mapsplice_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
         sed -i 's/mapsplice_//g' mapsplice_merge.matrix
         sed -i 's/_modify.candidates.bed//g' mapsplice_merge.matrix
@@ -1183,60 +1156,8 @@ if(run_mapsplice){
         '''
     }
 
-    /*
-    ========================================================================================
-                                    the third tool : mapsplice
-                                    Differential Expression
-    ========================================================================================
-    */
-    if(!params.skipDE){
-        process Mapsplice_DE{
-        publishDir "${params.outdir}/DE_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
-
-        input:
-        file (anno_file) from De_mapsplice
-        
-        file designfile
-        file comparefile
-        file (matrix_file) from Plot_mapsplice
-        
-
-        output:
-        file ('*') into end_mapsplice
-
-
-        shell:
-        '''
-        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-        '''
-        }
-    }
-
-    /*
-    ========================================================================================
-                                    the third tool : mapsplice
-                                            Correlation
-    ========================================================================================
-    */
-    if(params.mRNA){
-        process Mapsplice_Cor{
-            publishDir "${params.outdir}/Corrrelation_Analysis/Mapsplice", mode: 'copy', pattern: "*", overwrite: true
-
-            input:
-            file (matrix_file) from Plot_mapsplice_cor
-            file (anno_file) from Cor_mapsplice
-            file mRNAfile
-            
-
-            output:
-            file ('*') into cor_plot_mapsplice
-
-            shell:
-            '''
-            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
-            '''
-        }
-    }
+    
+   
 }else{
     Merge_mapsplice=Channel.empty()
     Name_mapsplice=Channel.empty()
@@ -1276,55 +1197,54 @@ if(run_segemehl){
                 file index from Segindex.collect()
 
                 output:
-                set sampleID, file ('*splicesites.bed') into segemehlfiles
+                set sampleID, file ("segemehl_${sampleID}.circ.sum.bed") into segemehlfiles
 
                 shell:
                 if(params.singleEnd){
                     """
+                        # step 1
                     segemehl.x \
-                    -s \
-                    -d ${genomefile} \
-                    -i ${params.segindex} \
-                    -q ${query_file} \
-                    -t ${task.cpus} \
-                    -S \
-                    | samtools view -bS - \
-                    | samtools sort -o - \
-                    | samtools view -h - \
-                    > segemehl_${sampleID}_mapped.sam
-
-                    testrealign.x \
                     -t ${task.cpus} \
                     -d ${genomefile} \
-                    -q segemehl_${sampleID}_mapped.sam \
-                    -n \
-                    -U segemehl_${sampleID}_splicesites.bed \
-                    -T segemehl_${sampleID}_transrealigned.bed
+                    -i ${index} \
+                    -q ${query_file[0]} \
+                    -S -o segemehl_${sampleID}.sam
 
+                    # step 2
+                    grep ';C;' segemehl_${sampleID}.sngl.bed  > segemehl_${sampleID}_circ_reads.bed
+
+                    # step 3
+
+                    haarz.x split -m 2 -q 1 \
+                    -f segemehl_${sampleID}_circ_reads.bed > segemehl_${sampleID}.circ.sum.bed
+
+                    # remove sam file for reducing storage requirement 
+
+                    rm segemehl_${sampleID}.sam
 
                     """
                 }else{
                     """
+                    # step 1
                     segemehl.x \
-                    -s \
-                    -d ${genomefile} \
-                    -i ${params.segindex} \
-                    -q ${query_file[0]} \
-                    -p ${query_file[1]} \
                     -t ${task.cpus} \
-                    -S \
-                    | samtools view -bS - \
-                    | samtools sort -o - \
-                    | samtools view -h - \
-                    > segemehl_${sampleID}_mapped.sam
+                    -d ${genomefile} \
+                    -i ${index} \
+                    -q ${query_file[0]} -p ${query_file[1]}  \
+                    -S -o segemehl_${sampleID}.sam
 
-                    testrealign.x \
-                    -t ${task.cpus} \
-                    -d ${genomefile} \
-                    -q segemehl_${sampleID}_mapped.sam \
-                    -n \
-                    -U segemehl_${sampleID}_splicesites.bed \
-                    -T segemehl_${sampleID}_transrealigned.bed
+                    # step 2
+                    grep ';C;' segemehl_${sampleID}.sngl.bed  > segemehl_${sampleID}_circ_reads.bed
+
+                    # step 3
+
+                    haarz.x split -m 2 -q 1\
+                    -f segemehl_${sampleID}_circ_reads.bed > segemehl_${sampleID}.circ.sum.bed
+
+                    # remove sam file for reducing storage requirement 
+
+                    rm segemehl_${sampleID}.sam
+
                     """
                 }
 
@@ -1349,23 +1269,8 @@ if(run_segemehl){
 
             shell :
             '''
-            if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
-            touch !{sampleID}_modify_segemehl.candidates.bed
-            else
-            cat !{query_file} \
-            | awk '{print $4}' \
-            | awk -F":" '{print $2 "\t" $5 "\t" $6}' \
-            > !{sampleID}_segemehl.temp.bed
-
-            paste !{query_file} !{sampleID}_segemehl.temp.bed \
-            | grep C \
-            | grep P \
-            | grep -v chrM \
-            | awk '{print $1 "\t" $2 "\t" $3 "\t" "segemehl" "\t" $7 "\t" $6}' \
-            > !{sampleID}_modify_segemehl.temp.bed
             
-            python !{baseDir}/bin/quchong.py !{sampleID}_modify_segemehl.temp.bed segemehl_!{sampleID}_modify.candidates.bed
-            fi
+            awk 'NR > 1 {OFS="\t";print $1,$2,$3,"segemehl",$4,$6}' segemehl_${sampleID}.circ.sum.bed> ${sampleID}_modify_segemehl.candidates.bed
             '''
     }
 
@@ -1385,7 +1290,6 @@ if(run_segemehl){
             output:
             file ('segemehl_merge.matrix') into (Output_segemehl,Plot_segemehl,Merge_segemehl,Plot_segemehl_cor)
             file ('Name_segemehl.txt') into Name_segemehl
-            file ('annoted_segemehl_merge_annote.txt') into (Cor_segemehl,De_segemehl)
     
             shell :
             '''
@@ -1393,67 +1297,16 @@ if(run_segemehl){
             java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o segemehl -sup 5 -merge
             mv segemehl_merge.bed segemehl_merge.matrix
             # annotate circRNA with GTFs
-            java -jar !{baseDir}/bin/circpipetools.jar -i segemehl_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+            # java -jar !{baseDir}/bin/circpipetools.jar -i segemehl_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
             sed -i 's/segemehl_//g' segemehl_merge.matrix
             sed -i 's/_modify.candidates.bed//g' segemehl_merge.matrix
             echo -e "segemehl" > Name_segemehl.txt
             '''
     }
-    /*   
-    ========================================================================================
-                                    the fourth tool : segemehl
-                                        Differential Expression
-    ========================================================================================
-    */
-    if(!params.skipDE){
-        process Segemehl_DE{
-                publishDir "${params.outdir}/DE_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
+  
 
-                input:
-                file (anno_file) from De_segemehl
-                
-                file designfile
-                file comparefile
-                file (matrix_file) from Plot_segemehl
-                
-
-                output:
-                file ('*') into end_segemehl
-
-                shell:
-                '''
-                Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-                '''
-        }
-    }
-
-    /*
-    ========================================================================================
-                                        the fourth tool : segemehl
-                                                Correlation
-    ========================================================================================
-    */
-    if(params.mRNA){
-            process Segemehl_Cor{
-                publishDir "${params.outdir}/Corrrelation_Analysis/Segemehl", mode: 'copy', pattern: "*", overwrite: true
-
-                input:
-                file (matrix_file) from Plot_segemehl_cor
-                file (anno_file) from Cor_segemehl
-                file mRNAfile
-                
-                
-
-                output:
-                file ('*') into cor_plot_segemehl
-
-                shell:
-                '''
-                Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
-                '''
-            }
-    }
+    
 
 }else{
     Merge_segemehl=Channel.empty()
@@ -1629,7 +1482,6 @@ if(run_find_circ){
 
         file ('find_circ_merge.matrix') into (Output_find_circ,Plot_find_circ,Plot_find_circ_cor,Merge_find_circ)
         file ('Name_find_circ.txt') into Name_find_circ
-        file ('annoted_find_circ_merge_annote.txt') into (Cor_find_circ,De_find_circ)
 
 
         shell :
@@ -1639,7 +1491,7 @@ if(run_find_circ){
         java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o find_circ -sup 5 -merge
         mv find_circ_merge.bed find_circ_merge.matrix
         # annotate circRNA with GTFs
-        java -jar !{baseDir}/bin/circpipetools.jar -i find_circ_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
+        # java -jar !{baseDir}/bin/circpipetools.jar -i find_circ_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
 
         sed -i 's/_modify_find_circ.candidates.bed//g' find_circ_merge.matrix
@@ -1648,63 +1500,6 @@ if(run_find_circ){
         '''
     }
 
-    /*
-    ========================================================================================
-                            the fifth tool : bowtie2 - find_circ
-                                    Differential Expression
-    ========================================================================================
-    */
-    if(!params.skipDE){
-        process Find_circ_DE{
-        publishDir "${params.outdir}/DE_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
-
-        input:
-        file (anno_file) from De_find_circ
-        
-        file designfile
-        file comparefile
-        file (matrix_file) from Plot_find_circ
-        
-
-        output:
-        file ('*') into end_find_circ
-
-   
-
-        shell:
-        '''
-        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-        '''
-        }
-    }
-
-
-    /*
-    ========================================================================================
-                            the fifth tool : bowtie2 - find_circ
-                                            Correlation
-    ========================================================================================
-    */
-    if(params.mRNA){
-        process Find_circ_Cor{
-            publishDir "${params.outdir}/Corrrelation_Analysis/Find_circ", mode: 'copy', pattern: "*", overwrite: true
-
-            input:
-            file (matrix_file) from Plot_find_circ_cor
-            file (anno_file) from Cor_find_circ
-            file mRNAfile
-            
-    
-
-            output:
-            file ('*') into cor_plot_find_circ
-
-            shell:
-            '''
-            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
-            '''
-        }
-    }
  
 }else{
     Merge_find_circ=Channel.empty()
