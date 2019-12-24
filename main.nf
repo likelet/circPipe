@@ -683,7 +683,7 @@ if(run_circexplorer2){
         | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
         > !{sampleID}_modify_circexplorer2.temp.bed
         
-        python !{baseDir}/bin/quchong.py !{sampleID}_modify_circexplorer2.temp.bed circexplorer2_!{sampleID}_modify.candidates.bed
+        cp !{sampleID}_modify_circexplorer2.temp.bed circexplorer2_!{sampleID}_modify.candidates.bed
         fi
         '''
     }
@@ -813,7 +813,7 @@ if(run_circexplorer2){
                                       run the bwa
 ========================================================================================
 */
-if(run_ciri || run_multi_tools){
+if(run_ciri){
         process Bwa{
         tag "$sampleID"
         publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
@@ -825,7 +825,7 @@ if(run_ciri || run_multi_tools){
 
 
         output:
-        set sampleID, file ('*.sam') into BwaSamfile,BwaSamfileForQuantification
+        set sampleID, file ('*.sam') into BwaSamfile
 
         shell:
         
@@ -854,20 +854,6 @@ if(run_ciri || run_multi_tools){
 
     }
 
-    process BwaBamProcess {
-      input:
-        set sampleID, file(bwasamfile) from BwaSamfileForQuantification
-      output:
-        set sampleID, file("${sampleID}.sort.bam"),file("${sampleID}.sort.bam.bai") into BWAsortedBamfile
-
-      script:
-        """
-        samtools view -bS ${bwasamfile} > ${sampleID}.bam
-        samtools sort -@ ${task.cpus} ${sampleID}.bam -o ${sampleID}.sort.bam
-        samtools index ${sampleID}.sort.bam
-        rm ${sampleID}.bam
-        """
-    }
 
     /*
     ========================================================================================
@@ -931,7 +917,7 @@ if(run_ciri || run_multi_tools){
             | awk '{print $2 "\t" $3 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
             > !{sampleID}_modify_ciri.temp.bed
             
-            python !{baseDir}/bin/quchong.py !{sampleID}_modify_ciri.temp.bed !{sampleID}_modify_ciri.candidates.bed
+            cp !{sampleID}_modify_ciri.temp.bed !{sampleID}_modify_ciri.candidates.bed
             fi
             '''
     }
@@ -1094,7 +1080,7 @@ if(run_mapsplice){
         
 
         output:
-        file ('*candidates.bed') into modify_mapsplice
+        file ('*candidates.bed') into Modify_mapsplice
 
 
 
@@ -1118,7 +1104,7 @@ if(run_mapsplice){
         | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
         > !{sampleID}_modify_mapsplice.temp.bed
         
-        python !{baseDir}/bin/quchong.py !{sampleID}_modify_mapsplice.temp.bed mapsplice_!{sampleID}_modify.candidates.bed
+        cp !{sampleID}_modify_mapsplice.temp.bed mapsplice_!{sampleID}_modify.candidates.bed
         fi
         '''
     }
@@ -1133,19 +1119,19 @@ if(run_mapsplice){
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
-        file (query_file) from modify_mapsplice.collect()
+        file (query_file) from Modify_mapsplice.collect()
         file gtffile
 
         output:
         file ('mapsplice_merge.matrix') into (Output_mapsplice,Plot_mapsplice,Plot_mapsplice_cor,Merge_mapsplice)
         file ('Name_mapsplice.txt') into Name_mapsplice
-        file ('annoted_mapsplice_merge_annote.txt') into (De_mapsplice,Cor_mapsplice)
+   
 
 
         shell :
         '''
         # merge sample into matrix 
-        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o ciri -sup 5 -merge
+        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o mapsplice -sup 5 -merge
         mv mapsplice_merge.bed mapsplice_merge.matrix
         # annotate circRNA with GTFs
         # java -jar !{baseDir}/bin/circpipetools.jar -i mapsplice_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
@@ -1270,7 +1256,7 @@ if(run_segemehl){
             shell :
             '''
             
-            awk 'NR > 1 {OFS="\t";print $1,$2,$3,"segemehl",$4,$6}' segemehl_${sampleID}.circ.sum.bed> ${sampleID}_modify_segemehl.candidates.bed
+            awk 'NR > 1 {OFS="\t";print $1,$2,$3,"segemehl",$4,$6}' segemehl_!{sampleID}.circ.sum.bed> !{sampleID}_modify_segemehl.candidates.bed
             '''
     }
 
@@ -1460,7 +1446,7 @@ if(run_find_circ){
         | sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 \
         > !{sampleID}_modify_find_circ.temp.bed
         
-        python !{baseDir}/bin/quchong.py !{sampleID}_modify_find_circ.temp.bed !{sampleID}_modify_find_circ.candidates.bed
+        cp!{sampleID}_modify_find_circ.temp.bed !{sampleID}_modify_find_circ.candidates.bed
         fi
         '''
     }
@@ -1512,228 +1498,6 @@ if(run_find_circ){
 ========================================================================================
 */
 
-
-
-
-//  $$\                 $$\  $$$$$$\           
-//  $$ |                \__|$$  __$$\          
-//  $$ |  $$\ $$$$$$$\  $$\ $$ /  \__|$$$$$$\  
-//  $$ | $$  |$$  __$$\ $$ |$$$$\    $$  __$$\ 
-//  $$$$$$  / $$ |  $$ |$$ |$$  _|   $$$$$$$$ |
-//  $$  _$$<  $$ |  $$ |$$ |$$ |     $$   ____|
-//  $$ | \$$\ $$ |  $$ |$$ |$$ |     \$$$$$$$\ 
-//  \__|  \__|\__|  \__|\__|\__|      \_______|
-//                                             
-//                                             
-//                                             
-
-
-if(run_knife){
-    process Knife{
-        tag "$sampleID"
-        publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', overwrite: true
-
-        input:
-        set sampleID, file (query_file) from fastpfiles_knife
-
-
-
-        output:
-        set sampleID, file ('*.txt') into knifefiles
-
-
-        shell:
-        knifedir = run_knifedir
-        knfieprefix = run_knifeprefix
-        if(params.singleEnd){
-            '''
-            ln -s !{knifedir} ./
-            
-            pwd | awk '{print "sh completeRun.sh",$0,"complete",$0,"testData 15", !{knfieprefix}, "circReads 40 1 2>&1"}' | bash
-
-            cp ./testData/circReads/combinedReports/naiveunzip* ./
-            '''
-        }else{
-            '''
-            ln -s !{knifedir} ./
-        
-            pwd | awk '{print "sh completeRun.sh",$0,"appended",$0,"testData 13", !{knfieprefix}, "circReads 40 1 2>&1"}' | bash
-            
-            cp ./testData/circReads/combinedReports/naiveunzip* ./
-            '''
-        }
-
-    }
-
-    /*
-    ========================================================================================
-                                the sixth tool : knife
-                                produce the bed6 file
-    ========================================================================================
-    */
-    process Knife_Bed{
-        tag "$sampleID"
-        publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', pattern:"*candidates.bed", overwrite: true
-
-        input:
-        set sampleID , file ( query_file ) from knifefiles
-        
-
-        output:
-        file ('*candidates.bed') into modify_knifefiles
-
-
-        shell :
-        '''
-        if [ $((`cat !{query_file} | grep -v reg | wc -l`)) == 1 ];then
-        touch !{sampleID}_modify_knife.candidates.bed
-        else
-        cat !{query_file} \
-        | awk 'NR>1{print $10}' \
-        > reads.txt
-
-        cat !{query_file} \
-        | awk 'NR>1{print $1}' \
-        | awk -F"|" '{print $1}' \
-        > chr.txt
-
-        cat !{query_file} \
-        | awk 'NR>1{print $1}' \
-        | awk -F"|" '{print $5}' \
-        > strand.txt
-
-        cat !{query_file} \
-        | awk 'NR>1{print $1}' \
-        | awk -F"|" '{print $2}' \
-        | awk -F":" '{print $2}' \
-        > start.txt
-
-        cat !{query_file} \
-        | awk 'NR>1{print $1}' \
-        | awk -F"|" '{print $3}' \
-        | awk -F":" '{print $2}' \
-        > end.txt
-
-        cat !{query_file} \
-        | awk 'NR>1{print $1}' \
-        | awk -F"|" '{print $4}' \
-        > kind.txt
-
-        paste chr.txt start.txt end.txt reads.txt strand.txt kind.txt \
-        | grep -v reg \
-        | grep -v chrM \
-        | awk '{if($5=="-") print $1 "\t" $2 "\t" $3 "\t" "knife" "\t" $4 "\t" $5 ; else print $1 "\t" $3 "\t" $2 "\t" "knife" "\t" $4 "\t" $5 }' \
-        > temp.bed
-
-        python !{baseDir}/bin/quchong.py temp.bed !{sampleID}_modify_knife.candidates.bed
-        fi
-        '''
-
-    }
-
-    /*
-    ========================================================================================
-                                the sixth tool : knife
-                                    produce the matrix
-    ========================================================================================
-    */
-    process Knife_Matrix{
-        publishDir "${params.outdir}/circRNA_Identification/KNIFE", mode: 'copy', pattern: "*.matrix", overwrite: true
-
-        input:
-        file (query_file) from modify_knifefiles.collect()
-        file gtffile
-
-        output:
-
-        file ('knife_merge.matrix') into (Output_knife,Merge_knife,Plot_knife_cor,Plot_knife)
-        file ('annoted_knife_merge_annote.txt') into (Cor_knife,De_knife)
-        file ('Name_knife.txt') into Name_knife
-        
-
-        shell :
-        '''
-    # merge sample into matrix 
-        java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o knife -sup 5 -merge
-        mv knife_merge.bed knife_merge.matrix
-        # annotate circRNA with GTFs
-        java -jar !{baseDir}/bin/circpipetools.jar -i knife_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
-        sed -i 's/_modify_knife.candidates.bed//g' knife_merge.matrix
-
-        echo -e "knife" > Name_knife.txt
-        '''
-    }
-
-    /*
-    ========================================================================================
-                                    the sixth tool : knife
-                                    Differential Expression
-    ========================================================================================
-    */
-    if(!params.skipDE){
-        process Knife_DE{
-            publishDir "${params.outdir}/DE_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
-
-            input:
-            file (anno_file) from De_knife
-            
-            file designfile
-            file comparefile
-            file (matrix_file) from Plot_knife
-            
-
-            output:
-            file ('*') into end_knife
-
-            shell:
-            '''
-            Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-            '''
-        }
-    }
-
-    /*
-    ========================================================================================
-                                    the sixth tool : knife
-                                            Correlation
-    ========================================================================================
-    */
-    if(params.mRNA){
-        process Knife_Cor{
-            publishDir "${params.outdir}/Corrrelation_Analysis/Knife", mode: 'copy', pattern: "*", overwrite: true
-
-            input:
-            file (matrix_file) from Plot_knife_cor
-            file (anno_file) from Cor_knife
-            file mRNAfile
-            
-            
-
-            when:
-            run_knife && (!params.skipDE)
-
-            output:
-            file ('*') into cor_plot_knife
-
-            shell:
-            '''
-            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
-            '''
-        }
-    }
-
-
-}else{
-    Merge_knife=Channel.empty()
-    Name_knife=Channel.empty()
-}
-/*
-========================================================================================
-                              the sixth tool : knife
-                                   run the knife
-========================================================================================
-*/
 
 /*
 ========================================================================================
@@ -1908,12 +1672,11 @@ if(params.singleEnd){
     }
 
 }else{
-    BSJ_all_merge_mapping_bamfile=BSJ_mapping_bamfile.combine(BWAsortedBamfile,by:0)
     process Recount_estimate_step_paired{
         tag "${sampleID}"
 
         input:
-              set sampleID,file(bsjBamfile),file(allBam),file(allBai) from BSJ_all_merge_mapping_bamfile
+              set sampleID,file(bsjBamfile),file(allBai) from BSJ_mapping_bamfile
 
         output:
             set sampleID,file("${sampleID}.count") into Single_sample_recount
@@ -1922,7 +1685,7 @@ if(params.singleEnd){
             run_multi_tools
         script:
         """
-         java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count -allbam ${allBam}
+         java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count --paired
         
         """
         
