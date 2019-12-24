@@ -132,7 +132,6 @@ png("distance_raw.png",width=2400, height=1200, res = 300)
 f2a_circRNA  
 dev.off()
 
-
 ##################density row line
 density_plot_df <- data.frame()
 for (i in unique(circRNA_distance_df$type) ){

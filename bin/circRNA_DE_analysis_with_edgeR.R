@@ -8,7 +8,7 @@ options(stringsAsFactors=F)
 
 ########consent init######
 p_value <- 0.05 # p value of FDR
-lfc <- 0.58  #logFC
+lfc <- log2(1.5)  #logFC
 
 #######arguments#########
 
@@ -87,14 +87,13 @@ PCA_plot(DE_list,Circ_norm.mat[DE_list,],colData)
 
 dev.off()
 
-####################DE enrichment analysis
+###########DE enrichment analysis###########
 
 DE_circ_gene = filter(Circ_edgeR.res.anno,id%in%DE_list)
 gene_list=unique(DE_circ_gene$symbol)
 length(gene_list)
 
 GoKegg(gene_list,outkegg,"DE_circ")
-
 
 
 } else {
