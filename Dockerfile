@@ -3,9 +3,13 @@ LABEL description="Docker image containing all requirements for nf-core/circpipe
 
 COPY environment.yml ./
 
-RUN conda env create -f /environment.yml && conda clean -a
+RUN conda create -n mapsplice -c bioconda mapsplice=2.2.1
 
 ENV PATH /opt/conda/bin:$PATH
+ENV PATH /opt/conda/envs/mapsplice/bin:$PATH
+
+RUN conda env create -f /environment.yml && conda clean -a
+
 ENV PATH /opt/conda/envs/nf-core-cirpipe-1.0dev/bin:$PATH
 
 #install ciri
@@ -18,22 +22,18 @@ RUN wget http://sourceforge.net/projects/ciri/files/CIRI-full/CIRI-full_v2.0.zip
     echo "export PATH=\"$(pwd)/CIRI/bin/CIRI_v2.0.6:\$PATH\"" >> ~/.bashrc && \
     . ~/.bashrc
 
-ENV PATH $(pwd)/CIRI/bin/CIRI_v2.0.6:$PATH
+ENV PATH /CIRI/bin/CIRI_v2.0.6:$PATH
 
 #install find_circ
 RUN git clone http://github.com/marvin-jens/find_circ.git && \
     sed -i '1d' ./find_circ/unmapped2anchors.py && \
-    sed -i "1i\\#\!/usr/bin/python" ./find_circ/unmapped2anchors.py && \
+    sed -i "1i\\#\!/usr/bin/env python" ./find_circ/unmapped2anchors.py && \
     sed -i '1d' ./find_circ/find_circ.py && \
-    sed -i "1i\\#\!/usr/bin/python" ./find_circ/find_circ.py && \
+    sed -i "1i\\#\!/usr/bin/env python" ./find_circ/find_circ.py && \
     chmod a+x ./find_circ/* && \
     echo "export PATH=\"$(pwd)/find_circ:\$PATH\"" >> ~/.bashrc && \
     . ~/.bashrc
 
-ENV PATH $(pwd)/find_circ:$PATH
+ENV PATH /find_circ:$PATH
 
-
-# install saifish_cir.py
-# cufflinks 
-# saifish 
-# gffutils 
+RUN echo "source activate nf-core-cirpipe-1.0dev" >> ~/.bashrc

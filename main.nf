@@ -43,7 +43,7 @@ def helpMessage() {
       --annotationfile              Different annotation files from GENCODE database for annotating circRNAs. 
                                     e.g. [gencode.v25.annotation.gtf]/[gencode.v25.annotation.bed]/[hg38_gencode.txt]
       --ciridir/--find_circdir/
-      --mapsdir/--knifedir          Home folder of ciri/find_circ/mapsplice/knife installed location
+      --mapsdir/          Home folder of ciri/find_circ/mapsplice installed location
 
     Options:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
@@ -52,7 +52,7 @@ def helpMessage() {
                                     If not set, the pipeline will create the index itself.
       --singleEnd                   Specify that the reads are single ended
       --selectTools                 Specify which tools should be use. 
-                                    1 for circexplorer2, 2 for ciri, 3 for find_circ, 4 for mapsplice, 5 for segemehl, 6 for knife. 
+                                    1 for circexplorer2, 2 for ciri, 3 for find_circ, 4 for mapsplice, 5 for segemehl
                                     For example, you can set 1,2,3,4,5 for running five tools in the same time.
       --skipDE                      skip differential expression analysis                  
       --outdir                      The output directory of the results
@@ -133,12 +133,7 @@ if( toolstring.indexOf("5")!=-1){
 }else{
     run_segemehl = false
 }
-if( toolstring.indexOf("6")!=-1 ){
-    run_knife = true
-    number_of_tools=number_of_tools+1
-}else{
-    run_knife = false
-}
+
 
 // jugde wether multiple tools involved 
 run_multi_tools=false
@@ -267,7 +262,6 @@ log.info LikeletUtils.print_yellow("Find_circ :                     ") + Likelet
 log.info LikeletUtils.print_yellow("Ciri :                          ") + LikeletUtils.print_green(run_ciri)
 log.info LikeletUtils.print_yellow("Mapsplice :                     ") + LikeletUtils.print_green(run_mapsplice)
 log.info LikeletUtils.print_yellow("Segemehl :                      ") + LikeletUtils.print_green(run_segemehl)
-log.info LikeletUtils.print_yellow("Knife :                         ") + LikeletUtils.print_green(run_knife)
 log.info "\n"
 log.info LikeletUtils.print_yellow("==================================Input files selected==========================")
 log.info LikeletUtils.print_yellow("Reads :                         ") + LikeletUtils.print_green(params.reads)
@@ -359,7 +353,7 @@ if(run_find_circ){
 
 
             output:
-            file "*.bt2" into Bowtie2index, Bowtie2index_fc,Bowtie2_build_knife
+            file "*.bt2" into Bowtie2index, Bowtie2index_fc
 
             script:
             """
@@ -391,7 +385,7 @@ if(run_mapsplice){
             file genomefile
 
             output:
-            file "*.ebwt" into Bowtieindex,Bowtie_build_knife
+            file "*.ebwt" into Bowtieindex
 
             script:
             """
@@ -402,7 +396,7 @@ if(run_mapsplice){
     }
 }else{
     // avoiding throw errors  by nextflow
-    (Bowtieindex,Bowtie_build_knife)=Channel.empty().into(2)
+    Bowtieindex=Channel.empty()
     
 
 }
@@ -471,12 +465,6 @@ if(run_segemehl){
     Segindex=Channel.empty()
 }
 
-// check knife index , plz be causion of this tools. as this tools required a lot index for analysis and also need a fairly long running time 
-if(run_knife){
-     
-}else{
-    
-}
 
 log.info LikeletUtils.print_green("==========Index pass!...==========")
 log.info LikeletUtils.print_green("==========Start running CircPipe...==========")
@@ -490,7 +478,7 @@ log.info LikeletUtils.print_green("==========Start running CircPipe...==========
 */
 
 if(params.skip_fastp){
-    (fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)=read_pairs_fastp.into(8)
+    (Fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,Fastpfiles_segemehl,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)=read_pairs_fastp.into(8)
     fastp_for_waiting=Channel.empty()
     Fastp_for_multiqc=Channel.empty()
 }else{
@@ -502,7 +490,7 @@ if(params.skip_fastp){
         set sampleID, file(query_file) from read_pairs_fastp
 
         output:
-        set sampleID, file ('unzip_fastp_*') into (Fastqfor_swhich,fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,fastpfiles_segemehl,fastpfiles_knife,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)
+        set sampleID, file ('unzip_fastp_*') into (Fastqfor_swhich,Fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,Fastpfiles_segemehl,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)
         file ('*.html') into fastp_for_waiting
         file ('*_fastp.json') into Fastp_for_multiqc
 
@@ -992,7 +980,7 @@ if(run_mapsplice){
             tag "$sampleID"
 
             input:
-            set sampleID, file (query_file) from fastpfiles_mapsplice
+            set sampleID, file (query_file) from Fastpfiles_mapsplice
             output:
             set sampleID, file("*.fastq") into fastqraw_mapslice
             
@@ -1178,7 +1166,7 @@ if(run_segemehl){
                 publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
 
                 input:
-                set sampleID, file (query_file) from fastpfiles_segemehl
+                set sampleID, file (query_file) from Fastpfiles_segemehl
                 file genomefile
                 file index from Segindex.collect()
 
@@ -1541,8 +1529,8 @@ if(number_of_tools==1){
     Tools_merge_html=Channel.empty()
 
 }else{
-    Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl, Merge_knife )
-    Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl, Name_knife )
+    Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl )
+    Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl )
 
     /*
     ========================================================================================
@@ -1817,16 +1805,6 @@ if(params.singleEnd){
         Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
         '''
     }
-    process Finder_novel {
-      input:
-      
-      output:
-      
-      script:
-      """
-      
-      """
-    }
 
  process Venn{
         publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
@@ -1941,9 +1919,7 @@ workflow.onComplete {
     <tr>
     <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Segemehl : ${run_segemehl} </pre></td>
     </tr>
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Knife : ${run_knife} </pre></td>
-    </tr>
+
     </tbody>
     </table>
 
