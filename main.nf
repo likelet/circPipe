@@ -1434,7 +1434,7 @@ if(run_find_circ){
         | sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 \
         > !{sampleID}_modify_find_circ.temp.bed
         
-        cp!{sampleID}_modify_find_circ.temp.bed !{sampleID}_modify_find_circ.candidates.bed
+        cp !{sampleID}_modify_find_circ.temp.bed !{sampleID}_modify_find_circ.candidates.bed
         fi
         '''
     }
