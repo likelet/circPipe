@@ -2,7 +2,7 @@
 #!/usr/bin/env Rscript
 # Script to plot venn diagram for used tools
 options(stringsAsFactors=F)
-library(getopt)
+#library(getopt)
 library(readr)
 library(dplyr)
 library (VennDiagram)
@@ -12,21 +12,22 @@ args <-commandArgs(T)
 
 #################
 
+tools_matrix=args[1]
+outprefix=args[2]
+#arguments <- matrix(c(
+#  'help', 'h', 0, "logical",
+#  'tools_matrix' , 't', 2, "character",
+#  'outprefix','o',1,'character'
+#), ncol=4, byrow=T)
 
-arguments <- matrix(c(
-  'help', 'h', 0, "logical",
-  'tools_matrix' , 't', 2, "character",
-  'outprefix','o',1,'character'
-), ncol=4, byrow=T)
 
 
+#opt <- getopt(arguments)
 
-opt <- getopt(arguments)
-
-if (!is.null(opt$help) || is.null(opt$tools_matrix) || is.null(opt$outprefix) ) {
-  cat(paste(getopt(opt, usage = T), "\n"))
-  q()
-}
+#if (!is.null(opt$help) || is.null(opt$tools_matrix) || is.null(opt$outprefix) ) {
+#  cat(paste(getopt(opt, usage = T), "\n"))
+#  q()
+#}
 
 
 checkReadable <- function(filename) {
@@ -39,8 +40,8 @@ checkReadable <- function(filename) {
 
 
 
-tools_matrix = opt$tools_matrix 
-outprefix = opt$outprefix
+tools_matrix = tools_matrix 
+outprefix = outprefix
 checkReadable(tools_matrix)
 
 print(tools_matrix)

@@ -487,10 +487,10 @@ if(params.skip_fastp){
         publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
 
         input:
-        set sampleID, file(query_file) from read_pairs_fastp
+        tuple val(sampleID),  file(query_file) from read_pairs_fastp
 
         output:
-        set sampleID, file ('unzip_fastp_*') into (Fastqfor_swhich,Fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,Fastpfiles_segemehl,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)
+        tuple val(sampleID),  file ('unzip_fastp_*') into (Fastqfor_swhich,Fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,Fastpfiles_segemehl,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)
         file ('*.html') into fastp_for_waiting
         file ('*_fastp.json') into Fastp_for_multiqc
 
@@ -549,11 +549,11 @@ if(run_circexplorer2){
         publishDir "${params.outdir}/Alignment/STAR", mode: 'link', overwrite: true
 
         input:
-        set sampleID, file(query_file) from Fastpfiles_star
+        tuple val(sampleID),  file(query_file) from Fastpfiles_star
         file index from starindex.collect()
 
         output:
-        set sampleID, file ('*.junction') into starfiles
+        tuple val(sampleID),  file ('*.junction') into starfiles
         file ('*.out') into Star_multiqc
 
 
@@ -569,6 +569,7 @@ if(run_circexplorer2){
                 --readFilesIn ${query_file} \
                 --readFilesCommand zcat \
                 --outFileNamePrefix star_${sampleID}_
+                --outSAMtype BAM Unsorted
                 """
             }else{
                 """
@@ -579,6 +580,7 @@ if(run_circexplorer2){
                 --readFilesCommand zcat \
                 --readFilesIn ${query_file[0]} ${query_file[1]} \
                 --outFileNamePrefix star_${sampleID}_
+                --outSAMtype BAM Unsorted
                 """
             }
         }else{
@@ -590,6 +592,7 @@ if(run_circexplorer2){
                 --genomeDir ${star_run_index} \
                 --readFilesIn ${query_file} \
                 --outFileNamePrefix star_${sampleID}_
+                --outSAMtype BAM Unsorted
                 """
             }else{
                 """
@@ -599,6 +602,7 @@ if(run_circexplorer2){
                 --genomeDir ${star_run_index} \
                 --readFilesIn ${query_file[0]} ${query_file[1]} \
                 --outFileNamePrefix star_${sampleID}_
+                --outSAMtype BAM Unsorted
                 """
             }   
         }
@@ -617,12 +621,12 @@ if(run_circexplorer2){
         publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', overwrite: true
 
         input:
-        set sampleID, file (query_file) from starfiles
+        tuple val(sampleID),  file (query_file) from starfiles
         file annotationfile
         file genomefile
 
         output:
-        set sampleID, file ('*known.txt') into circexplorer2files
+        tuple val(sampleID),  file ('*known.txt') into circexplorer2files
 
 
 
@@ -652,7 +656,7 @@ if(run_circexplorer2){
         publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         input:
-        set sampleID, file (query_file) from circexplorer2files
+        tuple val(sampleID),  file (query_file) from circexplorer2files
         
 
         output:
@@ -687,8 +691,6 @@ if(run_circexplorer2){
 
         input:
         file (query_file) from modify_circexplorer2.collect()
-        
-        file designfile
         file gtffile
 
         output:
@@ -807,13 +809,13 @@ if(run_ciri){
         publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
 
         input:
-        set sampleID, file (query_file) from Fastpfiles_bwa
+        tuple val(sampleID),  file (query_file) from Fastpfiles_bwa
         file index from bwaindex.collect()
         file genomefile
 
 
         output:
-        set sampleID, file ('*.sam') into BwaSamfile
+        tuple val(sampleID),  file ('*.sam') into BwaSamfile
 
         shell:
         
@@ -854,12 +856,12 @@ if(run_ciri){
         publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', overwrite: true
 
         input:
-        set sampleID, file (query_file) from BwaSamfile
+        tuple val(sampleID),  file (query_file) from BwaSamfile
         file gtffile
         file genomefile
 
         output:
-        set sampleID, file ('*.txt') into cirifiles
+        tuple val(sampleID),  file ('*.txt') into cirifiles
         when:
          run_ciri
         script:
@@ -886,7 +888,7 @@ if(run_ciri){
         publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         input:
-        set sampleID, file (query_file) from cirifiles
+        tuple val(sampleID),  file (query_file) from cirifiles
         
 
         output:
@@ -896,13 +898,14 @@ if(run_ciri){
         run_ciri
         shell :
         '''
+        # conver to bed file and be cautious that convert 1-based coordinate to 0-based 
             if [ $((`cat !{query_file} | wc -l`)) == 1 ];then
             touch !{sampleID}_modify_ciri.candidates.bed
             else
             cat !{query_file} \
             | sed -e '1d' \
             | grep -v chrM \
-            | awk '{print $2 "\t" $3 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
+            | awk '{print $2-1 "\t" $3 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
             > !{sampleID}_modify_ciri.temp.bed
             
             cp !{sampleID}_modify_ciri.temp.bed !{sampleID}_modify_ciri.candidates.bed
@@ -980,9 +983,9 @@ if(run_mapsplice){
             tag "$sampleID"
 
             input:
-            set sampleID, file (query_file) from Fastpfiles_mapsplice
+            tuple val(sampleID),  file (query_file) from Fastpfiles_mapsplice
             output:
-            set sampleID, file("*.fastq") into fastqraw_mapslice
+            tuple val(sampleID),  file("*.fastq") into fastqraw_mapslice
             
             shell:
             if(params.singleEnd){
@@ -1002,14 +1005,14 @@ if(run_mapsplice){
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', overwrite: true
 
         input:
-        set sampleID, file (query_file) from fastqraw_mapslice
+        tuple val(sampleID),  file (query_file) from fastqraw_mapslice
         file gtffile
         file refmapsplice_dir from Refmapsplice
         file outdir
         file index from Bowtieindex.collect()
 
         output:
-        set sampleID, file('*') into mapsplicefiles
+        tuple val(sampleID),  file('*') into mapsplicefiles
 
 
 
@@ -1063,7 +1066,7 @@ if(run_mapsplice){
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         input:
-        set sampleID, file (query_file) from mapsplicefiles
+        tuple val(sampleID),  file (query_file) from mapsplicefiles
         file outdir
         
 
@@ -1089,7 +1092,7 @@ if(run_mapsplice){
 
         paste !{sampleID}_mapsplice_temp.bed !{sampleID}_mapsplice_temp1.bed output_mapsplice_!{sampleID}/circular_RNAs.txt \
         | grep -v chrM \
-        | awk '{if($2=="-") print $1 "\t" $4 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
+        | awk '{if($2=="-") print $1 "\t" $4-1 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5-1 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
         > !{sampleID}_modify_mapsplice.temp.bed
         
         cp !{sampleID}_modify_mapsplice.temp.bed mapsplice_!{sampleID}_modify.candidates.bed
@@ -1166,12 +1169,12 @@ if(run_segemehl){
                 publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
 
                 input:
-                set sampleID, file (query_file) from Fastpfiles_segemehl
+                tuple val(sampleID),  file (query_file) from Fastpfiles_segemehl
                 file genomefile
                 file index from Segindex.collect()
 
                 output:
-                set sampleID, file ("segemehl_${sampleID}.circ.sum.bed") into segemehlfiles
+                tuple val(sampleID),  file ("segemehl_${sampleID}.circ.sum.bed") into segemehlfiles
 
                 shell:
                 if(params.singleEnd){
@@ -1308,12 +1311,12 @@ if(run_find_circ){
         publishDir "${params.outdir}/Alignment/Bowtie2", mode: 'link', overwrite: true
 
         input:
-        set sampleID, file (query_file) from Fastpfiles_bowtie2
+        tuple val(sampleID),file (query_file) from Fastpfiles_bowtie2
         file index from Bowtie2index.collect()
 
         output:
-        set sampleID, file ('bowtie2_unmapped_*') into Bowtie2files
-        set sampleID, file ('bowtie2_unmapped_*') into Bowtie2files_for_autocirc
+        tuple val(sampleID), file ('bowtie2_unmapped_*') into Bowtie2files
+        tuple val(sampleID), file ('bowtie2_unmapped_*') into Bowtie2files_for_autocirc
         file ('*.log') into Bowtie2_multiqc
 
 
@@ -1371,12 +1374,12 @@ if(run_find_circ){
         publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', overwrite: true
 
         input:
-        set sampleID, file (query_file) from Bowtie2files
+        tuple val(sampleID), file (query_file) from Bowtie2files
         file genomefile
         file index from Bowtie2index_fc.collect()
 
         output:
-        set sampleID, file ('*splice_sites.bed') into find_circfiles
+        tuple val(sampleID),file ('*splice_sites.bed') into find_circfiles
 
 
 
@@ -1415,7 +1418,7 @@ if(run_find_circ){
         publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         input:
-        set sampleID, file (query_file) from find_circfiles
+        tuple val(sampleID),  file (query_file) from find_circfiles
         
 
         output:
@@ -1568,19 +1571,24 @@ if(number_of_tools==1){
         do 
             awk '{OFS="\t"}NR>1{print  $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t1"}' $file > ${file%%merge.matrix}merge_temp.matrix
         done 
-        java -jar !{baseDir}/bin/circpipetools.jar -i merge_temp.matrix -o tools -merge 
-
-        awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merge.matrix 
         
-        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' all_tools_merge.matrix  | awk '$3 - $2 >= 100 && $3 - $2 <=100000 ' >  all_tools_merge_filtered.matrix 
+        # java -jar !{baseDir}/bin/circpipetools.jar -i merge_temp.matrix -o tools -merge  ----deprecated code 
+
+        # merge and get ven merge matrix 
+        java -jar !{baseDir}/bin/circpipetools.jar -collapse  -dir ./ -suffix _merge_temp.matrix -out Merged_matrix_forVen.tsv -out2 tools_merge.bed 
+
+        awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merged.matrix 
+        
+        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' all_tools_merged.matrix  | awk '$3 - $2 >= 100 && $3 - $2 <=100000 ' >  all_tools_merge_filtered.matrix 
         
         # annotation
         java -jar !{baseDir}/bin/bed1114.jar -i all_tools_merge_filtered.matrix -o annote_  -gtf !{gtffile} -uniq 
-
-        # for Ven analysis 
-        java -jar !{baseDir}/bin/cjrcpipetools.jar -collapse !{matrix_file} -dir ./ -suffix _merge.matrix -out Merged_matrix_forVen.tsv
-
         sed -i "1ichr\tchromStart\tchromEnd\tname\tscore\tstrand\tstrand2\tensemble_id\tsymbol\ttranscript\tgene_feature\ttype1\ttype2\tdistant_from_start" annote_all_tools_merge_filtered_annote.txt 
+
+      
+        
+
+        
         
         '''
     }
@@ -1619,12 +1627,12 @@ if(number_of_tools==1){
     }
 
     process Recount_generate_BSJ_Bamfile {
-      tag "${sampleID}"
+      tag "$sampleID"
       input:
             file index from Candidate_circRNA_index.collect()
-            set sampleID, file(query_file) from Fastpfiles_recount
+            tuple val(sampleID),  file(query_file) from Fastpfiles_recount
       output:
-            set sampleID,file("${sampleID}.bam") into BSJ_mapping_bamfile
+            tuple val(sampleID),file("${sampleID}.bam") into BSJ_mapping_bamfile
       when:
             run_multi_tools
       script:
@@ -1644,12 +1652,12 @@ if(params.singleEnd){
     process Recount_estimate_step_single{
 
         input:
-            set sampleID,file(bsjBamfile) from BSJ_mapping_bamfile
+            tuple val(sampleID), file(bsjBamfile) from BSJ_mapping_bamfile
 
             
 
         output:
-            set sampleID,file("${sampleID}.count") into Single_sample_recount
+            tuple val(sampleID),file("${sampleID}.count") into Single_sample_recount
 
         when:
             run_multi_tools
@@ -1661,13 +1669,13 @@ if(params.singleEnd){
 
 }else{
     process Recount_estimate_step_paired{
-        tag "${sampleID}"
+        tag "$sampleID"
 
         input:
-              set sampleID,file(bsjBamfile),file(allBai) from BSJ_mapping_bamfile
+              tuple val(sampleID), file(bsjBamfile) from BSJ_mapping_bamfile
 
         output:
-            set sampleID,file("${sampleID}.count") into Single_sample_recount
+           tuple val(sampleID),file("${sampleID}.count") into Single_sample_recount
 
         when:
             run_multi_tools

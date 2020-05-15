@@ -16,7 +16,7 @@ dependencies:
   - bowtie=1.2.2
   - bowtie2=2.3.4.3
   - samtools=1.9
-  - star=2.6.1b
+  - star=2.7.3a
   - circexplorer2=2.3.3
   - r-ggplot2=3.1.0
   - r-pheatmap=1.0.10
