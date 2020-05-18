@@ -568,8 +568,8 @@ if(run_circexplorer2){
                 --genomeDir ${star_run_index} \
                 --readFilesIn ${query_file} \
                 --readFilesCommand zcat \
-                --outFileNamePrefix star_${sampleID}_
-                --outSAMtype BAM Unsorted
+                --outFileNamePrefix star_${sampleID}_ \
+                --outSAMtype None
                 """
             }else{
                 """
@@ -579,8 +579,8 @@ if(run_circexplorer2){
                 --genomeDir ${star_run_index} \
                 --readFilesCommand zcat \
                 --readFilesIn ${query_file[0]} ${query_file[1]} \
-                --outFileNamePrefix star_${sampleID}_
-                --outSAMtype BAM Unsorted
+                --outFileNamePrefix star_${sampleID}_ \
+                --outSAMtype None
                 """
             }
         }else{
@@ -591,8 +591,8 @@ if(run_circexplorer2){
                 --chimSegmentMin 10 \
                 --genomeDir ${star_run_index} \
                 --readFilesIn ${query_file} \
-                --outFileNamePrefix star_${sampleID}_
-                --outSAMtype BAM Unsorted
+                --outFileNamePrefix star_${sampleID}_ \
+                --outSAMtype None
                 """
             }else{
                 """
@@ -601,8 +601,8 @@ if(run_circexplorer2){
                 --chimSegmentMin 10 \
                 --genomeDir ${star_run_index} \
                 --readFilesIn ${query_file[0]} ${query_file[1]} \
-                --outFileNamePrefix star_${sampleID}_
-                --outSAMtype BAM Unsorted
+                --outFileNamePrefix star_${sampleID}_ \
+                --outSAMtype None
                 """
             }   
         }
@@ -675,7 +675,7 @@ if(run_circexplorer2){
         | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
         > !{sampleID}_modify_circexplorer2.temp.bed
         
-        cp !{sampleID}_modify_circexplorer2.temp.bed circexplorer2_!{sampleID}_modify.candidates.bed
+        cp !{sampleID}_modify_circexplorer2.temp.bed circexplorer2_!{sampleID}.candidates.bed
         fi
         '''
     }
@@ -806,7 +806,7 @@ if(run_circexplorer2){
 if(run_ciri){
         process Bwa{
         tag "$sampleID"
-        publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
+        //publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
 
         input:
         tuple val(sampleID),  file (query_file) from Fastpfiles_bwa
@@ -853,7 +853,7 @@ if(run_ciri){
     */
     process Ciri{
         tag "$sampleID"
-        publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', overwrite: true
+        publishDir "${params.outdir}/circRNA_Identification/CIRI", pattern: "*.txt",mode: 'copy', overwrite: true
 
         input:
         tuple val(sampleID),  file (query_file) from BwaSamfile
@@ -905,10 +905,10 @@ if(run_ciri){
             cat !{query_file} \
             | sed -e '1d' \
             | grep -v chrM \
-            | awk '{print $2-1 "\t" $3 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
+            | awk '{print $2 "\t" $3-1 "\t" $4 "\t" "ciri" "\t" $5 "\t" $11}' \
             > !{sampleID}_modify_ciri.temp.bed
             
-            cp !{sampleID}_modify_ciri.temp.bed !{sampleID}_modify_ciri.candidates.bed
+            cp !{sampleID}_modify_ciri.temp.bed ciri_!{sampleID}.candidates.bed
             fi
             '''
     }
@@ -1031,7 +1031,7 @@ if(run_mapsplice){
             --gene-gtf ${gtffile} \
             -c ${refmapsplice_dir} \
             -1 ${sampleID}.fastq \
-	    --bam \
+	        --bam \
             -o output_mapsplice_${sampleID} 
             """
         }else{
@@ -1048,7 +1048,7 @@ if(run_mapsplice){
             -c ${refmapsplice_dir} \
             -1 ${sampleID}_1.fastq \
             -2 ${sampleID}_2.fastq \
-	    --bam \
+	        --bam \
             -o output_mapsplice_${sampleID} 
             """
         }
@@ -1095,7 +1095,7 @@ if(run_mapsplice){
         | awk '{if($2=="-") print $1 "\t" $4-1 "\t" $5 "\t" "mapsplice" "\t" $7 "\t" $2 ; else print $1 "\t" $5-1 "\t" $4 "\t" "mapsplice" "\t" $7 "\t" $2 }' \
         > !{sampleID}_modify_mapsplice.temp.bed
         
-        cp !{sampleID}_modify_mapsplice.temp.bed mapsplice_!{sampleID}_modify.candidates.bed
+        cp !{sampleID}_modify_mapsplice.temp.bed mapsplice_!{sampleID}.candidates.bed
         fi
         '''
     }
@@ -1247,7 +1247,7 @@ if(run_segemehl){
             shell :
             '''
             
-            awk 'NR > 1 {OFS="\t";print $1,$2,$3,"segemehl",$4,$6}' segemehl_!{sampleID}.circ.sum.bed> !{sampleID}_modify_segemehl.candidates.bed
+            awk 'NR > 1 {OFS="\t";print $1,$2,$3,"segemehl",$4,$6}' segemehl_!{sampleID}.circ.sum.bed> segemehl_!{sampleID}.candidates.bed
             '''
     }
 
@@ -1308,7 +1308,7 @@ if(run_segemehl){
 if(run_find_circ){
     process Bowtie2{
         tag "$sampleID"
-        publishDir "${params.outdir}/Alignment/Bowtie2", mode: 'link', overwrite: true
+        publishDir "${params.outdir}/Alignment/Bowtie2", pattern: "*.log", mode: 'link', overwrite: true
 
         input:
         tuple val(sampleID),file (query_file) from Fastpfiles_bowtie2
@@ -1437,7 +1437,7 @@ if(run_find_circ){
         | sort -t $'\t' -k 1,1 -k 2n,2 -k 3n,3 \
         > !{sampleID}_modify_find_circ.temp.bed
         
-        cp !{sampleID}_modify_find_circ.temp.bed !{sampleID}_modify_find_circ.candidates.bed
+        cp !{sampleID}_modify_find_circ.temp.bed findCirc_!{sampleID}.candidates.bed
         fi
         '''
     }
