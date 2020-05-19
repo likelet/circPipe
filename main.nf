@@ -39,11 +39,12 @@ def helpMessage() {
 
     Configuration:
       --genomefile                  Path to Fasta reference (required if not set in config file)
-      --gtffile/
+      --gtffile
       --annotationfile              Different annotation files from GENCODE database for annotating circRNAs. 
                                     e.g. [gencode.v25.annotation.gtf]/[gencode.v25.annotation.bed]/[hg38_gencode.txt]
-      --ciridir/--find_circdir/
-      --mapsdir/          Home folder of ciri/find_circ/mapsplice installed location
+      --ciridir/--find_circdir
+      --mapsdir                     Home folder of ciri/find_circ/mapsplice installed location
+      --genomebuild                 specific genome build for circplot, default 'hg19'
 
     Options:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
@@ -805,6 +806,7 @@ if(run_circexplorer2){
 */
 if(run_ciri){
         process Bwa{
+        scratch true
         tag "$sampleID"
         //publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
 
@@ -1553,7 +1555,7 @@ if(number_of_tools==1){
 
         output:
         file ('all_tools_merge_filtered.matrix') into (Tools_merge_html,Bed_to_sailfish_cir,Bed_for_recount)
-        file ('annote_all_tools_merge_filtered_annote.txt') into (Bed_for_annotation,Bed_for_merge,De_merge,Cor_merge)
+        file ('tools_merge.bed') into (Bed_for_annotation,De_merge,Cor_merge)
         file ('Merged_matrix_forVen.tsv') into Merged_file_for_Venn
         
 
@@ -1572,7 +1574,6 @@ if(number_of_tools==1){
             awk '{OFS="\t"}NR>1{print  $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t1"}' $file > ${file%%merge.matrix}merge_temp.matrix
         done 
         
-        # java -jar !{baseDir}/bin/circpipetools.jar -i merge_temp.matrix -o tools -merge  ----deprecated code 
 
         # merge and get ven merge matrix 
         java -jar !{baseDir}/bin/circpipetools.jar -collapse  -dir ./ -suffix _merge_temp.matrix -out Merged_matrix_forVen.tsv -out2 tools_merge.bed 
@@ -1581,9 +1582,9 @@ if(number_of_tools==1){
         
         awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' all_tools_merged.matrix  | awk '$3 - $2 >= 100 && $3 - $2 <=100000 ' >  all_tools_merge_filtered.matrix 
         
-        # annotation
-        java -jar !{baseDir}/bin/bed1114.jar -i all_tools_merge_filtered.matrix -o annote_  -gtf !{gtffile} -uniq 
-        sed -i "1ichr\tchromStart\tchromEnd\tname\tscore\tstrand\tstrand2\tensemble_id\tsymbol\ttranscript\tgene_feature\ttype1\ttype2\tdistant_from_start" annote_all_tools_merge_filtered_annote.txt 
+        # annotation （depracated with functions ）
+        # java -jar !{baseDir}/bin/bed1114.jar -i all_tools_merge_filtered.matrix -o annote_  -gtf !{gtffile} -uniq 
+        # sed -i "1ichr\tchromStart\tchromEnd\tname\tscore\tstrand\tstrand2\tensemble_id\tsymbol\ttranscript\tgene_feature\ttype1\ttype2\tdistant_from_start" annote_all_tools_merge_filtered_annote.txt 
 
       
         
@@ -1798,6 +1799,7 @@ if(params.singleEnd){
         file (query_file) from Matrix_for_circos
         file gtffile 
         file faifile
+        file genomefile
 
         when:
         run_multi_tools
@@ -1807,7 +1809,9 @@ if(params.singleEnd){
 
         shell:
         '''
-        java -jar !{baseDir}/bin/circpipetools.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
+        #java -jar !{baseDir}/bin/circpipetools.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
+        annotatePeaks.pl !{bed_file}  !{genomefile} -gtf !{gtffile} > annotated.circRNA.txt
+
         Rscript !{baseDir}/bin/circos.R !{baseDir}/bin/R_function.R  !{params.genomebuild} !{faifile} !{query_file}
         #perl !{baseDir}/bin/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
         Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
