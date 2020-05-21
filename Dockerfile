@@ -27,9 +27,9 @@ ENV PATH /CIRI/bin/CIRI_v2.0.6:$PATH
 #install find_circ
 RUN git clone http://github.com/marvin-jens/find_circ.git && \
     sed -i '1d' ./find_circ/unmapped2anchors.py && \
-    sed -i "1i\\#\!/usr/bin/env python" ./find_circ/unmapped2anchors.py && \
+    sed -i "1i\\#\!/usr/bin/env python2.7" ./find_circ/unmapped2anchors.py && \
     sed -i '1d' ./find_circ/find_circ.py && \
-    sed -i "1i\\#\!/usr/bin/env python" ./find_circ/find_circ.py && \
+    sed -i "1i\\#\!/usr/bin/env python2.7" ./find_circ/find_circ.py && \
     chmod a+x ./find_circ/* && \
     echo "export PATH=\"$(pwd)/find_circ:\$PATH\"" >> ~/.bashrc && \
     . ~/.bashrc
