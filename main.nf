@@ -545,6 +545,8 @@ fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process fir
                                                                                                                                                                                                                                                          
 
 if(run_circexplorer2){
+
+
     process Star{
         tag "$sampleID"
         publishDir "${params.outdir}/Alignment/STAR", mode: 'link', overwrite: true
@@ -805,42 +807,52 @@ if(run_circexplorer2){
 ========================================================================================
 */
 if(run_ciri){
-        process Bwa{
-        scratch true
+        process BwaAndCiri{
         tag "$sampleID"
-        //publishDir "${params.outdir}//Alignment/BWA", mode: 'link', overwrite: true
+        publishDir "${params.outdir}/circRNA_Identification/CIRI", pattern: "*.txt",mode: 'copy', overwrite: true
 
         input:
         tuple val(sampleID),  file (query_file) from Fastpfiles_bwa
         file index from bwaindex.collect()
         file genomefile
+        file gtffile
 
 
         output:
-        tuple val(sampleID),  file ('*.sam') into BwaSamfile
+        tuple val(sampleID),  file ('*.txt') into cirifiles
 
         shell:
         
         if(params.singleEnd){
             """
-            bwa \
-            mem -t ${task.cpus} \
-            -k 15 \
-            -T 19  -M -R \
-            "@RG\\tID:fastp_${sampleID}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${sampleID}" \
-            ${bowtie_run_index} \
-            ${query_file} \
-            > bwa_${sampleID}.mem.sam
+           bwa mem -t ${task.cpus} -T 19 -M -R "@RG\\tID:fastp_${sampleID}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${sampleID}" ${bowtie_run_index} ${query_file[0]} > ${sampleID}.sam 
+
+
+            CIRI2.pl \
+            -T 10 \
+            -F ${genomefile} \
+            -A ${gtffile} \
+            -G CIRI_${sampleID}.log \
+            -I ${sampleID}.sam \
+            -O CIRI_${sampleID}.txt \
+            > CIRI_${sampleID}_detail.log
+             rm ${sampleID}.sam
+
             """
         }else{
             """
-            bwa \
-            mem -t ${task.cpus} \
-            -T 19 -M -R \
-            "@RG\\tID:fastp_${sampleID}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${sampleID}" \
-            ${bowtie_run_index} \
-            ${query_file[0]} ${query_file[1]} \
-            > bwa_${sampleID}.mem.sam
+    
+            bwa mem -t ${task.cpus} -T 19 -M -R "@RG\\tID:fastp_${sampleID}\\tPL:PGM\\tLB:noLB\\tSM:fastp_${sampleID}" ${bowtie_run_index} ${query_file[0]} ${query_file[1]} > ${sampleID}.sam 
+            CIRI2.pl \
+            -T 10 \
+            -F ${genomefile}  \
+            -A ${gtffile} \
+            -G CIRI_${sampleID}.log \
+            -I ${sampleID}.sam \
+            -O CIRI_${sampleID}.txt \
+            > CIRI_${sampleID}_detail.log
+
+            rm ${sampleID}.sam
             """
         }
 
@@ -853,31 +865,31 @@ if(run_ciri){
                                         run the ciri
     ========================================================================================
     */
-    process Ciri{
-        tag "$sampleID"
-        publishDir "${params.outdir}/circRNA_Identification/CIRI", pattern: "*.txt",mode: 'copy', overwrite: true
+    // process Ciri{
+    //     tag "$sampleID"
+    //     publishDir "${params.outdir}/circRNA_Identification/CIRI", pattern: "*.txt",mode: 'copy', overwrite: true
 
-        input:
-        tuple val(sampleID),  file (query_file) from BwaSamfile
-        file gtffile
-        file genomefile
+    //     input:
+    //     tuple val(sampleID),  file (query_file) from BwaSamfile
+    //     file gtffile
+    //     file genomefile
 
-        output:
-        tuple val(sampleID),  file ('*.txt') into cirifiles
-        when:
-         run_ciri
-        script:
-            """
-            CIRI2.pl \
-            -T 10 \
-            -F ${genomefile} \
-            -A ${gtffile} \
-            -G CIRI_${sampleID}.log \
-            -I ${query_file} \
-            -O CIRI_${sampleID}.txt \
-            > CIRI_${sampleID}_detail.log
-            """
-    }
+    //     output:
+    //     tuple val(sampleID),  file ('*.txt') into cirifiles
+    //     when:
+    //      run_ciri
+    //     script:
+    //         """
+    //         CIRI2.pl \
+    //         -T 10 \
+    //         -F ${genomefile} \
+    //         -A ${gtffile} \
+    //         -G CIRI_${sampleID}.log \
+    //         -I ${query_file} \
+    //         -O CIRI_${sampleID}.txt \
+    //         > CIRI_${sampleID}_detail.log
+    //         """
+    // }
 
     /*
     ========================================================================================
@@ -1469,10 +1481,7 @@ if(run_find_circ){
         # merge sample into matrix 
         java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o find_circ -sup 5 -merge
         mv find_circ_merge.bed find_circ_merge.matrix
-        # annotate circRNA with GTFs
-        # java -jar !{baseDir}/bin/circpipetools.jar -i find_circ_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
-
+     
         sed -i 's/_modify_find_circ.candidates.bed//g' find_circ_merge.matrix
 
         echo -e "find_circ" > Name_find_circ.txt
@@ -1582,9 +1591,7 @@ if(number_of_tools==1){
         
         awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' all_tools_merged.matrix  | awk '$3 - $2 >= 100 && $3 - $2 <=100000 ' >  all_tools_merge_filtered.matrix 
         
-        # annotation （depracated with functions ）
-        # java -jar !{baseDir}/bin/bed1114.jar -i all_tools_merge_filtered.matrix -o annote_  -gtf !{gtffile} -uniq 
-        # sed -i "1ichr\tchromStart\tchromEnd\tname\tscore\tstrand\tstrand2\tensemble_id\tsymbol\ttranscript\tgene_feature\ttype1\ttype2\tdistant_from_start" annote_all_tools_merge_filtered_annote.txt 
+       
 
       
         
@@ -1809,12 +1816,12 @@ if(params.singleEnd){
 
         shell:
         '''
-        #java -jar !{baseDir}/bin/circpipetools.jar -i !{bed_file} -o merge_ -gtf !{gtffile} -uniq 
+        #
         annotatePeaks.pl !{bed_file}  !{genomefile} -gtf !{gtffile} > annotated.circRNA.txt
 
         Rscript !{baseDir}/bin/circos.R !{baseDir}/bin/R_function.R  !{params.genomebuild} !{faifile} !{query_file}
         #perl !{baseDir}/bin/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
-        Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R merge_for_annotation_annote.txt newtest.anno.txt
+        Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R  annotated.circRNA.txt newtest.anno.txt
         '''
     }
 
@@ -1879,8 +1886,10 @@ process Report_production{
 /*
 * Completion e-mail notification
 */
+if(params.email){
+    emailaddress = params.email
+}
 
-emailaddress = params.email
 
 
 
