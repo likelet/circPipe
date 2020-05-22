@@ -1,4 +1,4 @@
-FROM nfcore/base
+FROM nfcore/base:1.6
 LABEL description="Docker image containing all requirements for nf-core/circpipe pipeline"
 
 COPY environment.yml ./
