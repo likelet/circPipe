@@ -1033,6 +1033,7 @@ if(run_mapsplice){
         shell:
         if(params.singleEnd){
             """
+            source activate mapsplice
             mapsplice.py \
             -p ${task.cpus} \
             -k 1 \
@@ -1049,7 +1050,7 @@ if(run_mapsplice){
             """
         }else{
             """
-            
+            source activate mapsplice
             mapsplice.py \
             -p ${task.cpus} \
             -k 1 \
@@ -1398,7 +1399,6 @@ if(run_find_circ){
 
         shell:
         """     
-        source activate py2.7
         unmapped2anchors.py ${query_file} \
         | gzip \
         > find_circ_${sampleID}_anchors.qfa.gz
