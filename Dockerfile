@@ -3,7 +3,7 @@ LABEL description="Docker image containing all requirements for nf-core/circpipe
 
 COPY environment.yml ./
 
-
+RUN conda create -n mapsplice -c bioconda mapsplice=2.2.1 && conda clean -a
 
 ENV PATH /opt/conda/bin:$PATH
 ENV PATH /opt/conda/envs/mapsplice/bin:$PATH
@@ -23,6 +23,7 @@ RUN wget http://sourceforge.net/projects/ciri/files/CIRI-full/CIRI-full_v2.0.zip
     . ~/.bashrc
 
 ENV PATH /CIRI/bin/CIRI_v2.0.6:$PATH
+
 #install find_circ
 RUN git clone http://github.com/marvin-jens/find_circ.git && \
     sed -i '1d' ./find_circ/unmapped2anchors.py && \
