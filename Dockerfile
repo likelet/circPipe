@@ -1,9 +1,9 @@
-FROM nfcore/base
+FROM nfcore/base:1.7
 LABEL description="Docker image containing all requirements for nf-core/circpipe pipeline"
 
 COPY environment.yml ./
 
-RUN conda create -n mapsplice -c bioconda mapsplice=2.2.1 && conda clean -a
+RUN conda create -n mapsplice -c bioconda mapsplice=2.2.1
 
 ENV PATH /opt/conda/bin:$PATH
 ENV PATH /opt/conda/envs/mapsplice/bin:$PATH

@@ -46,4 +46,3 @@ dependencies:
   - unzip=6.0
   - r-ggpubr=0.2
   - homer=4.11
-  - mapsplice=2.2.1
