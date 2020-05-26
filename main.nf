@@ -1554,7 +1554,7 @@ if(number_of_tools==1){
     */
     process Tools_Merge{
         publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
-
+        
         input:
         file (query_file) from Combine_matrix_file.collect()
         file (name_file) from Combine_name_file.collect()
@@ -1565,7 +1565,7 @@ if(number_of_tools==1){
         output:
         file ('all_tools_merge_filtered.matrix') into (Tools_merge_html,Bed_to_sailfish_cir,Bed_for_recount)
         file ('tools_merge.bed') into (Bed_for_annotation,De_merge,Cor_merge)
-        file ('Merged_matrix_forVen.tsv') into Merged_file_for_Venn
+        file ('Merged_matrix_forVen.matrix') into Merged_file_for_Venn
         
 
 
@@ -1585,7 +1585,7 @@ if(number_of_tools==1){
         
 
         # merge and get ven merge matrix 
-        java -jar !{baseDir}/bin/circpipetools.jar -collapse  -dir ./ -suffix _merge_temp.matrix -out Merged_matrix_forVen.tsv -out2 tools_merge.bed 
+        java -jar !{baseDir}/bin/circpipetools.jar -collapse  -dir ./ -suffix _merge_temp.matrix -out Merged_matrix_forVen.matrix -out2 tools_merge.bed 
 
         awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merged.matrix 
         
@@ -1629,7 +1629,7 @@ if(number_of_tools==1){
       # merge and get combined fasta formatted psudoCirc sequences
       sh ${baseDir}/bin/MergeBSJsequence.sh temp.sort.fa temp.start.fa temp.end.fa tmp_candidate.circular_BSJ_flank.fa
 
-      hisat2-build -p ${task.cpus} tmp_candidate.circular_BSJ_flank.fa candidate_circRNA_BSJ_flank 
+      hisat2-build -p ${task.cpus}  tmp_candidate.circular_BSJ_flank.fa candidate_circRNA_BSJ_flank 
       
       """
     }
@@ -1646,11 +1646,11 @@ if(number_of_tools==1){
       script:
        if(params.singleEnd){
             """
-             hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS - > ${sampleID}.bam 
+             hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}.bam 
             """
         }else{
             """
-            hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS - > ${sampleID}.bam 
+            hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}.bam 
             """
         }
     }
