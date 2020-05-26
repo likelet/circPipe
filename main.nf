@@ -663,22 +663,22 @@ if(run_circexplorer2){
         
 
         output:
-        file ('*candidates.bed') into modify_circexplorer2
-        val (sampleID) into modify_circexplorer2_id
+        file ('*candidates.bed') into Modify_circexplorer2
+        val (sampleID) into Modify_circexplorer2_id
 
 
 
         shell :
         '''
         if [ $((`cat !{query_file} | wc -l`)) == 0 ];then
-        touch !{sampleID}_modify_circexplorer2.candidates.bed
+        touch !{sampleID}_Modify_circexplorer2.candidates.bed
         else
         grep circ !{query_file} \
         | grep -v chrM \
         | awk '{print $1 "\t" $2 "\t" $3 "\t" "circexplorer2" "\t" $13 "\t" $6}' \
-        > !{sampleID}_modify_circexplorer2.temp.bed
+        > !{sampleID}_Modify_circexplorer2.temp.bed
         
-        cp !{sampleID}_modify_circexplorer2.temp.bed circexplorer2_!{sampleID}.candidates.bed
+        cp !{sampleID}_Modify_circexplorer2.temp.bed circexplorer2_!{sampleID}.candidates.bed
         fi
         '''
     }
@@ -693,7 +693,7 @@ if(run_circexplorer2){
         publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
-        file (query_file) from modify_circexplorer2.collect()
+        file (query_file) from Modify_circexplorer2.collect()
         file gtffile
 
         output:
@@ -727,27 +727,27 @@ if(run_circexplorer2){
     ========================================================================================
     */
     if(!params.skipDE){
-    process Circexplorer2_DE{
-        publishDir "${params.outdir}/DE_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
+        process Circexplorer2_DE{
+            publishDir "${params.outdir}/DE_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
 
-        input:
-        file (anno_file) from De_circexplorer2
+            input:
+            file (anno_file) from De_circexplorer2
+            
+            file designfile
+            file comparefile
+            file (matrix_file) from Plot_circexplorer2
+            
+
+            output:
+            file ('*') into End_circexplorer2
+
         
-        file designfile
-        file comparefile
-        file (matrix_file) from Plot_circexplorer2
-        
 
-        output:
-        file ('*') into End_circexplorer2
-
-     
-
-        shell:
-        '''
-        Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-        '''
-    }
+            shell:
+            '''
+            Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
+            '''
+        }
     }
 
     /*
@@ -906,7 +906,7 @@ if(run_ciri){
         
 
         output:
-        file ('*candidates.bed') into modify_ciri_file
+        file ('*candidates.bed') into Modify_ciri
 
         when:
         run_ciri
@@ -938,7 +938,7 @@ if(run_ciri){
         publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
-        file (query_file) from modify_ciri_file.collect()
+        file (query_file) from Modify_ciri.collect()
         file gtffile
 
 
@@ -1256,7 +1256,7 @@ if(run_segemehl){
             
 
             output:
-            file ('*candidates.bed') into modify_segemehl
+            file ('*candidates.bed') into Modify_segemehl
 
             shell :
             '''
@@ -1275,7 +1275,7 @@ if(run_segemehl){
             publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern: "*.matrix", overwrite: true
 
             input:
-            file (query_file) from modify_segemehl.collect()
+            file (query_file) from Modify_segemehl.collect()
             file gtffile
 
             output:
@@ -1287,9 +1287,6 @@ if(run_segemehl){
             # merge sample into matrix 
             java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o segemehl -sup 5 -merge
             mv segemehl_merge.bed segemehl_merge.matrix
-            # annotate circRNA with GTFs
-            # java -jar !{baseDir}/bin/circpipetools.jar -i segemehl_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
             sed -i 's/segemehl_//g' segemehl_merge.matrix
             sed -i 's/_modify.candidates.bed//g' segemehl_merge.matrix
             echo -e "segemehl" > Name_segemehl.txt
@@ -1436,7 +1433,7 @@ if(run_find_circ){
         
 
         output:
-        file ('*candidates.bed') into modify_find_circfiles
+        file ('*candidates.bed') into Modify_find_circfiles
 
         shell :
         '''
@@ -1466,7 +1463,7 @@ if(run_find_circ){
         publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
-        file (query_file) from modify_find_circfiles.collect()
+        file (query_file) from Modify_find_circfiles.collect()
         file gtffile
 
         output:
