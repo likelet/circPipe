@@ -13,7 +13,11 @@ gtffile = file(params.gtffile) //the annotationfile-gtf-format
 if( !gtffile.exists() ) exit 1, LikeletUtils.print_red("Missing gtf annotation file: ${gtffile}")
 
 // path for placing the bedfile
+inputDir= "${params.outdir}/circRNA_Identification"
+if(params.bedDir){
 inputDir=params.bedDir
+}
+
 
 // check tool number 
 

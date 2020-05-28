@@ -46,3 +46,14 @@ Choose between workflows by using `--selectTools` or not(default) .
     * [MultiQC](https://github.com/ewels/MultiQC)
     * Several R packages for downstream analysis.
 
+### run analysis with bed format circRNA result 
+
+```shell
+nextflow run /data1/software/circPipe/alternative_mode.nf \
+		-c  /data1/software/circPipe/nextflow.config  \
+		-with-trace -profile docker,colonCancer \
+		-resume --selectTools 1,2,3 --bedDir "place to your bedfiles" \
+		--skip_fastp \
+		--skipDE \
+		--container likelet/circpipe:latest
+```
