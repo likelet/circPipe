@@ -48,7 +48,7 @@ def helpMessage() {
 
     Options:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
-                                    Available: standard, conda, docker, singularity, awsbatch, test
+                                    Available: standard, conda, docker, singularity, test
 
                                     If not set, the pipeline will create the index itself.
       --singleEnd                   Specify that the reads are single ended
@@ -64,9 +64,6 @@ def helpMessage() {
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
-    AWSBatch options:
-      --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion                   The AWS Region for your AWS Batch job to run on
     """.stripIndent()
 }
 
@@ -200,7 +197,8 @@ gtffile = file(params.gtffile) //the annotationfile-gtf-format
 if( !gtffile.exists() ) exit 1, LikeletUtils.print_red("Missing gtf annotation file: ${gtffile}")
 
 
-
+  hisat2_index = Channel.fromPath("${params.hisat2_index}*.ht2")
+            .ifEmpty { exit 1, "HISAT2 index not found: ${params.hisat2_index}" }
 
 /*
 ========================================================================================
@@ -285,7 +283,7 @@ log.info "\n"
 Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-        .set { read_pairs_fastp }
+        .set { Read_pairs_fastp }
 
 
 
@@ -479,7 +477,7 @@ log.info LikeletUtils.print_green("==========Start running CircPipe...==========
 */
 
 if(params.skip_fastp){
-    (Fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,Fastpfiles_segemehl,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)=read_pairs_fastp.into(8)
+    (Fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,Fastpfiles_segemehl,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish,Fastpfiles_hisat)=Read_pairs_fastp.into(9)
     fastp_for_waiting=Channel.empty()
     Fastp_for_multiqc=Channel.empty()
 }else{
@@ -488,10 +486,10 @@ if(params.skip_fastp){
         publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
 
         input:
-        tuple val(sampleID),  file(query_file) from read_pairs_fastp
+        tuple val(sampleID),  file(query_file) from Read_pairs_fastp
 
         output:
-        tuple val(sampleID),  file ('unzip_fastp_*') into (Fastqfor_swhich,Fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,Fastpfiles_segemehl,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish)
+        tuple val(sampleID),  file ('unzip_fastp_*') into (Fastqfor_swhich,Fastpfiles_mapsplice,Fastpfiles_bwa,Fastpfiles_star,Fastpfiles_segemehl,Fastpfiles_bowtie2,Fastpfiles_recount,Fastpfiles_for_sailfish,Fastpfiles_hisat)
         file ('*.html') into fastp_for_waiting
         file ('*_fastp.json') into Fastp_for_multiqc
 
@@ -713,7 +711,7 @@ if(run_circexplorer2){
 
         # remove non samplename string from matrix header 
         sed -i 's/circexplorer2_//g' circexplorer2_merge.matrix
-        sed -i 's/_modify.candidates.bed//g' circexplorer2_merge.matrix
+        sed -i 's/.candidates.bed//g' circexplorer2_merge.matrix
 
 
         echo -e "circexplorer2" > Name_circexplorer2.txt
@@ -836,6 +834,10 @@ if(run_ciri){
             -I ${sampleID}.sam \
             -O CIRI_${sampleID}.txt \
             > CIRI_${sampleID}_detail.log
+
+           
+
+
              rm ${sampleID}.sam
 
             """
@@ -852,6 +854,8 @@ if(run_ciri){
             -O CIRI_${sampleID}.txt \
             > CIRI_${sampleID}_detail.log
 
+             # bwa sam to bam file 
+           
             rm ${sampleID}.sam
             """
         }
@@ -956,7 +960,7 @@ if(run_ciri){
         # java -jar !{baseDir}/bin/circpipetools.jar -i ciri_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
             sed -i 's/ciri_//g' ciri_merge.matrix
-        sed -i 's/_modify.candidates.bed//g' ciri_merge.matrix
+        sed -i 's/.candidates.bed//g' ciri_merge.matrix
 
         #for what 
         echo -e "ciri" > Name_ciri.txt
@@ -1138,11 +1142,9 @@ if(run_mapsplice){
         # merge sample into matrix 
         java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o mapsplice -sup 5 -merge
         mv mapsplice_merge.bed mapsplice_merge.matrix
-        # annotate circRNA with GTFs
-        # java -jar !{baseDir}/bin/circpipetools.jar -i mapsplice_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
-
+       
         sed -i 's/mapsplice_//g' mapsplice_merge.matrix
-        sed -i 's/_modify.candidates.bed//g' mapsplice_merge.matrix
+        sed -i 's/.candidates.bed//g' mapsplice_merge.matrix
         echo -e "mapsplice" > Name_mapsplice.txt
         '''
     }
@@ -1288,7 +1290,7 @@ if(run_segemehl){
             java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o segemehl -sup 5 -merge
             mv segemehl_merge.bed segemehl_merge.matrix
             sed -i 's/segemehl_//g' segemehl_merge.matrix
-            sed -i 's/_modify.candidates.bed//g' segemehl_merge.matrix
+            sed -i 's/.candidates.bed//g' segemehl_merge.matrix
             echo -e "segemehl" > Name_segemehl.txt
             '''
     }
@@ -1349,6 +1351,7 @@ if(run_find_circ){
             view -hf 4 bowtie2_output_${sampleID}.bam \
             | samtools view -Sb - \
             > bowtie2_unmapped_${sampleID}.bam
+            rm  bowtie2_output_${sampleID}.bam
             """
         }else{
             """
@@ -1368,6 +1371,8 @@ if(run_find_circ){
             view -hf 4 bowtie2_output_${sampleID}.bam \
             | samtools view -Sb - \
             > bowtie2_unmapped_${sampleID}.bam
+
+            rm  bowtie2_output_${sampleID}.bam
             """
         }
 
@@ -1479,7 +1484,8 @@ if(run_find_circ){
         java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o find_circ -sup 5 -merge
         mv find_circ_merge.bed find_circ_merge.matrix
      
-        sed -i 's/_modify_find_circ.candidates.bed//g' find_circ_merge.matrix
+        sed -i 's/findCirc_//g' find_circ_merge.matrix
+        sed -i 's/.candidates.bed//g' find_circ_merge.matrix
 
         echo -e "find_circ" > Name_find_circ.txt
         '''
@@ -1637,27 +1643,57 @@ if(number_of_tools==1){
             file index from Candidate_circRNA_index.collect()
             tuple val(sampleID),  file(query_file) from Fastpfiles_recount
       output:
-            tuple val(sampleID),file("${sampleID}.bam") into BSJ_mapping_bamfile
+            tuple val(sampleID),file("${sampleID}_denovo.bam") into BSJ_mapping_bamfile
+            file "fileforwaiting.txt" into Wait_for_hisat2
       when:
             run_multi_tools
       script:
        if(params.singleEnd){
             """
-             hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}.bam 
+             hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}_denovo.bam 
+             touch fileforwaiting.txt
             """
         }else{
             """
-            hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}.bam 
+            hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}_denovo.bam 
+            touch fileforwaiting.txt
             """
         }
     }
+
+ process Recount_generate_genome_Bamfile {
+      tag "$sampleID"
+      input:
+            file index from hisat2_index.collect()
+            tuple val(sampleID),  file(query_file) from Fastpfiles_hisat
+            file filewait from Wait_for_hisat2
+      output:
+            tuple val(sampleID),file("${sampleID}.bam") into Genome_remapping_bamfile
+      when:
+            run_multi_tools
+      script:
+      index_base = index[0].toString() - ~/.\d.ht2/
+       if(params.singleEnd){
+            """
+             hisat2 -p ${task.cpus} -t -k 1 -x ${index_base} -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}.bam 
+            """
+        }else{
+            """
+            hisat2 -p ${task.cpus} -t -k 1 -x ${index_base} -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}.bam 
+            """
+        }
+    }
+
+
+BSJ_mapping_bamfile.combine(Genome_remapping_bamfile, by : 0 ).set{RecountBamfiles}
+
 
 
 if(params.singleEnd){
     process Recount_estimate_step_single{
 
         input:
-            tuple val(sampleID), file(bsjBamfile) from BSJ_mapping_bamfile
+            tuple val(sampleID), file(bsjBamfile),file(genomeBamfile) from RecountBamfiles
 
             
 
@@ -1668,7 +1704,7 @@ if(params.singleEnd){
             run_multi_tools
         script:
         """
-        java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count
+        java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -allBam ${genomeBamfile} -out ${sampleID}.count
         """
     }
 
@@ -1677,7 +1713,7 @@ if(params.singleEnd){
         tag "$sampleID"
 
         input:
-              tuple val(sampleID), file(bsjBamfile) from BSJ_mapping_bamfile
+              tuple val(sampleID), file(bsjBamfile),file(genomeBamfile) from RecountBamfiles
 
         output:
            tuple val(sampleID),file("${sampleID}.count") into Single_sample_recount
@@ -1686,7 +1722,7 @@ if(params.singleEnd){
             run_multi_tools
         script:
         """
-         java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count --paired
+         java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -allBam ${genomeBamfile} -out ${sampleID}.count
         
         """
         
@@ -1725,7 +1761,7 @@ if(params.singleEnd){
                                     Differential Expression
     ========================================================================================
     */
-
+if(!params.skipDE){
         process Merge_DE{
         publishDir "${params.outdir}/DE_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
 
@@ -1752,7 +1788,7 @@ if(params.singleEnd){
     
 
     }
-   
+} 
 
     /*
     ========================================================================================

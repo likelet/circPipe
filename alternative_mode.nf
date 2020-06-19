@@ -12,11 +12,13 @@ if( !faifile.exists() ) exit 1, LikeletUtils.print_red("Missing genome file inde
 gtffile = file(params.gtffile) //the annotationfile-gtf-format
 if( !gtffile.exists() ) exit 1, LikeletUtils.print_red("Missing gtf annotation file: ${gtffile}")
 
+hisat2_index = Channel.fromPath("${params.hisat2_index}*.ht2")
+            .ifEmpty { exit 1, "HISAT2 index not found: ${params.hisat2_index}" }
+
+
+
 // path for placing the bedfile
-inputDir= "${params.outdir}/circRNA_Identification"
-if(params.bedDir){
-inputDir=params.bedDir
-}
+inputDir= "./circRNA_Identification"
 
 
 // check tool number 
@@ -55,19 +57,24 @@ if( toolstring.indexOf("5")!=-1){
     run_segemehl = false
 }
 
+run_multi_tools=false
+if(number_of_tools>1){
+    run_multi_tools=true
+}
+
+
 
 
 // fastqfile
-Channel
-        .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-        .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-        .set { Reads_for_recount }
+(Fastpfiles_recount,Fastpfiles_hisat)=Channel.fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
+                                                .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+                                                .into(3) 
 
 
 // circexplorer2 import
 if(run_circexplorer2){
     Modify_circexplorer2 = Channel.fromPath( inputDir+'/circexplorer2_*.candidates.bed' )
-    process Circexplorer2_Matrix{
+    process Circexplorer2_Matrix {
         publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
@@ -90,7 +97,9 @@ if(run_circexplorer2){
         sed -i 's/_modify.candidates.bed//g' circexplorer2_merge.matrix
 
         echo -e "circexplorer2" > Name_circexplorer2.txt
+        
         '''
+    }
 
 }else{
     Merge_circexplorer2=Channel.empty()
@@ -224,7 +233,7 @@ if(run_find_circ){
         echo -e "find_circ" > Name_find_circ.txt
         '''
     }
-else{
+}else{
     Merge_find_circ=Channel.empty()
      Name_find_circ=Channel.empty()
 }
@@ -243,8 +252,8 @@ else{
 //                                                                      
 
 
-    Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl )
-    Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl )
+Combine_matrix_file= Merge_find_circ.concat( Merge_circexplorer2, Merge_ciri, Merge_mapsplice, Merge_segemehl )
+Combine_name_file=Name_find_circ.concat( Name_circexplorer2, Name_ciri, Name_mapsplice, Name_segemehl )
 
     /*
     ========================================================================================
@@ -330,6 +339,8 @@ else{
       sh ${baseDir}/bin/MergeBSJsequence.sh temp.sort.fa temp.start.fa temp.end.fa tmp_candidate.circular_BSJ_flank.fa
 
       hisat2-build -p ${task.cpus}  tmp_candidate.circular_BSJ_flank.fa candidate_circRNA_BSJ_flank 
+      rm temp* 
+      rm tmp*
       
       """
     }
@@ -340,64 +351,92 @@ else{
             file index from Candidate_circRNA_index.collect()
             tuple val(sampleID),  file(query_file) from Fastpfiles_recount
       output:
-            tuple val(sampleID),file("${sampleID}.bam") into BSJ_mapping_bamfile
+            tuple val(sampleID),file("${sampleID}_denovo.bam") into BSJ_mapping_bamfile
+            file "fileforwaiting.txt" into Wait_for_hisat2
       when:
             run_multi_tools
       script:
        if(params.singleEnd){
             """
-             hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}.bam 
+             hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}_denovo.bam 
+             touch fileforwaiting.txt
             """
         }else{
             """
-            hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}.bam 
+            hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}_denovo.bam 
+            touch fileforwaiting.txt
+            """
+        }
+    }
+
+ process Recount_generate_genome_Bamfile {
+      tag "$sampleID"
+      input:
+            file index from hisat2_index.collect()
+            tuple val(sampleID),  file(query_file) from Fastpfiles_hisat
+            file filewait from Wait_for_hisat2
+      output:
+            tuple val(sampleID),file("${sampleID}.bam") into Genome_remapping_bamfile
+      when:
+            run_multi_tools
+      script:
+      index_base = index[0].toString() - ~/.\d.ht2/
+       if(params.singleEnd){
+            """
+             hisat2 -p ${task.cpus} -t -k 1 -x ${index_base} -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}.bam 
+            """
+        }else{
+            """
+            hisat2 -p ${task.cpus} -t -k 1 -x ${index_base} -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}.bam 
             """
         }
     }
 
 
-    if(params.singleEnd){
-        process Recount_estimate_step_single{
+BSJ_mapping_bamfile.combine(Genome_remapping_bamfile, by : 0 ).set{RecountBamfiles}
 
-            input:
-                tuple val(sampleID), file(bsjBamfile) from BSJ_mapping_bamfile
 
-                
 
-            output:
-                tuple val(sampleID),file("${sampleID}.count") into Single_sample_recount
+if(params.singleEnd){
+    process Recount_estimate_step_single{
 
-            when:
-                run_multi_tools
-            script:
-            """
-            java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count
-            """
-        }
+        input:
+            tuple val(sampleID), file(bsjBamfile),file(genomeBamfile) from RecountBamfiles
 
-    }else{
-        process Recount_estimate_step_paired{
-            tag "$sampleID"
+            
 
-            input:
-                tuple val(sampleID), file(bsjBamfile) from BSJ_mapping_bamfile
-
-            output:
+        output:
             tuple val(sampleID),file("${sampleID}.count") into Single_sample_recount
 
-            when:
-                run_multi_tools
-            script:
-            """
-            java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -out ${sampleID}.count --paired
-            
-            """
-            
-        }
-
+        when:
+            run_multi_tools
+        script:
+        """
+        java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -allBam ${genomeBamfile} -out ${sampleID}.count
+        """
     }
 
+}else{
+    process Recount_estimate_step_paired{
+        tag "$sampleID"
+
+        input:
+              tuple val(sampleID), file(bsjBamfile),file(genomeBamfile) from RecountBamfiles
+
+        output:
+           tuple val(sampleID),file("${sampleID}.count") into Single_sample_recount
+
+        when:
+            run_multi_tools
+        script:
+        """
+         java -jar ${baseDir}/bin/circpipetools.jar -recount -bsjbam ${bsjBamfile} -allBam ${genomeBamfile} -out ${sampleID}.count
         
+        """
+        
+    }
+
+}
 
 
     // test
@@ -422,40 +461,7 @@ else{
     }
 
 
-    /*
-    ========================================================================================
-                                        after recount
-                                    Differential Expression
-    ========================================================================================
-    */
-
-        process Merge_DE{
-        publishDir "${params.outdir}/DE_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
-
-        input:
-        file anno_file from De_merge
-        file designfile
-        file comparefile
-        file matrixFile from Plot_merge
-        
-
-        output:
-        file ('*') into End_merge
-
-        when:
-        run_multi_tools 
-
-        shell:
-        '''
-        mkdir plotdir
-        Rscript !{baseDir}/bin/circRNA_DE_analysis_with_edgeR.R !{baseDir}/bin/R_function.R !{matrixFile} !{designfile} !{comparefile} !{anno_file} plotdir
-        '''
-
-
     
-
-    }
-   
 
     /*
     ========================================================================================
@@ -546,7 +552,7 @@ else{
 
 }
    
-}
+
 
 
 
@@ -561,11 +567,9 @@ process Report_production{
     publishDir "${params.outdir}/Report", mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
-    file (de_file) from End_merge.collect()
     file (cor_file) from CorPlotMerge.collect()
     file (anno_file) from Annotation_plot.collect()
     file (calculate_file) from Tools_merge_html
-    file (multiqc_file) from Multiqc_results
     
     
 
@@ -583,77 +587,3 @@ process Report_production{
 }
 
 
-/*
-* Completion e-mail notification
-*/
-if(params.email){
-    emailaddress = params.email
-}
-
-
-
-
-workflow.onComplete {
-
-    def msg = """\
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="circpipe: cirRNA analysis pipe">
-  <title>circpipe Pipeline Report</title>
-</head>
-<body>
-<div style="text-align:center; font-family: Helvetica, Arial, sans-serif; padding: 30px; max-width: 800px; margin: 0 auto;">
-    <h1> CircPipe execution summary </h1>
-    <h2> ---------------------------------------------- </h2>
-    <div style = "text-align:center; color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;" >
-        <h3 style = "margin-top:0; color: inherit;" ><strong>CircPipe</strong></h3>
-        <p>Completed at : <strong>${workflow.complete}</strong></p>
-        <p>Duration : <strong>${workflow.duration}</strong></p>
-        <p>Success : <strong>${workflow.success}</strong></p>
-        <p>Exit status : <strong>${workflow.exitStatus}</strong></p>
-    </div>
-    <div style="text-align:center; color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
-        <p>Error report : </p>
-        <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${workflow.errorReport}</pre>
-        <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${workflow.errorMessage}</pre>
-    </div>
-    <p>The command used to launch the workflow was as follows : </p>      
-    <pre style="white-space: pre-wrap; overflow: visible; background-color: #ededed; padding: 15px; border-radius: 4px; margin-bottom:0px;">${workflow.commandLine}</pre>
-    <h3> Tools selected : </h3>
-    <table style="width:100%; max-width:100%; border-spacing: 0; border-collapse: collapse; border:0; margin-bottom: 30px;">
-    <tbody style="border-bottom: 1px solid #ddd;">
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Circexplorer2 : ${run_circexplorer2} </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:cneter; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Find_circ : ${run_find_circ} </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Ciri : ${run_ciri} </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Mapsplice : ${run_mapsplice} </pre></td>
-    </tr>
-    <tr>
-    <td style = 'text-align:center; padding: 8px; line-height: 1.42857143; vertical-align: top; border-top: 1px solid #ddd;' ><pre style="white-space: pre-wrap; overflow: visible;"> Segemehl : ${run_segemehl} </pre></td>
-    </tr>
-
-    </tbody>
-    </table>
-
-    <h4> likelet/CircPipe </h4>
-    <h4><a href="https://github.com/likelet/circPipe">https://github.com/likelet/circPipe</a></h4>
-    <h4> If you need help, you can send email to Qi Zhao(zhaoqi@sysucc.org.cn) or Wei Qijin (513848731@qq.com) </h4>
-</div>
-</body>
-</html>
-        """
-            .stripIndent()
-
-    sendMail(to: emailaddress,
-            subject: 'Breaking News in CircPipe Mission!',
-            body: msg)
-}
