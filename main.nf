@@ -22,7 +22,7 @@
 
 
 def helpMessage() {
-    log.info"""
+    log.info "INFO "+"""
     =========================================
      CircPipe v${workflow.manifest.version}
     =========================================
@@ -30,7 +30,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow path/to/circPipe/main.nf --reads="path/to/*{1,2}.fq.gz" -profile standard,docker
+    nextflow path/to/circPipe/main.nf --reads "path/to/*{1,2}.fq.gz" -profile standard,docker
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
@@ -44,7 +44,7 @@ def helpMessage() {
                                     e.g. [gencode.v25.annotation.gtf]/[gencode.v25.annotation.bed]/[hg38_gencode.txt]
       --ciridir/--find_circdir
       --mapsdir                     Home folder of ciri/find_circ/mapsplice installed location
-      --genomebuild                 specific genome build for circplot, default 'hg19'
+      --genomebuild                 specific genome build for circplot, default 'hg19'; Available 'GRCh38', 'hg10'
 
     Options:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
@@ -249,30 +249,30 @@ log.info LikeletUtils.print_cyan("""
  =======================================================================
          """)
         .stripIndent()
-log.info LikeletUtils.print_purple("============You are running circpipe with the following parameters===============")
-log.info LikeletUtils.print_purple("Checking parameters ...")
+log.info "INFO "+LikeletUtils.print_purple("============You are running circpipe with the following parameters===============")
+log.info "INFO "+LikeletUtils.print_purple("Checking parameters ...")
 log.info "\n"
-log.info LikeletUtils.print_yellow("=====================================Reads types================================")
-log.info LikeletUtils.print_yellow("SingleEnd :                     ") + LikeletUtils.print_green(params.singleEnd)
+log.info "INFO "+LikeletUtils.print_yellow("=====================================Reads types================================")
+log.info "INFO "+LikeletUtils.print_yellow("SingleEnd :                     ") + LikeletUtils.print_green(params.singleEnd)
 log.info "\n"
-log.info LikeletUtils.print_yellow("====================================Tools selected==============================")
-log.info LikeletUtils.print_yellow("Circexplorer2 :                 ") + LikeletUtils.print_green(run_circexplorer2)
-log.info LikeletUtils.print_yellow("Find_circ :                     ") + LikeletUtils.print_green(run_find_circ)
-log.info LikeletUtils.print_yellow("Ciri :                          ") + LikeletUtils.print_green(run_ciri)
-log.info LikeletUtils.print_yellow("Mapsplice :                     ") + LikeletUtils.print_green(run_mapsplice)
-log.info LikeletUtils.print_yellow("Segemehl :                      ") + LikeletUtils.print_green(run_segemehl)
+log.info "INFO "+LikeletUtils.print_yellow("====================================Tools selected==============================")
+log.info "INFO "+LikeletUtils.print_yellow("Circexplorer2 :                 ") + LikeletUtils.print_green(run_circexplorer2)
+log.info "INFO "+LikeletUtils.print_yellow("Find_circ :                     ") + LikeletUtils.print_green(run_find_circ)
+log.info "INFO "+LikeletUtils.print_yellow("Ciri :                          ") + LikeletUtils.print_green(run_ciri)
+log.info "INFO "+LikeletUtils.print_yellow("Mapsplice :                     ") + LikeletUtils.print_green(run_mapsplice)
+log.info "INFO "+LikeletUtils.print_yellow("Segemehl :                      ") + LikeletUtils.print_green(run_segemehl)
 log.info "\n"
-log.info LikeletUtils.print_yellow("==================================Input files selected==========================")
-log.info LikeletUtils.print_yellow("Reads :                         ") + LikeletUtils.print_green(params.reads)
-log.info LikeletUtils.print_yellow("Annotation file :               ") + LikeletUtils.print_green(params.annotationfile)
-log.info LikeletUtils.print_yellow("Genome file :                   ") + LikeletUtils.print_green(params.genomefile)
-log.info LikeletUtils.print_yellow("GTF file :                      ") + LikeletUtils.print_green(params.gtffile)
+log.info "INFO "+LikeletUtils.print_yellow("==================================Input files selected==========================")
+log.info "INFO "+LikeletUtils.print_yellow("Reads :                         ") + LikeletUtils.print_green(params.reads)
+log.info "INFO "+LikeletUtils.print_yellow("Annotation file :               ") + LikeletUtils.print_green(params.annotationfile)
+log.info "INFO "+LikeletUtils.print_yellow("Genome file :                   ") + LikeletUtils.print_green(params.genomefile)
+log.info "INFO "+LikeletUtils.print_yellow("GTF file :                      ") + LikeletUtils.print_green(params.gtffile)
 log.info "\n"
-log.info LikeletUtils.print_yellow("==================================Output files directory========================")
-log.info LikeletUtils.print_yellow("Output directory :              ") + LikeletUtils.print_green(params.outdir)
-log.info LikeletUtils.print_yellow("==================================          Others      ========================")
-log.info LikeletUtils.print_yellow("Skip Fastqc :                   ") + LikeletUtils.print_green(params.skip_fastp)
-log.info LikeletUtils.print_yellow("Skip DE analysis :              ") + LikeletUtils.print_green(params.skipDE)
+log.info "INFO "+LikeletUtils.print_yellow("==================================Output files directory========================")
+log.info "INFO "+LikeletUtils.print_yellow("Output directory :              ") + LikeletUtils.print_green(params.outdir)
+log.info "INFO "+LikeletUtils.print_yellow("==================================          Others      ========================")
+log.info "INFO "+LikeletUtils.print_yellow("Skip Fastqc :                   ") + LikeletUtils.print_green(params.skip_fastp)
+log.info "INFO "+LikeletUtils.print_yellow("Skip DE analysis :              ") + LikeletUtils.print_green(params.skipDE)
 log.info "\n"
 
 
@@ -301,7 +301,7 @@ if(run_circexplorer2){
                 .ifEmpty { exit 1, "STAR index not found: ${params.starindex}" }
         star_run_index = params.starindex
     }else{
-        LikeletUtils.print_yellow("Seems that you did not provide a STAR index for circexplorer2, circPipe will built it automaticaly. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
+       log.info  "INFO "+LikeletUtils.print_yellow("Seems that you did not provide a STAR index for circexplorer2, circPipe will built it automaticaly. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeSTARindex {
             storeDir "${params.outdir}/reference_genome"
 
@@ -343,7 +343,7 @@ if(run_find_circ){
 
         bowtie2_run_index = params.bowtie2index
     }else{
-        LikeletUtils.print_yellow("Seems that you did not provide a Bowtie2 index for find_circ, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
+        log.info  "INFO "+LikeletUtils.print_yellow("Seems that you did not provide a Bowtie2 index for find_circ, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBowtie2index {
              storeDir "${params.outdir}/reference_genome"
 
@@ -376,7 +376,7 @@ if(run_mapsplice){
                 .ifEmpty { exit 1, "Bowtie index not found: ${params.bowtieindex}" }
         bowtie_run_index=params.bowtieindex                
     }else{
-         LikeletUtils.print_yellow("Seems that you did not provide a Bowtie index for mapsplice, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
+        log.info  "INFO "+LikeletUtils.print_yellow("Seems that you did not provide a Bowtie index for mapsplice, circPipe will built it automatically. And it may take hours to prepare the reference. So you can go outside and have rest before it finished . ")
         process makeBowtieindex {
             storeDir "${params.outdir}/reference_genome"
 
