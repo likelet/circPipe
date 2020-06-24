@@ -57,3 +57,18 @@ nextflow run /data1/software/circPipe/alternative_mode.nf \
 		--skipDE \
 		--container likelet/circpipe:latest
 ```
+
+
+### run `QuantCircle` analysis with a single bed file 
+
+```shell 
+
+nextflow run /data1/software/circPipe/QuantCircle.nf \
+		-with-trace -profile docker \
+		--container likelet/circpipe:latest \
+		--reads "Fastq/*{1,2}.fq.gz" \
+        --bedfile "ciri_pos20190613.candidates.bed"  \
+		--genomefile "Genome/hg19_chr2.fa" \
+	    --hisat2_index "Genome/hg19_chr2_hisat2_index/hg19_chr2" \
+
+```

@@ -1406,20 +1406,24 @@ if(run_find_circ){
         > find_circ_${sampleID}_anchors.qfa.gz
 
         bowtie2 \
-        -p ${task.cpus} \
-        --reorder \
-        --mm \
-        --score-min=C,-15,0 \
-        -q \
-        -x ${bowtie2_run_index} \
-        -U find_circ_${sampleID}_anchors.qfa.gz \
+            -p ${task.cpus} \
+            --reorder \
+            --mm \
+            --score-min=C,-15,0 \
+            -q \
+            -x ${bowtie2_run_index} \
+            -U find_circ_${sampleID}_anchors.qfa.gz \
         | find_circ.py \
-        -G ${genomefile} \
-        -p ${sampleID}_ \
-        -s find_circ_${sampleID}_stats.sites.log \
-        -n find_circ \
-        -R find_circ_${sampleID}_spliced_reads.fa \
-        > find_circ_${sampleID}_splice_sites.bed   
+            -G ${genomefile} \
+            -p ${sampleID}_ \
+            -s find_circ_${sampleID}_stats.sites.log \
+            -n find_circ \
+            -R find_circ_${sampleID}_spliced_reads.fa \
+            > find_circ_${sampleID}_splice_sites.bed   
+
+        # remove temp file for reduce the usage of the disk .
+        rm find_circ_${sampleID}_spliced_reads.fa 
+        rm find_circ_${sampleID}_anchors.qfa.gz
         """
     }
 
@@ -1578,7 +1582,7 @@ if(number_of_tools==1){
         cat *_merge.matrix >> temp_concatenate.txt
 
         # filtered the circRNA length less than 100bp   
-        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' temp_concatenate.txt  | awk '$3 - $2 >= 100 && $3 - $2 <=100000 ' >  concatenate.txt
+        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' temp_concatenate.txt  | awk '$3 - $2 >= 100' >  concatenate.txt
         
 
         for file in !{query_file}
@@ -1592,14 +1596,8 @@ if(number_of_tools==1){
 
         awk '{OFS="\t"}{$4=".";print $0}' tools_merge.bed > all_tools_merged.matrix 
         
-        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' all_tools_merged.matrix  | awk '$3 - $2 >= 100 && $3 - $2 <=100000 ' >  all_tools_merge_filtered.matrix 
-        
-       
+        awk -F  "\t" '{OFS="\t"}{if ($3 > $2) {name=($1"_"$2"_"$3"_"$6);print $1,$2,$3,name,$5,$6} else {name=($1"_"$3"_"$2"_"$6);print $1,$3,$2,name,$5,$6} }' all_tools_merged.matrix  | awk '$3 - $2 >= 100 ' >  all_tools_merge_filtered.matrix 
 
-      
-        
-
-        
         
         '''
     }

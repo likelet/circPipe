@@ -2,9 +2,9 @@
 
 /*
 ========================================================================================
-                                QuantCircle
+                                QuantCirc
 ========================================================================================
- * QuantCircle was developed by Dr. Qi Zhao from Sun Yat-sen University Cancer Center.
+ * QuantCirc was developed by Dr. Qi Zhao from Sun Yat-sen University Cancer Center.
  * it implemented a workform circRNA remapping step to quantification with a pre-build count function
  * in circletools.jar, which uses a bsj remapping bamfile and genome mapped bamfile to filter the 
  * false positive circRNA reads. 
@@ -30,18 +30,18 @@
 def helpMessage() {
     log.info"""
     =========================================
-     QuantCircle v${workflow.manifest.version}
+     QuantCirc v${workflow.manifest.version}
     =========================================
     Usage:
 
-    The typical command for running the QuantCircle is as follows:
+    The typical command for running the QuantCirc is as follows:
 
-    nextflow path/to/circPipe/QuantCircle.nf --reads "path/to/*{1,2}.fq.gz" --bedfile circleRNA.bed --genome genome.fa --hisat2_index hisat2_index 
+    nextflow path/to/circPipe/QuantCirc.nf --reads "path/to/*{1,2}.fq.gz" --bedfile circleRNA.bed --genomefile genome.fa --hisat2_index hisat2_index 
 
     Mandatory arguments:
       --reads                       Path to input data (must be surrounded with quotes)
-      --hisat2_index                Hisat2_index file name with `*.ht2` suffixed. like "GRCh38" when your files are "GRCh38.*.ht2" 
-      --genomefile                  A txt file that stored experimental design information, such as genome.fa .
+      --hisat2_index                Hisat2 index of whole genome sequence file name with `*.ht2` suffixed. like "GRCh38" when your files are "GRCh38.*.ht2" 
+      --genomefile                  genome reference file with fasta format,  such as genome.fa .
     Options:
                                     If not set, the pipeline will create the index itself.
       --singleEnd                   Specify that the reads are single ended
@@ -50,7 +50,11 @@ def helpMessage() {
 }
 
 
-
+// Show help emssage
+if (params.help){
+    helpMessage()
+    exit 0
+}
 
 /*
 ========================================================================================
@@ -94,17 +98,17 @@ if( !bedfile.exists() ) exit 1, LikeletUtils.print_red("Missing circRNA bedfile 
 */
 log.info "INFO "+LikeletUtils.print_cyan("""
 ========================================================================
-#    ____                        _     _____  _             _       
-#  / __ \\                      | |   / ____|(_)           | |      
-# | |  | | _   _   __ _  _ __  | |_ | |      _  _ __  ___ | |  ___ 
-# | |  | || | | | / _` || '_ \\ | __|| |     | || '__|/ __|| | / _ \\
-# | |__| || |_| || (_| || | | || |_ | |____ | || |  | (__ | ||  __/
-#  \\___\\_\\ \\__,_| \\_,_ ||_| |_| \\__| \\_____||_||_|   \\___||_| \\___|
+#    ____                        _     _____  _               
+#  / __ \\                      | |   / ____|(_)          
+# | |  | | _   _   __ _  _ __  | |_ | |      _  _ __  ___ 
+# | |  | || | | | / _` || '_ \\ | __|| |     | || '__|/ __
+# | |__| || |_| || (_| || | | || |_ | |____ | || |  | (__ 
+#  \\___\\_\\ \\__,_| \\_,_ ||_| |_| \\__| \\_____||_||_| 
 #
 ========================================================================
          """)
         .stripIndent()
-log.info "INFO "+LikeletUtils.print_purple("========You are running QuantCircle with the following parameters===============")
+log.info "INFO "+LikeletUtils.print_purple("========You are running QuantCirc with the following parameters===============")
 log.info "INFO "+LikeletUtils.print_purple("Checking parameters ...")
 
 log.info "\n"
@@ -130,6 +134,8 @@ log.info "\n"
     ========================================================================================
     */
     process getPsudoCircSequenceAndBuildHisatIndex {
+
+      storeDir "${params.outdir}/BSJ_Index"
       input:
            file bedfile
            file genomefile
@@ -157,6 +163,7 @@ log.info "\n"
 
     process Recount_generate_BSJ_Bamfile {
       tag "$sampleID"
+      maxForks 3
       input:
             file index from Candidate_circRNA_index.collect()
             tuple val(sampleID),  file(query_file) from Fastpfiles_recount
@@ -166,12 +173,12 @@ log.info "\n"
       script:
        if(params.singleEnd){
             """
-             hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}_denovo.bam 
+             hisat2 -p 8 -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}_denovo.bam 
              touch fileforwaiting.txt
             """
         }else{
             """
-            hisat2 -p ${task.cpus} -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}_denovo.bam 
+            hisat2 -p 8 -t -k 1 -x candidate_circRNA_BSJ_flank -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}_denovo.bam 
             touch fileforwaiting.txt
             """
         }
@@ -179,6 +186,7 @@ log.info "\n"
 
  process Recount_generate_genome_Bamfile {
       tag "$sampleID"
+      maxForks 3
       input:
             file index from hisat2_index.collect()
             tuple val(sampleID),  file(query_file) from Fastpfiles_hisat
@@ -190,11 +198,11 @@ log.info "\n"
       index_base = index[0].toString() - ~/.\d.ht2/
        if(params.singleEnd){
             """
-             hisat2 -p ${task.cpus} -t -k 1 -x ${index_base} -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}.bam 
+             hisat2 -p 8 -t -k 1 -x ${index_base} -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}.bam 
             """
         }else{
             """
-            hisat2 -p ${task.cpus} -t -k 1 -x ${index_base} -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}.bam 
+            hisat2 -p 8 -t -k 1 -x ${index_base} -1 ${query_file[0]}  -2 ${query_file[1]} | samtools view -bS -q 10 - > ${sampleID}.bam 
             """
         }
     }
