@@ -5,12 +5,12 @@ Before running circPipe, users should check if all the required tools
 and databases are available on the system(that is, either on the local
 machine or on the HPC facility).circPipe accepts raw reads, annotations
 and genome reference as input to process the whole pipeline. At present,
-we mainly focus on human genom.
+we mainly focus on human genome.
 
-Here, we will exhibit step by step the usage of circPipe using our test
+Here, we will show the usage of circPipe step by step using our test
 data in a linux system as an example.
 
-Step 1. Download the test data set
+Step 1. Download test data
 ----------------------------------
 
 ::
@@ -40,8 +40,8 @@ Step 3. Get the lastest circPipe
 Step 4. Pipeline configuration
 ------------------------------
 
-By default, the circPipe runs with the ``standard`` configuration
-profile `conf/base.config <https://github.com/likelet/circPipe/blob/master/conf/base.config>`_ under the github . 
+By default, circPipe runs with the ``standard`` configuration
+profile `conf/base.config <https://github.com/likelet/circPipe/blob/master/conf/base.config>`_ under the github. 
 
 Step 3. Run the analysis command
 --------------------------------
@@ -54,7 +54,7 @@ Step 3. Run the analysis command
 Result content(expected result)
 -------------------------------
 
-.. note:: After finishing running the pipeline, users will get the final results,the details are described in the part of ``output`` section
+.. note:: After finishing running the pipeline, users will get final results, details of which are described in the part of ``output`` section
 
 
 Run information
