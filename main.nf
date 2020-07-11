@@ -231,7 +231,7 @@ if(!params.skipDE){
                          showing the process and files
 ========================================================================================
 */
-log.info LikeletUtils.print_cyan("""
+log.info "INFO "+LikeletUtils.print_cyan("""
 ========================================================================
     ________                          _______
    |  ____  |                        |  ___  |
@@ -287,7 +287,7 @@ Channel
 
 
 
-log.info LikeletUtils.print_yellow("===================check or build the index===============================")
+log.info "INFO "+LikeletUtils.print_yellow("===================check or build the index===============================")
 /*
 ========================================================================================
                              check or build the index
@@ -465,8 +465,8 @@ if(run_segemehl){
 }
 
 
-log.info LikeletUtils.print_green("==========Index pass!...==========")
-log.info LikeletUtils.print_green("==========Start running CircPipe...==========")
+log.info "INFO "+LikeletUtils.print_green("==========Index pass!...==========")
+log.info "INFO "+LikeletUtils.print_green("==========Start running CircPipe...==========")
 
 
 
@@ -1786,7 +1786,9 @@ if(!params.skipDE){
     
 
     }
-} 
+} else{
+    End_merge=Channel.empty()
+}
 
     /*
     ========================================================================================

@@ -214,6 +214,7 @@ BSJ_mapping_bamfile.combine(Genome_remapping_bamfile, by : 0 ).set{RecountBamfil
 
 process Recount_estimate_step{
 
+        publishDir "${params.outdir}/QuantCirc", pattern: "*.count", mode: 'link', overwrite: true
         input:
             tuple val(sampleID), file(bsjBamfile),file(genomeBamfile) from RecountBamfiles
 
