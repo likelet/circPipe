@@ -42,16 +42,16 @@ run arbitrary pipelines among five pipelines. Choose between workflows
 by using ``--selectTools``.
 
 +--------------------+----------+-----------+-----------+-----------+-----------+
-| Step               | Pipelin  | Pipeline  | Pipeline  | Pipeline  | Pipeline  |
-|                    | e        | Two       | Three     | Four      | Five      |
-|                    | One      |           |           |           |           |
+| Step               | Pipeline | Pipeline  | Pipeline  | Pipeline  | Pipeline  |
+|                    | One      | Two       | Three     | Four      | Five      |
+|                    |          |           |           |           |           |
 +====================+==========+===========+===========+===========+===========+
 | Raw Data QC        | Fastp    | Fastp     | Fastp     | Fastp     | Fastp     |
 +--------------------+----------+-----------+-----------+-----------+-----------+
 | Reads Alignment    | STAR     | BWA       | Bowtie2   | -         | -         |
 +--------------------+----------+-----------+-----------+-----------+-----------+
-| cirRNA             | CIRCexp  | CIRI      | Find\_cir | Mapsplice | Segemehl  |
-| identification     | lorer2   |           | c         |           |           |
+| cirRNA             | CIRCexp  | CIRI      | Find\_circ| Mapsplice | Segemehl  |
+| identification     | lorer2   |           |           |           |           |
 +--------------------+----------+-----------+-----------+-----------+-----------+
 | Data Processing    | Python,  | Python,Ja | Python,Ja | Python,Ja | Python,Ja |
 | (in house script)  | Java,R   | va,R      | va,R      | va,R      | va,R      |
@@ -59,8 +59,8 @@ by using ``--selectTools``.
 | Differential       | edgeR    | edgeR     | edgeR     | edgeR     | edgeR     |
 | expression         |          |           |           |           |           |
 +--------------------+----------+-----------+-----------+-----------+-----------+
-| Summary Report     | MultiQC  | MultiQC+R | MultiQC+R | MultiQC+R | MultiQC+R |
-|                    | +R       | markdown  | markdown  | markdown  | markdown  |
-|                    | markdow  |           |           |           |           |
-|                    | n        |           |           |           |           |
+| Summary Report     | MultiQC+R| MultiQC+R | MultiQC+R | MultiQC+R | MultiQC+R |
+|                    | markdown | markdown  | markdown  | markdown  | markdown  |
+|                    |          |           |           |           |           |
+|                    |          |           |           |           |           |
 +--------------------+----------+-----------+-----------+-----------+-----------+
