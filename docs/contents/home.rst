@@ -39,28 +39,28 @@ Workflows
 
 Our Pipeline Steps are showed in the below chart. CircPipe allows you to
 run arbitrary pipelines among five pipelines. Choose between workflows
-by using ``--selectTools`` or not(default) .
+by using ``--selectTools``.
 
-+--------------------+---------+-----------+-----------+-----------+-----------+
-| Step               | Pipelin | Pipeline  | Pipeline  | Pipeline  | Pipeline  |
-|                    | e       | Two       | Three     | Four      | Five      |
-|                    | One     |           |           |           |           |
-+====================+=========+===========+===========+===========+===========+
-| Raw Data QC        | Fastp   | Fastp     | Fastp     | Fastp     | Fastp     |
-+--------------------+---------+-----------+-----------+-----------+-----------+
-| Reads Alignment    | STAR    | BWA       | Bowtie2   | -         | -         |
-+--------------------+---------+-----------+-----------+-----------+-----------+
-| cirRNA             | CIRCexp | CIRI      | Find\_cir | Mapsplice | Segemehl  |
-| identification     | lorer2  |           | c         |           |           |
-+--------------------+---------+-----------+-----------+-----------+-----------+
-| Data Processing    | Python, | Python,Ja | Python,Ja | Python,Ja | Python,Ja |
-| (in house script)  | Java,R  | va,R      | va,R      | va,R      | va,R      |
-+--------------------+---------+-----------+-----------+-----------+-----------+
-| Differential       | edgeR   | edgeR     | edgeR     | edgeR     | edgeR     |
-| expression         |         |           |           |           |           |
-+--------------------+---------+-----------+-----------+-----------+-----------+
-| Summary Report     | MultiQC | MultiQC+R | MultiQC+R | MultiQC+R | MultiQC+R |
-|                    | +R      | markdown  | markdown  | markdown  | markdown  |
-|                    | markdow |           |           |           |           |
-|                    | n       |           |           |           |           |
-+--------------------+---------+-----------+-----------+-----------+-----------+
++--------------------+----------+-----------+-----------+-----------+-----------+
+| Step               | Pipelin  | Pipeline  | Pipeline  | Pipeline  | Pipeline  |
+|                    | e        | Two       | Three     | Four      | Five      |
+|                    | One      |           |           |           |           |
++====================+==========+===========+===========+===========+===========+
+| Raw Data QC        | Fastp    | Fastp     | Fastp     | Fastp     | Fastp     |
++--------------------+----------+-----------+-----------+-----------+-----------+
+| Reads Alignment    | STAR     | BWA       | Bowtie2   | -         | -         |
++--------------------+----------+-----------+-----------+-----------+-----------+
+| cirRNA             | CIRCexp  | CIRI      | Find\_cir | Mapsplice | Segemehl  |
+| identification     | lorer2   |           | c         |           |           |
++--------------------+----------+-----------+-----------+-----------+-----------+
+| Data Processing    | Python,  | Python,Ja | Python,Ja | Python,Ja | Python,Ja |
+| (in house script)  | Java,R   | va,R      | va,R      | va,R      | va,R      |
++--------------------+----------+-----------+-----------+-----------+-----------+
+| Differential       | edgeR    | edgeR     | edgeR     | edgeR     | edgeR     |
+| expression         |          |           |           |           |           |
++--------------------+----------+-----------+-----------+-----------+-----------+
+| Summary Report     | MultiQC  | MultiQC+R | MultiQC+R | MultiQC+R | MultiQC+R |
+|                    | +R       | markdown  | markdown  | markdown  | markdown  |
+|                    | markdow  |           |           |           |           |
+|                    | n        |           |           |           |           |
++--------------------+----------+-----------+-----------+-----------+-----------+
