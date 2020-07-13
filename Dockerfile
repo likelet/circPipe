@@ -25,7 +25,7 @@ ENV PATH /CIRI/bin/CIRI_v2.0.6:$PATH
 
 SHELL ["/bin/bash", "-c"]
 RUN source activate find_circ && \
-    pip install pysam && \
+    pip install numpy pysam && \
     conda install -c bioconda bowtie2 samtools
 
 #install find_circ
