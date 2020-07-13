@@ -154,9 +154,7 @@ As to build the different indexes, you can simply download from
 `igenome <https://support.illumina.com/sequencing/sequencing_software/igenome.html>`__,
 or using your own genome file and annotation file with the command lines
 introduced in ``Parameters`` section. Or you can just ignore the steps
-because circpipe will build the indexes automatically except knife. 
+because circpipe will build the indexes automatically. 
 
-.. note:: Download KNIFE If you want to use knife, you can download the package
-from (the url).
 
 
