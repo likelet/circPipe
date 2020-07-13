@@ -15,7 +15,7 @@ Mandatory
 | --reads      | ``./*{1,2}.fq.gz | input raw      |
 |              | ``               | paired reads   |
 +--------------+------------------+----------------+
-| --designfile | ``FALSE``        | a txt file     |
+| --designfile | ``FALSE``        | A txt file     |
 |              |                  | that stored    |
 |              |                  | experimental   |
 |              |                  | design         |
@@ -26,8 +26,8 @@ Mandatory
 |              |                  | ``             |
 |              |                  | section above  |
 +--------------+------------------+----------------+
-| --comparefil | ``FALSE``        | a txt file     |
-| e            |                  | that stored    |
+| --comparefile| ``FALSE``        | A txt file     |
+|              |                  | that stored    |
 |              |                  | experimental   |
 |              |                  | compare        |
 |              |                  | information,   |
@@ -48,12 +48,6 @@ Configuration
 | Name         | Example/Default | Description    |
 |              | value           |                |
 +==============+=================+================+
-| --redir      | ``/path/to/refd | the folder     |
-|              | ir``            | containing all |
-|              |                 | reference      |
-|              |                 | files and      |
-|              |                 | index          |
-+--------------+-----------------+----------------+
 | --genomefile | ``path/to/refdi | Path to Fasta  |
 |              | r/chr2.fa``     | reference(requ |
 |              |                 | ired           |
@@ -76,10 +70,14 @@ Configuration
 +--------------+-----------------+----------------+
 | --ciridir/-- | ``/path/to/tool | Home folder of |
 | find\_circdi | s/directory``   | ciri/find\_cir |
-| r/--mapsdir/ |                 | c/mapsplice/kn |
-| --knifedir   |                 | ife            |
+| r/--mapsdir/ |                 | c/mapsplice    |
 |              |                 | installed      |
 |              |                 | location       |
+|              |                 |                |
++--------------+-----------------+----------------+
+|--genomebuild |``'hg19'``       |specific genome |
+|              | 'GRCh38', 'hg10'| build for      |
+|              | available       |circplot        |
 +--------------+-----------------+----------------+
 
 Optional
@@ -88,16 +86,13 @@ Optional
 +--------------+-----------------+----------------+
 | Name         | Default value   | Description    |
 +==============+=================+================+
-| --starindex/ | ``-``           | Path to        |
-| --bowtie2ind |                 | STAR/bowtie2/s |
-| ex/--bwainde |                 | egemehl/bowtie |
-| x/--segindex |                 | /bwa/mapsplice |
-| /--bowtieind |                 | /knife         |
-| ex/--refmaps |                 | index. If not  |
-| plice/--knif |                 | set, the       |
-| eindex       |                 | pipeline will  |
-|              |                 | create the     |
-|              |                 | index itself.  |
+|-profile      | ``standard``    | Configuration  |
+|              |                 | profile to use.|
+|              |                 | Available:     |
+|              |                 | standard,      |
+|              |                 | conda, docker, |
+|              |                 | singularity,   |
+|              |                 | test           |
 +--------------+-----------------+----------------+
 | --singleEnd  | ``false``       | specify that   |
 |              |                 | the reads are  |
@@ -115,8 +110,8 @@ Optional
 |              |                 | results        |
 |              |                 | separately     |
 +--------------+-----------------+----------------+
-| --selectTool | ``1``           | specify which  |
-| s            |                 | tools should   |
+| --selectTools| ``1``           | specify which  |
+|              |                 | tools should   |
 |              |                 | be use. ``1``  |
 |              |                 | for            |
 |              |                 | circexplorer2, |
@@ -128,10 +123,8 @@ Optional
 |              |                 | mapsplice,     |
 |              |                 | ``5`` for      |
 |              |                 | segemehl,      |
-|              |                 | ``6`` for      |
-|              |                 | knife. For     |
-|              |                 | example, you   |
-|              |                 | can set        |
+|              |                 | For example,   |
+|              |                 | you can set    |
 |              |                 | ``1,2,3,4,5``  |
 |              |                 | for running    |
 |              |                 | five tools in  |
@@ -166,8 +159,8 @@ Detailed instruction of parameters
 -  ``--selectTools``
 
    specify which tools should be use. ``1`` for circexplorer2, ``2`` for
-   ciri, ``3`` for find\_circ, ``4`` for mapsplice, ``5`` for segemehl,
-   ``6`` for knife. For example, you can set
+   ciri, ``3`` for find\_circ, ``4`` for mapsplice, ``5`` for segemehl.
+   For example, you can set
    ``--selectTools='1,2,3,4,5'`` for running five tools in the same
    time.
 
