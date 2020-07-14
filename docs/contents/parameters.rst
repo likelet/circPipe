@@ -94,11 +94,11 @@ Optional
 |              |                 | singularity,   |
 |              |                 | test           |
 +--------------+-----------------+----------------+
-|--singleEnd   | ``false``       | specify that   |
+| --singleEnd  | ``false``       | specify that   |
 |              |                 | the reads are  |
 |              |                 | single ended   |
 +--------------+-----------------+----------------+
-|--selectTools | ``1``           | specify which  |
+| --selectTools| ``1``           | specify which  |
 |              |                 | tools should   |
 |              |                 | be use. ``1``  |
 |              |                 | for            |
