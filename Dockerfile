@@ -3,14 +3,13 @@ LABEL description="Docker image containing all requirements for nf-core/circpipe
 
 COPY environment.yml ./
 
-RUN conda create -n mapsplice -c bioconda mapsplice=2.2.1
+RUN conda create -n find_circ python=2.7
 
 ENV PATH /opt/conda/bin:$PATH
-ENV PATH /opt/conda/envs/mapsplice/bin:$PATH
 
 RUN conda env create -f /environment.yml && conda clean -a
 
-ENV PATH /opt/conda/envs/nf-core-cirpipe-1.0dev/bin:$PATH
+ENV PATH /opt/conda/envs/cirpipe-1.0dev/bin:$PATH
 
 #install ciri
 RUN wget http://sourceforge.net/projects/ciri/files/CIRI-full/CIRI-full_v2.0.zip && \
@@ -24,6 +23,11 @@ RUN wget http://sourceforge.net/projects/ciri/files/CIRI-full/CIRI-full_v2.0.zip
 
 ENV PATH /CIRI/bin/CIRI_v2.0.6:$PATH
 
+SHELL ["/bin/bash", "-c"]
+RUN source activate find_circ && \
+    pip install numpy pysam && \
+    conda install -c bioconda bowtie2 samtools
+
 #install find_circ
 RUN git clone http://github.com/marvin-jens/find_circ.git && \
     sed -i '1d' ./find_circ/unmapped2anchors.py && \
@@ -35,5 +39,3 @@ RUN git clone http://github.com/marvin-jens/find_circ.git && \
     . ~/.bashrc
 
 ENV PATH /find_circ:$PATH
-
-RUN echo "source activate nf-core-cirpipe-1.0dev" >> ~/.bashrc

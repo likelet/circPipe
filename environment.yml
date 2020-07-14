@@ -6,6 +6,7 @@ channels:
 dependencies:
   - fastp=0.19.5
   - multiqc=1.6
+  - mapsplice=2.2.1
   - pysam=0.15.1
   - perl=5.26.2
   - numpy=1.15.2
