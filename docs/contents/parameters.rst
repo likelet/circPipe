@@ -122,7 +122,7 @@ Optional
 |              |                 | differential   |
 |              |                 | expression     |
 |              |                 | analysis       |
-         
++--------------+-----------------+----------------+         
 | --outdir     | ``./Result``    | the output     |
 |              |                 | directory of   |
 |              |                 | the results    |
