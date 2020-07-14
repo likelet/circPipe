@@ -94,15 +94,11 @@ Optional
 |              |                 | singularity,   |
 |              |                 | test           |
 +--------------+-----------------+----------------+
-| --singleEnd  | ``false``       | specify that   |
+|--singleEnd   | ``false``       | specify that   |
 |              |                 | the reads are  |
 |              |                 | single ended   |
 +--------------+-----------------+----------------+
-| --separate   | ``false``       | annotate the   |
-|              |                 | results        |
-|              |                 | separately     |
-+--------------+-----------------+----------------+
-| --selectTools| ``1``           | specify which  |
+|--selectTools | ``1``           | specify which  |
 |              |                 | tools should   |
 |              |                 | be use. ``1``  |
 |              |                 | for            |
@@ -122,6 +118,11 @@ Optional
 |              |                 | five tools in  |
 |              |                 | the same time. |
 +--------------+-----------------+----------------+
+| --skipDE     | ``false``       | skip           |
+|              |                 | differential   |
+|              |                 | expression     |
+|              |                 | analysis       |
+         
 | --outdir     | ``./Result``    | the output     |
 |              |                 | directory of   |
 |              |                 | the results    |
