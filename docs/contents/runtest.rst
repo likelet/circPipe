@@ -55,9 +55,3 @@ Result content(expected result)
 -------------------------------
 
 .. note:: After finishing running the pipeline, users will get final results, details of which are described in the part of ``output`` section
-
-
-Run information
----------------
-
-to be filled 
