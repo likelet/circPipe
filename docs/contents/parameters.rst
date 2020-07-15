@@ -98,10 +98,6 @@ Optional
 |              |                 | the reads are  |
 |              |                 | single ended   |
 +--------------+-----------------+----------------+
-| --separate   | ``false``       | annotate the   |
-|              |                 | results        |
-|              |                 | separately     |
-+--------------+-----------------+----------------+
 | --selectTools| ``1``           | specify which  |
 |              |                 | tools should   |
 |              |                 | be use. ``1``  |
@@ -122,6 +118,11 @@ Optional
 |              |                 | five tools in  |
 |              |                 | the same time. |
 +--------------+-----------------+----------------+
+| --skipDE     | ``false``       | skip           |
+|              |                 | differential   |
+|              |                 | expression     |
+|              |                 | analysis       |
++--------------+-----------------+----------------+         
 | --outdir     | ``./Result``    | the output     |
 |              |                 | directory of   |
 |              |                 | the results    |
