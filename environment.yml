@@ -45,3 +45,4 @@ dependencies:
   - htseq=0.11.2
   - unzip=6.0
   - r-ggpubr=0.2
+  - subread=2.0.1

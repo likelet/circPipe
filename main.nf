@@ -145,7 +145,7 @@ if(number_of_tools>1){
 
 if(params.mRNA){
     mRNAfile = file(params.mRNA) //the mRNA file
-    if( !mRNAfile.exists() ) exit 1, LikeletUtils.print_red("Missing mRNA expression file: ${mRNAfile}")
+    if( !mRNAfile.exists() ) exit 1, LikeletUtils.print_red("Missing mRNA expression file: ${params.mRNAfile}")
 
 }
 
@@ -161,11 +161,11 @@ if(params.mRNA){
 
 if(run_circexplorer2){
     annotationfile = file(params.annotationfile) //the annotationfile
-    if( !annotationfile.exists() ) exit 1, LikeletUtils.print_red("Missing annotation file: ${annotationfile}")
+    if( !annotationfile.exists() ) exit 1, LikeletUtils.print_red("Missing annotation file: ${params.annotationfile}")
 }
 
 genomefile = file(params.genomefile) //the genomefile
-if( !genomefile.exists() ) exit 1, LikeletUtils.print_red("Missing genome file: ${genomefile}")
+if( !genomefile.exists() ) exit 1, LikeletUtils.print_red("Missing genome file: ${params.genomefile}")
 
 if(run_mapsplice){
     if(params.refmapsplice){
@@ -697,8 +697,6 @@ if(run_circexplorer2){
         output:
         file ('circexplorer2_merge.matrix') into (Output_circexplorer2,Plot_circexplorer2,Plot_circexplorer2_cor,Merge_circexplorer2)
         file ('Name_circexplorer2.txt') into Name_circexplorer2
-        file ('annoted_circexplorer2_merge_annote.txt') into (De_circexplorer2,Cor_circexplorer2)
- 
 
         shell :
         '''
@@ -706,8 +704,6 @@ if(run_circexplorer2){
         # merge sample into matrix 
         java -jar !{baseDir}/bin/circpipetools.jar -i candidates.bed -o circexplorer2 -sup 5 -merge
         mv circexplorer2_merge.bed circexplorer2_merge.matrix
-        # annotate circRNA with GTFs
-        java -jar !{baseDir}/bin/bed1114.jar -i circexplorer2_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
         # remove non samplename string from matrix header 
         sed -i 's/circexplorer2_//g' circexplorer2_merge.matrix
@@ -718,60 +714,6 @@ if(run_circexplorer2){
         '''
     }
 
-    /*
-    ========================================================================================
-                            the first tool : star - circexplorer2
-                                    Differential Expression
-    ========================================================================================
-    */
-    if(!params.skipDE){
-        process Circexplorer2_DE{
-            publishDir "${params.outdir}/DE_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
-
-            input:
-            file (anno_file) from De_circexplorer2
-            
-            file designfile
-            file comparefile
-            file (matrix_file) from Plot_circexplorer2
-            
-
-            output:
-            file ('*') into End_circexplorer2
-
-        
-
-            shell:
-            '''
-            Rscript !{baseDir}/bin/edgeR_circ.R !{baseDir}/bin/R_function.R !{matrix_file} !{designfile} !{comparefile} !{anno_file}
-            '''
-        }
-    }
-
-    /*
-    ========================================================================================
-                            the first tool : star - circexplorer2
-                                            Correlation
-    ========================================================================================
-    */
-    if(params.mRNA){
-        process Circexplorer2_Cor{
-            publishDir "${params.outdir}/Corrrelation_Analysis/Circexplorer2", mode: 'copy', pattern: "*", overwrite: true
-
-            input:
-            file (matrix_file) from Plot_circexplorer2_cor
-            file (anno_file) from Cor_circexplorer2
-            file mRNAfile
-
-            output:
-            file ('*') into cor_plot_circexplorer2
-
-            shell:
-            '''
-            Rscript !{baseDir}/bin/correlation.R !{baseDir}/bin/R_function.R !{mRNAfile} !{matrix_file} !{anno_file}
-            '''
-        }
-    }
 
 }else{
     Merge_circexplorer2=Channel.empty()
@@ -1038,6 +980,8 @@ if(run_mapsplice){
         if(params.singleEnd){
             """
            
+             source activate find_circ
+
             mapsplice.py \
             -p ${task.cpus} \
             -k 1 \
@@ -1054,7 +998,7 @@ if(run_mapsplice){
             """
         }else{
             """
-          
+            source activate find_circ
             mapsplice.py \
             -p ${task.cpus} \
             -k 1 \
@@ -1667,7 +1611,7 @@ if(number_of_tools==1){
             tuple val(sampleID),  file(query_file) from Fastpfiles_hisat
             file filewait from Wait_for_hisat2
       output:
-            tuple val(sampleID),file("${sampleID}.bam") into Genome_remapping_bamfile
+            tuple val(sampleID),file("${sampleID}.bam") into Genome_remapping_bamfile, Genome_remapping_bamfile_for_mRNAcounting
       when:
             run_multi_tools
       script:
@@ -1883,6 +1827,30 @@ if(!params.skipDE){
 }
 
 
+/*
+========================================================================================
+                                mRNA abundence counting
+========================================================================================
+*/
+
+if(params.mRNA){
+    process mRNAmeasurementByFeatureCount {
+      input:
+        file gtffile
+        tuple val(sampleID),file(bamfile)  from  Genome_remapping_bamfile_for_mRNAcounting
+      output:
+        tuple val(sampleID),file("${sampleID}.gene.count") into Feature_count_out
+      script:
+      """
+      
+        featureCounts -a $gtf -T ${task.cpus} -p -t gene -g gene_id -o ${sampleID}.gene.count ${bamfile}
+
+      """
+    }
+
+}
+
+
 
 
 /*
@@ -1991,8 +1959,6 @@ workflow.onComplete {
             subject: 'Breaking News in CircPipe Mission!',
             body: msg)
 }
-
-
 
 
 
