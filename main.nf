@@ -1847,6 +1847,18 @@ if(params.mRNA){
 
       """
     }
+    
+    process featureCount2Matrix {
+      publishDir "${params.outdir}/mRNAexpression", mode: 'copy', pattern: "*", overwrite: true
+      input:
+        file bamfiles  from  Genome_remapping_bamfile_for_mRNAcounting.collect()
+      output:
+        file "featureCount.matrix" into Expression_matrix_of_mRNA
+      script:
+      """
+        java -jar ${baseDir}/bin/circpipeTools.jar -MF -dir ./ -out featureCount.matrix
+      """
+    }
 
 }
 
