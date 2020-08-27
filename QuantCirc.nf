@@ -87,7 +87,7 @@ if( !bedfile.exists() ) exit 1, LikeletUtils.print_red("Missing circRNA bedfile 
 // fastqfile
 (Fastpfiles_recount,Fastpfiles_hisat)=Channel.fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
                                                 .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-                                                .into(3) 
+                                                .into(2) 
 
 
 
@@ -162,15 +162,16 @@ log.info "\n"
     }
 
     process Recount_generate_BSJ_Bamfile {
-      tag "$sampleID"
+      tag "$tag_id"
       maxForks 3
       input:
             file index from Candidate_circRNA_index.collect()
-            tuple val(sampleID),  file(query_file) from Fastpfiles_recount
+            tuple val(sampleID),file(query_file) from Fastpfiles_recount
       output:
             tuple val(sampleID),file("${sampleID}_denovo.bam") into BSJ_mapping_bamfile
             file "fileforwaiting.txt" into Wait_for_hisat2
       script:
+      tag_id=sampleID
        if(params.singleEnd){
             """
              hisat2 -p 8 -t -k 1 -x candidate_circRNA_BSJ_flank -U ${query_file} | samtools view -bS  -q 10 -  > ${sampleID}_denovo.bam 
