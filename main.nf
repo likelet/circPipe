@@ -805,38 +805,7 @@ if(run_ciri){
     }
 
 
-    /*
-    ========================================================================================
-                                the second tool : bwa - ciri
-                                        run the ciri
-    ========================================================================================
-    */
-    // process Ciri{
-    //     tag "$sampleID"
-    //     publishDir "${params.outdir}/circRNA_Identification/CIRI", pattern: "*.txt",mode: 'copy', overwrite: true
-
-    //     input:
-    //     tuple val(sampleID),  file (query_file) from BwaSamfile
-    //     file gtffile
-    //     file genomefile
-
-    //     output:
-    //     tuple val(sampleID),  file ('*.txt') into cirifiles
-    //     when:
-    //      run_ciri
-    //     script:
-    //         """
-    //         CIRI2.pl \
-    //         -T 10 \
-    //         -F ${genomefile} \
-    //         -A ${gtffile} \
-    //         -G CIRI_${sampleID}.log \
-    //         -I ${query_file} \
-    //         -O CIRI_${sampleID}.txt \
-    //         > CIRI_${sampleID}_detail.log
-    //         """
-    // }
-
+  
     /*
     ========================================================================================
                                 the second tool : bwa - ciri
@@ -938,49 +907,28 @@ if(run_mapsplice){
     ========================================================================================
     */
 
-    process unzipFastq{
-
-            tag "$sampleID"
-
-            input:
-            tuple val(sampleID),  file (query_file) from Fastpfiles_mapsplice
-            output:
-            tuple val(sampleID),  file("*.fastq") into fastqraw_mapslice
-            
-            shell:
-            if(params.singleEnd){
-            """
-                gunzip -c ${query_file} > ${sampleID}.fastq
-            """
-            } else{
-            """
-                gunzip -c ${query_file[0]} > ${sampleID}_1.fastq
-                gunzip -c ${query_file[1]} > ${sampleID}_2.fastq
-            """
-            }
-
-    }
     process Mapsplice{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', overwrite: true
 
         input:
-        tuple val(sampleID),  file (query_file) from fastqraw_mapslice
+
+        tuple val(sampleID),  file (query_file) from Fastpfiles_mapsplice
+        //tuple val(sampleID),  file (query_file) from Fastqraw_mapslice
         file gtffile
-        file refmapsplice_dir from Refmapsplice
-        file outdir
+        file refmapsplice_dir from Refmapsplice.collect()
         file index from Bowtieindex.collect()
 
         output:
-        tuple val(sampleID),  file('*') into mapsplicefiles
+        tuple val(sampleID),  file('*') into Mapsplicefiles
 
 
 
         shell:
         if(params.singleEnd){
             """
-           
-             source activate find_circ
+            source activate find_circ
+            gunzip -c ${query_file} > ${sampleID}.fastq
 
             mapsplice.py \
             -p ${task.cpus} \
@@ -995,10 +943,15 @@ if(run_mapsplice){
             -1 ${sampleID}.fastq \
 	        --bam \
             -o output_mapsplice_${sampleID} 
+
+            rm *.fastq
             """
         }else{
             """
             source activate find_circ
+            gunzip -c ${query_file[0]} > ${sampleID}_1.fastq
+            gunzip -c ${query_file[1]} > ${sampleID}_2.fastq
+
             mapsplice.py \
             -p ${task.cpus} \
             -k 1 \
@@ -1012,6 +965,8 @@ if(run_mapsplice){
             -2 ${sampleID}_2.fastq \
 	        --bam \
             -o output_mapsplice_${sampleID} 
+
+            rm *.fastq
             """
         }
 
@@ -1028,7 +983,7 @@ if(run_mapsplice){
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
         input:
-        tuple val(sampleID),  file (query_file) from mapsplicefiles
+        tuple val(sampleID),  file (query_file) from Mapsplicefiles
         file outdir
         
 
@@ -1548,14 +1503,8 @@ if(number_of_tools==1){
     }
 
     
-
-    /*
-    ========================================================================================
-                                    after running the tools
-                                    Recount for merge
-    ========================================================================================
-    */
-    process getPsudoCircSequenceAndBuildHisatIndex {
+if(!params.skipQuant){
+   process getPsudoCircSequenceAndBuildHisatIndex {
       input:
            file (bed_file) from Bed_for_recount
            file genomefile
@@ -1697,6 +1646,14 @@ if(params.singleEnd){
             """
     }
 
+}
+    /*
+    ========================================================================================
+                                    after running the tools
+                                    Recount for merge
+    ========================================================================================
+    */
+ 
 
     /*
     ========================================================================================
