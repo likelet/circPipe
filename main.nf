@@ -481,7 +481,7 @@ if(params.skip_fastp){
     fastp_for_waiting=Channel.empty()
     Fastp_for_multiqc=Channel.empty()
 }else{
-    process Fastp{
+    process RUN_FASTP{
         tag "$sampleID"
         publishDir "${params.outdir}/QC", mode: 'copy', pattern: "*_fastpreport.html", overwrite: true
 
@@ -545,7 +545,7 @@ fastp_for_waiting = fastp_for_waiting.first() //wait for finish this process fir
 if(run_circexplorer2){
 
 
-    process Star{
+    process RUN_STAR{
         tag "$sampleID"
         publishDir "${params.outdir}/Alignment/STAR", mode: 'link', overwrite: true
 
@@ -617,7 +617,7 @@ if(run_circexplorer2){
                                     run the circexplorer2
     ========================================================================================
     */
-    process Circexplorer2{
+    process RUN_Circexplorer2{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', overwrite: true
 
@@ -652,7 +652,7 @@ if(run_circexplorer2){
                                     produce the bed6 file
     ========================================================================================
     */
-    process Circexplorer2_Bed{
+    process RUN_Circexplorer2_Bed{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
@@ -687,7 +687,7 @@ if(run_circexplorer2){
                                     produce the matrix
     ========================================================================================
     */
-    process Circexplorer2_Matrix{
+    process RUN_Circexplorer2_Matrix{
         publishDir "${params.outdir}/circRNA_Identification/CIRCexplorer2", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
@@ -747,7 +747,7 @@ if(run_circexplorer2){
 ========================================================================================
 */
 if(run_ciri){
-        process BwaAndCiri{
+        process BWA_and_CIRI{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/CIRI", pattern: "*.txt",mode: 'copy', overwrite: true
 
@@ -812,7 +812,7 @@ if(run_ciri){
                                     produce the bed6 file
     ========================================================================================
     */
-    process Ciri_Bed{
+    process CIRI_BED{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
@@ -848,7 +848,7 @@ if(run_ciri){
                                     produce the matrix
     ========================================================================================
     */
-    process Ciri_Matrix{
+    process CIRI_Matrix{
 
         publishDir "${params.outdir}/circRNA_Identification/CIRI", mode: 'copy', pattern: "*.matrix", overwrite: true
 
@@ -870,7 +870,7 @@ if(run_ciri){
         # annotate circRNA with GTFs
         # java -jar !{baseDir}/bin/circpipetools.jar -i ciri_merge.matrix -o annoted_ -gtf !{gtffile} -uniq
 
-            sed -i 's/ciri_//g' ciri_merge.matrix
+        sed -i 's/ciri_//g' ciri_merge.matrix
         sed -i 's/.candidates.bed//g' ciri_merge.matrix
 
         #for what 
@@ -907,7 +907,7 @@ if(run_mapsplice){
     ========================================================================================
     */
 
-    process Mapsplice{
+    process RUN_Mapsplice{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', overwrite: true
 
@@ -978,7 +978,7 @@ if(run_mapsplice){
                                     produce the bed6 file
     ========================================================================================
     */
-    process Mapsplice_Bed{
+    process RUN_Mapsplice_Bed{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
@@ -1023,7 +1023,7 @@ if(run_mapsplice){
                                     produce the matrix
     ========================================================================================
     */
-    process Mapsplice_Matrix{
+    process RUN_Mapsplice_Matrix{
         publishDir "${params.outdir}/circRNA_Identification/Mapsplice", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
@@ -1079,7 +1079,7 @@ if(run_segemehl){
     ========================================================================================
     */
 
-    process Segemehl{
+    process RUN_Segemehl{
                 tag "$sampleID"
                 publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', overwrite: true
 
@@ -1148,7 +1148,7 @@ if(run_segemehl){
                                         produce the bed6 file
         ========================================================================================
     */
-    process Segemehl_Bed{
+    process RUN_Segemehl_Bed{
             tag "$sampleID"
             publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern:"*candidates.bed", overwrite: true
 
@@ -1172,7 +1172,7 @@ if(run_segemehl){
                                         produce the matrix
     ========================================================================================
     */
-    process Segemehl_Matrix{
+    process RUN_Segemehl_Matrix{
             publishDir "${params.outdir}/circRNA_Identification/Segemehl", mode: 'copy', pattern: "*.matrix", overwrite: true
 
             input:
@@ -1218,7 +1218,7 @@ if(run_segemehl){
 //                                                                             
 
 if(run_find_circ){
-    process Bowtie2{
+    process RUN_BOWTIE2{
         tag "$sampleID"
         publishDir "${params.outdir}/Alignment/Bowtie2", pattern: "*.log", mode: 'link', overwrite: true
 
@@ -1284,7 +1284,7 @@ if(run_find_circ){
                                     run the find_circ
     ========================================================================================
     */
-    process Find_circ{
+    process RUN_Find_circ{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', overwrite: true
 
@@ -1333,7 +1333,7 @@ if(run_find_circ){
                                     produce the bed6 file
     ========================================================================================
     */
-    process Find_circ_Bed{
+    process RUN_Find_circ_Bed{
         tag "$sampleID"
         publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*candidates.bed", overwrite: true
 
@@ -1368,7 +1368,7 @@ if(run_find_circ){
                                     produce the matrix
     ========================================================================================
     */
-    process Find_circ_Matrix{
+    process RUN_Find_circ_Matrix{
         publishDir "${params.outdir}/circRNA_Identification/Find_circ", mode: 'copy', pattern: "*.matrix", overwrite: true
 
         input:
@@ -1413,7 +1413,7 @@ if(run_find_circ){
                     run the multiqc (merge the results of fastp and star)
 ========================================================================================
 */
-process Multiqc{
+process RUN_MULTIQC{
     publishDir "${params.outdir}/MultiQC", mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
@@ -1459,7 +1459,7 @@ if(number_of_tools==1){
                         calculate the results by different tools
     ========================================================================================
     */
-    process Tools_Merge{
+    process TOOL_MERGE{
         publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
         
         input:
@@ -1504,7 +1504,7 @@ if(number_of_tools==1){
 
     
 if(!params.skipQuant){
-   process getPsudoCircSequenceAndBuildHisatIndex {
+   process getPsudoCircSequence_And_BuildHisatIndex {
       input:
            file (bed_file) from Bed_for_recount
            file genomefile
@@ -1529,7 +1529,7 @@ if(!params.skipQuant){
       """
     }
 
-    process Recount_generate_BSJ_Bamfile {
+    process RECOUNT_generate_BSJ_Bamfile {
       tag "$sampleID"
       input:
             file index from Candidate_circRNA_index.collect()
@@ -1553,7 +1553,7 @@ if(!params.skipQuant){
         }
     }
 
- process Recount_generate_genome_Bamfile {
+ process RECOUNT_generate_genome_Bamfile {
       tag "$sampleID"
       input:
             file index from hisat2_index.collect()
@@ -1582,7 +1582,7 @@ BSJ_mapping_bamfile.combine(Genome_remapping_bamfile, by : 0 ).set{RecountBamfil
 
 
 if(params.singleEnd){
-    process Recount_estimate_step_single{
+    process RECOUNT_estimate_step_single{
 
         input:
             tuple val(sampleID), file(bsjBamfile),file(genomeBamfile) from RecountBamfiles
@@ -1601,7 +1601,7 @@ if(params.singleEnd){
     }
 
 }else{
-    process Recount_estimate_step_paired{
+    process RECOUNT_estimate_step_paired{
         tag "$sampleID"
 
         input:
@@ -1626,7 +1626,7 @@ if(params.singleEnd){
 
 
     // test
-    process Recount_results_combine{
+    process RECOUNT_COMBINE{
 
         publishDir "${params.outdir}/Combination_Matrix", mode: 'copy', pattern: "*.matrix", overwrite: true
 
@@ -1662,7 +1662,7 @@ if(params.singleEnd){
     ========================================================================================
     */
 if(!params.skipDE){
-        process Merge_DE{
+        process MERGE_DiffernetialExpression{
         publishDir "${params.outdir}/DE_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
 
         input:
@@ -1700,7 +1700,7 @@ if(!params.skipDE){
     */
 
     if(params.mRNA){
-        process Merge_Cor{
+        process MERGE_CorrelationAnalysis{
             publishDir "${params.outdir}/Corrrelation_Analysis/Merge", mode: 'copy', pattern: "*", overwrite: true
 
             input:
@@ -1733,7 +1733,7 @@ if(!params.skipDE){
                                             annotation
     ========================================================================================
     */
-    process Merge_Annotation{
+    process ANNOTATION{
         publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
 
         input:
@@ -1750,17 +1750,17 @@ if(!params.skipDE){
         file ('*') into Annotation_plot
 
         shell:
-        '''
-        #
-        annotatePeaks.pl !{bed_file}  !{genomefile} -gtf !{gtffile} > annotated.circRNA.txt
+        """
+        java -jar ${baseDir}/bin/circpipeTools.jar -annote -bedfile !{bed_file}  -gtf !{gtffile} -out annotated.circRNA.txt
 
         Rscript !{baseDir}/bin/circos.R !{baseDir}/bin/R_function.R  !{params.genomebuild} !{faifile} !{query_file}
-        #perl !{baseDir}/bin/try_annotate_forGTF.pl !{gtffile} !{bed_file} newtest
         Rscript !{baseDir}/bin/circRNA_feature.R !{baseDir}/bin/R_function.R  annotated.circRNA.txt newtest.anno.txt
-        '''
+
+        """
+        
     }
 
- process Venn{
+ process VENN_PLOT{
         publishDir "${params.outdir}/Annotation", mode: 'copy', pattern: "*", overwrite: true
 
         input:
@@ -1828,7 +1828,7 @@ if(params.mRNA){
                                      produce report
 ========================================================================================
 */
-process Report_production{
+process REPORT_GENERATION{
     publishDir "${params.outdir}/Report", mode: 'copy', pattern: "*.html", overwrite: true
 
     input:
